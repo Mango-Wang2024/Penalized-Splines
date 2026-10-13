@@ -1,0 +1,3 @@
+Generated once in Julia 1.13.1, seed 42.
+Both projects use uniform_k8/data.csv and uniform_k8/knots.csv for the main example.
+The other knot cases reuse the same x/y values. duplicates_k4 is a separate stress-test dataset.

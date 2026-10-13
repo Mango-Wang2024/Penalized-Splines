@@ -1,0 +1,6 @@
+case	k	knot_mode
+uniform_k8	8	explicit
+quantile_k8	8	default
+uneven_k10	10	explicit
+duplicates_k4	4	explicit
+minimum_k3	3	explicit
