@@ -14,7 +14,8 @@ run <- function() {
   }
   rchecks <- read.csv(file.path(conversion,"r_reference","reference_checks.csv"))
   if(!nrow(rchecks)||any(!rchecks$passed)) stop("R reference checks failed")
-  cases <- read.delim(file.path(inputs,"cases.tsv"),stringsAsFactors=FALSE)$case
+  settings <- read.delim(file.path(inputs,"cases.tsv"),stringsAsFactors=FALSE)
+  cases <- settings$case
   hashes <- lapply(c(basis,workflow),function(out)read.csv(file.path(out,"r_reference","source_checksums.csv"),stringsAsFactors=FALSE))
   for(h in hashes) {
     if(!setequal(h$case,cases)) stop("Reference case lists differ")
@@ -50,8 +51,9 @@ run <- function() {
     tail <- if(i<length(to))to[seq.int(i+1L,length(to))] else character()
     paste(c(rep("..",length(from)-i),tail),collapse="/")
   }
-  lines <- c("# Stage 1 validation","",
-    "Three separate checks passed for the tested natural cubic spline model. Inputs were generated once in Julia.","",
+  lines <- c("# Stage 1 results","",
+    "Saved comparisons for cubic B-splines with one curvature penalty: mgcv bs=\"bs\", m=c(3,2). All comparisons use shared Julia-generated inputs.","",
+    "## Overall results","",
     "| Check | Passed | Largest scaled error |","| --- | --- | --- |")
   for(name in names(checks)) {
     tab <- checks[[name]]
@@ -59,25 +61,56 @@ run <- function() {
     if(any(!is.finite(errors))||any(errors>=1e-8)) stop("Invalid numerical comparison result")
     lines <- c(lines,sprintf("| %s | %d/%d | %.3g |",name,nrow(tab),nrow(tab),max(errors)))
   }
-  lines <- c(lines,"",sprintf("The mathematical tests completed before these comparisons. R input-capture checks passed: %d/%d. Comparison threshold: 1e-8.",nrow(rchecks),nrow(rchecks)),"",
-    "## What each check establishes","",
-    "1. **Basis:** R and Julia independently construct B and S from the same data and settings. No conversion is run.",
-    "2. **Conversion:** both converters use the exact same R-generated B and S. Julia is compared with mgcv and the actual lme inputs.",
-    "3. **Workflow:** each language constructs and converts its own spline from the shared raw inputs. Final model representations are compared.","",
-    "The basis and workflow checks cover five cases. The captured lme conversion check uses the main eight-knot case.","",
-    "## Shared inputs","",
-    "All basis and workflow input fingerprints match the shared files. The conversion check uses the same main data and knots.",
+  lines <- c(lines,"",sprintf("Mathematical tests completed before these comparisons. R input-capture checks passed: %d/%d. Comparison threshold: 1e-8.",nrow(rchecks),nrow(rchecks)))
+  for(name in c("Basis construction only","Combined workflow")) {
+    tab <- checks[[name]]
+    if(!setequal(unique(tab$case),cases)) stop("Comparison cases do not match the shared settings")
+    count_per_case <- if(name=="Basis construction only")13L else 7L
+    lines <- c(lines,"",paste0("## ",name,": results by case"),"",
+      sprintf("Five test cases, with %d comparisons per case.",count_per_case),"",
+      "| Case | Raw basis size k | Passed | Largest scaled error |",
+      "| --- | --- | --- | --- |")
+    for(case in cases) {
+      rows <- tab[tab$case==case,,drop=FALSE]
+      if(nrow(rows)!=count_per_case) stop("Unexpected number of comparisons for a case")
+      k <- settings$k[settings$case==case]
+      lines <- c(lines,sprintf("| %s | %d | %d/%d | %.3g |",case,k,nrow(rows),nrow(rows),max(rows$scaled_error)))
+    }
+  }
+  lines <- c(lines,"","## Conversion only: individual checks","",
+    "All nine comparisons use the main uniform_k8 case and the same R-generated B,S.","",
+    "| Comparison | Passed | Scaled error |","| --- | --- | --- |")
+  tab <- checks[["Conversion only"]]
+  labels <- c(
+    "curve matrix identity"="Curve preserved",
+    "penalty identity"="Penalty preserved",
+    "all basis directions retained"="All coefficient directions retained",
+    "fixed-effect space vs mgcv conversion"="Fixed-effect space matches mgcv",
+    "random covariance vs mgcv conversion"="Random covariance factor matches mgcv",
+    "fixed-effect space vs actual lme inputs"="Fixed-effect space matches captured lme inputs",
+    "random covariance vs actual lme inputs"="Random covariance factor matches captured lme inputs",
+    "curve after mapping coefficients to R coordinates"="Curve preserved after coefficient mapping",
+    "penalty after mapping coefficients to R coordinates"="Penalty preserved after coefficient mapping")
+  for(i in seq_len(nrow(tab))) {
+    label <- if(tab$check[i]%in%names(labels))unname(labels[tab$check[i]]) else tab$check[i]
+    lines <- c(lines,sprintf("| %s | Yes | %.3g |",label,tab$relative_error[i]))
+  }
+  lines <- c(lines,"","## Shared inputs","",
+    "Data and knot fingerprints match the shared files for all five cases. The conversion check uses the same main observations and knots.",
     paste0("Main data MD5: `",data_hash,"`. Main knots MD5: `",knots_hash,"`."),
     sprintf("Cross-reference B and S scaled errors: %.3g and %.3g.",cross[1],cross[2]),"",
-    "## Reports","",
-    sprintf("- [Basis construction](<%s>)",relative(file.path(basis,"RESULTS.md"))),
-    sprintf("- [Conversion](<%s>)",relative(file.path(conversion,"julia_conversion","RESULTS_EXPLAINED.txt"))),
-    sprintf("- [Combined workflow](<%s>)",relative(file.path(workflow,"RESULTS.md"))),"",
-    "## Stage 2 inputs","",
-    sprintf("The [main Julia model inputs](<%s>) contain y, X_fixed and Z. Matching B, S, C, knots, centering H, penalty scale and variance assumptions are retained.",relative(file.path(workflow,"julia","uniform_k8"))),"",
-    "Stage 1 prepares the model. Julia coefficient fitting, smoothing estimation and fitted predictions remain later stages.",
-    "The R input-capture example performs a reference fit. Its fitted parameters are not Julia estimates.",
-    paste0("Reference versions: ",md[["R_version"]],", mgcv ",md[["mgcv_version"]],", nlme ",md[["nlme_version"]],". The historical source revision is not automatically reproduced."))
+    "## Detailed evidence","",
+    sprintf("- [Basis construction checks](<%s>)",relative(file.path(basis,"julia","checks.tsv"))),
+    sprintf("- [Conversion checks](<%s>)",relative(file.path(conversion,"julia_conversion","validation.tsv"))),
+    sprintf("- [Combined workflow checks](<%s>)",relative(file.path(workflow,"julia","checks.tsv"))),
+    sprintf("- [R input-capture checks](<%s>)",relative(file.path(conversion,"r_reference","reference_checks.csv"))),"",
+    "## Prepared model","",
+    sprintf("The [main Julia model inputs](<%s>) contain y, X_fixed and Z, together with B, S, the coefficient map C, training settings and variance assumptions.",relative(file.path(workflow,"julia","uniform_k8"))),"",
+    paste0("R reference versions: ",md[["R_version"]],", mgcv ",md[["mgcv_version"]],", nlme ",md[["nlme_version"]],"."),"",
+    "## Sources","",
+    "- [mgcv cubic B-splines and curvature penalty](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth.construct.bs.smooth.spec.html)",
+    "- [Basis dimensions](https://stat.ethz.ch/R-manual/R-devel/library/splines/html/splineDesign.html)",
+    "- [Spline conversion](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth2random.html)")
   writeLines(lines,report)
   cat("All three Stage 1 checks passed. Summary:",normalizePath(report),"\n")
 }

@@ -1,6 +1,6 @@
 using DelimitedFiles, LinearAlgebra, Statistics
-include(joinpath(@__DIR__,"..","src","NaturalCubic.jl"))
-using .NaturalCubic
+include(joinpath(@__DIR__,"..","src","BSpline.jl"))
+using .BSplineBasis
 
 function main(args)
     root=dirname(@__DIR__)
@@ -9,8 +9,6 @@ function main(args)
     out=length(args)>=3 ? abspath(args[3]) : joinpath(root,"outputs","shared","julia")
     isdir(out)&&!isempty(readdir(out))&&error("Julia output directory is not empty; choose a new run directory")
     cases=readdlm(joinpath(inputs,"cases.tsv"),'\t',String;skipstart=1)
-    meta=readdlm(joinpath(reference,"metadata.tsv"),'\t',String;skipstart=1)
-    md=Dict(meta[i,1]=>meta[i,2] for i in axes(meta,1))
     threshold=1e-8
     records=NamedTuple[]
     function check(case,label,a,b)
@@ -28,8 +26,8 @@ function main(args)
         knots=mode=="default" ? default_knots(x,k) : vec(readdlm(joinpath(p,"knots.csv"),',',Float64))
         c=build_spline(x,knots)
         xe=vec(readdlm(joinpath(p,"evaluation_x.csv"),',',Float64))
-        Be=evaluate_basis(c.knots,c.F,xe)
-        values=["knots"=>reshape(c.knots,:,1),"F"=>c.F,"B_raw"=>c.B_raw,"S_raw"=>c.S_raw,
+        Be=evaluate_basis(c.knots,xe)
+        values=["knots"=>reshape(c.knots,:,1),"D2"=>c.D2,"B_raw"=>c.B_raw,"S_raw"=>c.S_raw,
           "constraint"=>reshape(c.constraint,:,1),"penalty_scale"=>reshape([c.penalty_scale],1,1),
           "S_scaled"=>c.S_scaled,"H"=>c.H,"B"=>c.B,"S"=>c.S,
           "B_eval_raw"=>Be,"B_eval"=>Be*c.H]
@@ -50,20 +48,6 @@ function main(args)
     end
     passed=count(r->r.passed,records)
     worst=maximum(r.scaled_error for r in records)
-    result=["# Basis and penalty comparison","",
-      "Data generated in Julia. R and Julia independently constructed the matrices from the same saved values.","",
-      "**Result: $passed/$(length(records)) checks passed.** Largest scaled error: $(worst). Threshold: $threshold.","",
-      "Versions: $(md["R_version"]), mgcv $(md["mgcv_version"]), Julia $(VERSION).","",
-      "| Case | Checks passed | Largest scaled error |","| --- | --- | --- |"]
-    for name in cases[:,1]
-        rs=filter(r->r.case==name,records)
-        push!(result,"| $name | $(count(r->r.passed,rs))/$(length(rs)) | $(maximum(r.scaled_error for r in rs)) |")
-    end
-    append!(result,["","Checks cover knot selection, raw basis, raw curvature penalty, scaling, centering, prepared matrices and basis evaluation. No conversion is run in this check.","",
-      "Comparisons use norm(a-b)/max(1, norm(a), norm(b)). Absolute errors are also recorded in `julia/checks.tsv`.","",
-      "This validates the tested natural cubic spline construction. Julia fitting, smoothing estimation and final fitted predictions remain separate checkpoints.","",
-      "[Detailed checks](julia/checks.tsv)"])
-    write(joinpath(dirname(out),"RESULTS.md"),join(result,"\n")*"\n")
     println("$passed/$(length(records)) checks passed; largest scaled error = $worst")
     all(r->r.passed,records)||error("Matrix comparisons failed; see checks.tsv")
 end

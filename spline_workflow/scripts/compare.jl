@@ -1,6 +1,6 @@
 using DelimitedFiles, LinearAlgebra
-include(joinpath(@__DIR__,"..","..","spline_basis","src","NaturalCubic.jl"))
-using .NaturalCubic
+include(joinpath(@__DIR__,"..","..","spline_basis","src","BSpline.jl"))
+using .BSplineBasis
 include(joinpath(@__DIR__,"..","..","spline_conversion","src","SplineConversion.jl"))
 using .SplineConversion
 
@@ -11,8 +11,6 @@ function main(args)
     out=length(args)>=3 ? abspath(args[3]) : joinpath(root,"outputs","shared","julia")
     isdir(out)&&!isempty(readdir(out))&&error("Julia output directory is not empty; choose a new run directory")
     cases=readdlm(joinpath(inputs,"cases.tsv"),'\t',String;skipstart=1)
-    meta=readdlm(joinpath(reference,"metadata.tsv"),'\t',String;skipstart=1)
-    md=Dict(meta[i,1]=>meta[i,2] for i in axes(meta,1))
     threshold=1e-8
     records=NamedTuple[]
     function check(case,label,a,b)
@@ -53,7 +51,9 @@ function main(args)
         end
         open(joinpath(dst,"model_settings.tsv"),"w") do io
             println(io,"key\tvalue")
-            println(io,"spline_type\tcr")
+            println(io,"spline_type\tbs")
+            println(io,"degree\t3")
+            println(io,"penalty_derivative_order\t2")
             println(io,"observations\t",length(x))
             println(io,"penalty_rank\t",converted.penalty_rank)
             println(io,"random_covariance\tsigma_u_squared * identity")
@@ -70,20 +70,6 @@ function main(args)
     end
     passed=count(r->r.passed,records)
     worst=maximum(r.scaled_error for r in records)
-    result=["# Combined construction and conversion","",
-      "R constructs and converts the spline. Julia independently constructs and converts it from the same raw inputs.","",
-      "**Result: $passed/$(length(records)) checks passed.** Largest scaled error: $worst. Threshold: $threshold.","",
-      "Versions: $(md["R_version"]), mgcv $(md["mgcv_version"]), Julia $(VERSION).","",
-      "| Case | Checks passed | Largest scaled error |","| --- | --- | --- |"]
-    for name in cases[:,1]
-        rs=filter(r->r.case==name,records)
-        push!(result,"| $name | $(count(r->r.passed,rs))/$(length(rs)) | $(maximum(r.scaled_error for r in rs)) |")
-    end
-    append!(result,["","Checks compare the fixed space and random covariance, preserve curve and penalty, and map all coefficient directions into common coordinates. Raw eigenvectors are not compared.","",
-      "Scaled errors use norm(a-b)/max(1, norm(a), norm(b)).","",
-      "Each Julia case exports y, X_fixed and Z for Stage 2, with the matching B, S, coefficient map C and training settings. No coefficients or smoothing strength have been estimated.","",
-      "[Detailed checks](julia/checks.tsv)"])
-    write(joinpath(dirname(out),"RESULTS.md"),join(result,"\n")*"\n")
     println("$passed/$(length(records)) combined-workflow checks passed; largest scaled error = $worst")
     all(r->r.passed,records)||error("Combined workflow comparisons failed; see checks.tsv")
 end

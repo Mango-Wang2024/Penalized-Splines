@@ -23,14 +23,14 @@ run <- function() {
   if(!all(c("x","y")%in%names(dat))||!is.numeric(dat$x)||!is.numeric(dat$y)||any(!is.finite(dat$x))||any(!is.finite(dat$y)))
     stop("Data must contain finite numeric x and y columns")
   knots <- scan(knots_csv,quiet=TRUE)
-  n <- nrow(dat);k <- length(knots)
-  if(n<20L||k<3L||k>=length(unique(dat$x))||any(!is.finite(knots))||any(diff(knots)<=0))
-    stop("Require at least 20 observations and 3<=k<unique(x), with increasing finite knots")
+  n <- nrow(dat);k <- length(knots)-4
+  if(n<20L||k<5L||k>=length(unique(dat$x))||any(!is.finite(knots))||any(diff(knots)<=0)||min(dat$x)<knots[4]||max(dat$x)>knots[length(knots)-3])
+    stop("Require at least 20 observations and 5<=k<unique(x), with increasing finite knots")
   # Refuse to overwrite a previous reference silently.
   if (dir.exists(out) && length(list.files(out,all.files=TRUE,no..=TRUE)))
     stop("Output directory is not empty. Supply a new directory for a new run.")
   dir.create(out,recursive=TRUE,showWarnings=FALSE)
-  f <- as.formula(sprintf("y ~ s(x, bs='cr', k=%d)",k),env=environment())
+  f <- as.formula(sprintf("y ~ s(x, bs='bs', m=c(3,2), k=%d)",k),env=environment())
 
   # Clone gamm's closure and shadow only its unqualified lme lookup. This is
   # the lookup used in the reference source. All other helpers resolve
@@ -127,7 +127,7 @@ run <- function() {
   metadata <- c(R_version=R.version.string,mgcv_version=as.character(packageVersion("mgcv")),
     nlme_version=as.character(packageVersion("nlme")),n=n,k_requested=k,
     constrained_basis_columns=ncol(B),penalty_rank=r,null_rank=ncol(X0),
-    spline_type="cr",method="REML",data_source="shared CSV; no R simulation",
+    spline_type="bs",degree=3,penalty_derivative_order=2,full_knot_entries=length(knots),method="REML",data_source="shared CSV; no R simulation",
     source_data_case=basename(dirname(data_csv)),
     source_data_md5=unname(tools::md5sum(data_csv)),
     source_knots_md5=unname(tools::md5sum(knots_csv)),
@@ -140,13 +140,13 @@ run <- function() {
   writeLines(capture.output(sessionInfo()),file.path(out,"sessionInfo.txt"))
 
   report <- c("STAGE 1: WHAT DOES MGCV PASS TO LME?", "",
-    "This example uses one cubic regression spline, one penalty, an intercept,",
+    "This example uses one cubic B-spline, one penalty, an intercept,",
     "Gaussian noise, one dummy spline group and REML. It is not an EEG overlap model.","",
     "Data source: saved Julia-generated CSV; R does not regenerate data.",
     paste("Source data case:",basename(dirname(data_csv))),
     paste("Source data MD5:",unname(tools::md5sum(data_csv))),
     paste("Source knots MD5:",unname(tools::md5sum(knots_csv))),"",
-    paste("Requested basis size:",k),paste("Constrained basis columns:",ncol(B)),
+    paste("Requested basis size:",k),paste("Full knot entries:",length(knots)),paste("Constrained basis columns:",ncol(B)),
     paste("Penalized columns:",r),paste("Unpenalized spline columns:",ncol(X0)),"",
     "ACTUAL INPUTS (captured before lme fitting)",
     paste("fixed.formula:",paste(deparse(input$fixed),collapse=" ")),

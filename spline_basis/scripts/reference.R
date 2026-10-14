@@ -30,7 +30,7 @@ run <- function() {
     t <- scan(file.path(p,"knots.csv"),quiet=TRUE)
     xe <- scan(file.path(p,"evaluation_x.csv"),quiet=TRUE)
     supplied <- if(cases$knot_mode[i]=="default")NULL else list(x=t)
-    spec <- s(x,k=k,bs="cr")
+    spec <- s(x,k=k,bs="bs",m=c(3,2))
     raw <- smoothCon(spec,dat,knots=supplied,absorb.cons=FALSE,scale.penalty=FALSE,
                      diagonal.penalty=FALSE,sparse.cons=0)[[1]]
     scaled <- smoothCon(spec,dat,knots=supplied,absorb.cons=FALSE,scale.penalty=TRUE,
@@ -41,7 +41,7 @@ run <- function() {
     if(!inherits(qrc,"qr")||nrow(qrc$qr)!=k||attr(prepared,"nCons")!=1L)
       stop("This example requires one full centering constraint")
     H <- qr.Q(qrc,complete=TRUE)[,-1,drop=FALSE]
-    matrices <- list(knots=matrix(raw$xp,ncol=1),F=t(matrix(raw$F,k,k)),
+    matrices <- list(knots=matrix(raw$knots,ncol=1),D2=splines::splineDesign(raw$knots,dat$x,ord=4,derivs=2),
       B_raw=raw$X,S_raw=raw$S[[1]],constraint=t(raw$C),
       penalty_scale=matrix(scaled$S.scale[1],1,1),S_scaled=scaled$S[[1]],
       H=H,B=prepared$X,S=prepared$S[[1]],
@@ -49,10 +49,10 @@ run <- function() {
       B_eval=PredictMat(prepared,data.frame(x=xe)))
     for(nm in names(matrices))save_matrix(matrices[[nm]],nm,dst)
     saveRDS(list(raw=raw,scaled=scaled,prepared=prepared),file.path(dst,"objects.rds"))
-    cat("R reference:",name,"|",nrow(dat),"observations |",k,"knots\n")
+    cat("R reference:",name,"|",nrow(dat),"observations |",k,"basis functions |",length(raw$knots),"full knot entries\n")
   }
-  metadata <- data.frame(key=c("R_version","mgcv_version","spline_type","constraint","penalty_scaling"),
-    value=c(R.version.string,as.character(packageVersion("mgcv")),"cr","one mean-zero constraint","one-norm(S_raw) / infinity-norm(B_raw)^2"))
+  metadata <- data.frame(key=c("R_version","mgcv_version","spline_type","degree","penalty_derivative_order","constraint","penalty_scaling"),
+    value=c(R.version.string,as.character(packageVersion("mgcv")),"bs","3","2","one mean-zero constraint","one-norm(S_raw) / infinity-norm(B_raw)^2"))
   write.table(metadata,file.path(out,"metadata.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
   write.csv(source_checksums,file.path(out,"source_checksums.csv"),row.names=FALSE)
   writeLines(capture.output(sessionInfo()),file.path(out,"sessionInfo.txt"))
