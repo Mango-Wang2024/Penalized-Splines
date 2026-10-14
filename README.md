@@ -33,7 +33,7 @@ The prepared model contains:
 | `X_fixed` | Intercept and unpenalized spline component | 200 × 2 |
 | `Z` | Penalized spline components sharing one random-effect variance | 200 × 6 |
 
-Training knots and transformations are retained for later prediction.
+Training knots and transformations are retained for later prediction. The linked evidence tables, captured R inputs and main Julia model inputs are included in the repository.
 
 ## Connection to the R fitting inputs
 

@@ -1,0 +1,86 @@
+STAGE 1: WHAT DOES MGCV PASS TO LME?
+
+This example uses one cubic B-spline, one penalty, an intercept,
+Gaussian noise, one dummy spline group and REML. It is not an EEG overlap model.
+
+Data source: saved Julia-generated CSV; R does not regenerate data.
+Source data case: uniform_k8
+Source data MD5: d7f3ce440112190e44cd54269ce48790
+Source knots MD5: 6665cb09426afb769ec771f896515c87
+
+Requested basis size: 8
+Full knot entries: 12
+Constrained basis columns: 7
+Penalized columns: 6
+Unpenalized spline columns: 1
+
+ACTUAL INPUTS (captured before lme fitting)
+fixed.formula: y.0 ~ X - 1
+random block class: pdIdnot, pdMat
+random formula: ~Xr - 1
+dummy group: g ; distinct levels: 1
+method: REML
+correlation: NULL (independent residuals)
+weights: NULL (one residual variance)
+data fields: y, x, g, Xr, y.0, X
+control settings:
+List of 17
+ $ maxIter       : num 50
+ $ msMaxIter     : num 50
+ $ tolerance     : num 1e-06
+ $ niterEM       : num 0
+ $ msMaxEval     : num 200
+ $ msTol         : num 1e-07
+ $ msVerbose     : logi FALSE
+ $ returnObject  : logi TRUE
+ $ gradHess      : logi TRUE
+ $ apVar         : logi TRUE
+ $ .relStep      : num 6.06e-06
+ $ opt           : chr "nlminb"
+ $ optimMethod   : chr "L-BFGS-B"
+ $ minAbsParApVar: num 0.05
+ $ natural       : logi TRUE
+ $ sigma         : num 0
+ $ allow.n.lt.q  : logi FALSE
+
+MATRIX DICTIONARY
+            file rows columns
+           y.csv  200       1
+           B.csv  200       7
+           S.csv    7       7
+  X_ordinary.csv  200       1
+        X0_r.csv  200       1
+         Z_r.csv  200       6
+         C_r.csv    7       7
+   X_fixed_r.csv  200       2
+ X_fixed_lme.csv  200       2
+       Z_lme.csv  200       6
+                                                        meaning
+                                             Observed responses
+               Constrained spline basis in original coordinates
+                                 Matching scaled spline penalty
+                            Ordinary fixed predictor: intercept
+                                     Unpenalized spline columns
+                          Penalized and rescaled spline columns
+            Map [u; alpha] back to original spline coefficients
+                   Intercept plus unpenalized spline components
+         Fixed matrix from the actual captured lme formula/data
+ Random matrix from the actual captured lme random formula/data
+
+REFERENCE CHECKS
+                                          check relative_error passed
+             wrapper predictions vs normal gamm   0.000000e+00   TRUE
+               wrapper smoothing vs normal gamm   0.000000e+00   TRUE
+                         response passed to lme   0.000000e+00   TRUE
+                                 curve identity   0.000000e+00   TRUE
+                             normalized penalty   2.570703e-15   TRUE
+       fixed space: smooth2random vs actual lme   0.000000e+00   TRUE
+ random covariance: smooth2random vs actual lme   0.000000e+00   TRUE
+
+ESTIMATED OUTPUTS (not inputs)
+lambda: 0.609630550488
+noise variance: 0.140939244956
+
+Important: lambda is learned by fitting; k was chosen before fitting.
+The final Julia implementation need not depend on R.
+This run records the installed versions. It does not claim historical-version compatibility.

@@ -1,0 +1,10 @@
+check	relative_error	passed
+curve matrix identity	0.0	true
+penalty identity	2.008975620061469e-15	true
+all basis directions retained	6.4178619075662475e-15	true
+fixed-effect space vs mgcv conversion	6.7589233323966115e-15	true
+random covariance vs mgcv conversion	2.0788318278885616e-14	true
+fixed-effect space vs actual lme inputs	6.7589233323966115e-15	true
+random covariance vs actual lme inputs	2.0788318278885616e-14	true
+curve after mapping coefficients to R coordinates	2.6396081193519573e-15	true
+penalty after mapping coefficients to R coordinates	1.6922659432198128e-15	true

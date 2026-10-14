@@ -1,0 +1,8 @@
+"check","relative_error","passed"
+"wrapper predictions vs normal gamm",0,TRUE
+"wrapper smoothing vs normal gamm",0,TRUE
+"response passed to lme",0,TRUE
+"curve identity",0,TRUE
+"normalized penalty",2.57070345155532e-15,TRUE
+"fixed space: smooth2random vs actual lme",0,TRUE
+"random covariance: smooth2random vs actual lme",0,TRUE
