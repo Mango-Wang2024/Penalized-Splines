@@ -18,14 +18,14 @@ Construction comparisons include basis values, derivatives, penalty, scaling, ce
 
 ## What counts as agreement
 
-Equivalent converted models can have different column signs or rotations. We therefore compare the fixed-effect space, the random covariance factor `Z Zᵀ`, and curves and penalties expressed in matching coefficient coordinates. The random variance multiplying this factor will be estimated in Stage 2.
+Equivalent converted models can have different column signs or rotations. We therefore compare the fixed-effect space, the random covariance factor $ZZ^\top$, and curves and penalties expressed in matching coefficient coordinates. The random variance multiplying this factor will be estimated in Stage 2.
 
 The numerical criterion is:
 
-\[
-\frac{\lVert A_{Julia}-A_R\rVert}
-{\max(1,\lVert A_{Julia}\rVert,\lVert A_R\rVert)} < 10^{-8}.
-\]
+```math
+\frac{\lVert A_{\mathrm{Julia}}-A_R\rVert}
+{\max(1,\lVert A_{\mathrm{Julia}}\rVert,\lVert A_R\rVert)} < 10^{-8}.
+```
 
 For matrices, the norm is the square root of the sum of squared entries. The denominator handles small or zero values. Basis and workflow reports also record the largest entry difference as a diagnostic; it is not a separate pass criterion.
 
