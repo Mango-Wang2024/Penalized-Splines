@@ -10,4 +10,18 @@
 !spline_workflow/outputs/shared/julia/uniform_k8/*.csv
 !spline_workflow/outputs/shared/julia/uniform_k8/model_settings.tsv
 
+# Stage 2 fitting evidence; serialized R models and other arrays stay local.
+!spline_fitting/outputs/shared/unit_tests.txt
+!spline_fitting/outputs/shared/comparison/*.tsv
+!spline_fitting/outputs/shared/comparison/fitted_curves.png
+!spline_fitting/outputs/shared/r_reference/fit_summary.tsv
+!spline_fitting/outputs/shared/r_reference/source_checksums.tsv
+!spline_fitting/outputs/shared/r_reference/versions.tsv
+!spline_fitting/outputs/shared/julia/fit_summary.tsv
+!spline_fitting/outputs/shared/julia/versions.tsv
+!spline_fitting/outputs/shared/r_reference/*/fitted.csv
+!spline_fitting/outputs/shared/r_reference/*/knots.csv
+!spline_fitting/outputs/shared/julia/*/fitted.csv
+!spline_fitting/outputs/shared/julia/*/knots.csv
+
 .DS_Store

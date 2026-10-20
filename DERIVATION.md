@@ -121,9 +121,24 @@ Using the identities above, this equals the original objective:
 \lVert y-X\beta-Bz\rVert^2+\lambda z^\top Sz.
 ```
 
-Thus variance-based smoothing and the spline penalty describe the same coefficient-fitting problem. Estimating the variances through ML or REML is a later fitting step. These random effects represent spline shapes; separate participant groups are not required.
+Thus variance-based smoothing and the spline penalty describe the same coefficient-fitting problem. Stage 2 estimates the variances through REML. These random effects represent spline shapes; separate participant groups are not required.
 
 Sources: [penalized fitting objective](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/magic.html), [smooths represented as mixed models](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html).
+
+## 5. Prepare native fitting containers
+
+MixedModels.jl receives the prepared fixed and random designs through `FeTerm` and `ReMat`. Our adapter preserves one common variance across all spline directions. To obtain a native scalar `ReMat`, it finds orthogonal matrices $T$ and $V_r$ such that:
+
+```math
+TZV_r=\begin{bmatrix}D\\0\end{bmatrix},\qquad
+y^*=Ty,\qquad X^*=TX_{\mathrm{fixed}},\qquad r^*=V_r^\top r.
+```
+
+$D$ is diagonal. A thin QR decomposition of $Z$, followed by an SVD of its small triangular factor, provides these transformations without constructing a full observation-rotation matrix. Orthogonal rotations preserve squared lengths and the identity covariance matrices of $r$ and $\varepsilon$. The transformed model therefore has the same variance parameters and REML objective. The native scalar term has one level for each transformed spline direction and one shared variance; its levels are an internal representation of the spline.
+
+After fitting, coefficients and fitted responses are mapped back. MixedModels estimates $\theta=\tau/\sigma$, so the spline smoothing parameter is $\lambda=1/\theta^2$. If the estimated spline variance is zero, lambda is infinite and the penalized contribution vanishes.
+
+This adapter follows directly from the orthogonal identities above. Its implementation is checked against the original-coordinate Gaussian model in [VALIDATION.md](VALIDATION.md). Package sources: [MixedModels 5.9.0 constructor](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/linearmixedmodel.jl), [random-effect container](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/remat.jl), and [variance parameterization and REML](https://juliastats.org/MixedModels.jl/stable/optimization/).
 
 ## Training settings and prediction
 

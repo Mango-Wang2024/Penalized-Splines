@@ -1,0 +1,6 @@
+case	lambda	sigma2	tau2	random_directions	variance_parameters	shared_covariance_error	converged	method	status
+uniform_k8	0.609630550488441	0.140939244955676	0.231187962681258	6	1	0	TRUE	REML	lme returned without warnings
+default_k8	0.609630550566512	0.140939244956082	0.231187962652316	6	1	0	TRUE	REML	lme returned without warnings
+uneven_k10	4.42327208533096	0.141393508577279	0.0319658175779389	8	1	0	TRUE	REML	lme returned without warnings
+duplicates_k6	0.0534448002940079	0.104718631254767	1.95937922265018	4	1	0	TRUE	REML	lme returned without warnings
+small_k5	0.00962105738223272	0.153465772207521	15.9510297164351	3	1	0	TRUE	REML	lme returned without warnings

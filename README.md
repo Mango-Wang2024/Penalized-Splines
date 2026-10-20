@@ -1,6 +1,8 @@
 # Penalized splines as mixed models in Julia
 
-We are developing a Julia approach to fitting smooth curves, with future integration into Unfold for EEG analysis. R's **mgcv** provides a reference for checking our work.
+We construct cubic B-splines in Julia, prepare their mixed-model inputs, and automatically estimate smoothing with **MixedModels.jl**. R's **mgcv** and **nlme** provide the reference. Future work will connect this approach to Unfold for EEG analysis.
+
+The project has three stages: **prepare the model → fit and estimate smoothing → predict new responses**. Stages 1 and 2 are implemented and checked against R; Stage 3 is next.
 
 ## How Stage 1 was checked
 
@@ -9,13 +11,26 @@ We check basis construction first, then the complete preparation of the mixed-mo
 1. **Basis construction only:** R and Julia independently construct `B,S` from the same observations and spline settings. No conversion runs in this check.
 2. **Combined workflow:** R and Julia independently construct their spline and prepare `X_fixed,Z` from the same raw inputs. We compare the final model representations. The required fixed/random preparation runs inside this workflow; it is not a separate stage.
 
-The documented comparisons passed. [DATA.md](DATA.md) explains the observations and test cases; [DERIVATION.md](DERIVATION.md) explains the construction and input-preparation mathematics; [VALIDATION.md](VALIDATION.md) explains how correctness is checked; [STAGE1_RESULTS.md](STAGE1_RESULTS.md) records the numerical results and links to detailed checks.
+The documented comparisons passed. [DATA.md](DATA.md) explains the observations and test cases; [DERIVATION.md](DERIVATION.md) explains the mathematics; [VALIDATION.md](VALIDATION.md) explains the comparison criteria; [STAGE1_RESULTS.md](STAGE1_RESULTS.md) records input-preparation results; [STAGE2_RESULTS.md](STAGE2_RESULTS.md) records fitted curves, smoothing and variance estimates.
 
 ## Comparison flow
 
 ![Two comparisons: independent basis construction from shared inputs, followed by independent complete workflows compared at the final model representation.](assets/stage1_two_comparisons.png)
 
-**Stage 1 covers this preparation.** Stage 2 will estimate coefficients and smoothing strength. Stage 3 will predict responses for new data.
+**Stage 1 covers this preparation.** Stage 2 uses these prepared inputs to fit the model.
+
+## Stage 2: fit and estimate smoothing
+
+Both languages start with the same saved observations and spline settings. Each independently constructs its spline, prepares its inputs and fits with **REML**, which estimates variances while accounting for the fitted fixed effects.
+
+- **R:** `mgcv::gamm` prepares the spline and calls `nlme::lme`.
+- **Julia:** the existing Stage 1 functions prepare `y, X_fixed, Z`. An adapter forms valid `FeTerm` and `ReMat` containers for the low-level `MixedModels.LinearMixedModel` constructor, then `fit!` performs REML estimation.
+
+All penalized spline coefficients share one variance, **tau squared**. Observation noise has another variance, **sigma squared**. The estimated smoothing parameter is **lambda = sigma squared / tau squared**. Larger lambda means stronger smoothing. Julia estimates these variances directly; no fixed-lambda fitting step is required.
+
+We compare **lambda, both variances and all fitted responses**. Raw coefficient entries can depend on the chosen basis coordinates, so fitted responses provide a common comparison. The five cases pass; [Stage 2 results](STAGE2_RESULTS.md) show the estimates and an overlaid curve plot. The Julia fit runs without R; R is used to validate it.
+
+Sources: [mgcv fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html), [MixedModels constructors](https://juliastats.org/MixedModels.jl/stable/constructors/), and [MixedModels estimation](https://juliastats.org/MixedModels.jl/stable/optimization/). The fitting environment pins MixedModels 5.9.0 because the low-level adapter uses its container API.
 
 ## Model and inputs
 
@@ -52,6 +67,5 @@ Understanding these inputs identifies the model that a Julia fitter must receive
 
 ## Next steps
 
-- **Stage 2 — fitting:** first validate coefficient estimation with fixed smoothing strength, then variance-based smoothing estimation against R. Finally compare the complete fitting workflows.
 - **Stage 3 — prediction:** apply the fitted model to new predictor values while retaining the training knots and transformations, and compare predictions with R.
 - **Unfold integration:** use Unfold or UnfoldMixedModels where the required variance structure is supported with comparable efficiency. Validate on controlled examples before EEG applications. The final Julia workflow should run without R.

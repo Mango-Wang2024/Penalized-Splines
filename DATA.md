@@ -12,7 +12,7 @@ Every case has 200 observations. The main dataset contains 198 randomly distribu
 - **`truth`:** the known curve, `sin(1.7x) + 0.15x`.
 - **`y`:** the curve plus normally distributed noise with standard deviation 0.35.
 
-The basis depends on predictor values and spline settings. Response values are retained for later fitting; the known curve helps interpret the simulation.
+The basis depends on predictor values and spline settings. Stage 2 fits the observed responses `y`; the known curve helps interpret the simulation and is not supplied to the fitter.
 
 ## Five test cases
 
@@ -33,5 +33,7 @@ Each case also has 61 evaluation points from −2.7 to 2.7 for checking basis va
 ## Connection to the results
 
 Basis construction has **13 comparisons per case**, giving 65 across five cases. The combined workflow has **7 comparisons per case**, giving 35, and includes the required fixed/random preparation. The main `uniform_k8` case also provides the captured R fitting inputs.
+
+Stage 2 reuses these same five cases and observed responses. Each fit estimates smoothing automatically; the [fitting results](STAGE2_RESULTS.md) compare R and Julia without changing the data or knots.
 
 Saved observations, knots and evaluation points are under [data/inputs](data/inputs). Sources: the [Julia data definition](data/generate.jl), [recorded case settings](data/inputs/cases.tsv), and [cubic B-spline dimensions](https://stat.ethz.ch/R-manual/R-devel/library/splines/html/splineDesign.html).
