@@ -1,8 +1,8 @@
 using DelimitedFiles, LinearAlgebra
 include(joinpath(@__DIR__,"..","..","spline_basis","src","BSpline.jl"))
 using .BSplineBasis
-include(joinpath(@__DIR__,"..","..","spline_conversion","src","SplineConversion.jl"))
-using .SplineConversion
+include(joinpath(@__DIR__,"..","src","ModelInputs.jl"))
+using .ModelInputs
 
 function main(args)
     root=dirname(@__DIR__)
@@ -27,7 +27,7 @@ function main(args)
         # Construction reads the shared raw inputs only, never R basis outputs.
         knots=mode=="default" ? default_knots(x,k) : vec(readdlm(joinpath(p,"knots.csv"),',',Float64))
         basis=build_spline(x,knots)
-        converted=convert_spline(basis.B,basis.S;expected_rank=k-2)
+        converted=prepare_inputs(basis.B,basis.S;expected_rank=k-2)
         X_fixed=hcat(ones(length(x)),converted.X0)
         load(name)=Matrix{Float64}(readdlm(joinpath(rpath,name*".csv"),',',Float64))
         Xr,X0r,Zr,Cr=load("X_fixed"),load("X0"),load("Z"),load("C")
@@ -56,8 +56,8 @@ function main(args)
             println(io,"penalty_derivative_order\t2")
             println(io,"observations\t",length(x))
             println(io,"penalty_rank\t",converted.penalty_rank)
-            println(io,"random_covariance\tsigma_u_squared * identity")
-            println(io,"residual_covariance\tsigma_error_squared * identity")
+            println(io,"random_covariance\ttau_squared * identity")
+            println(io,"residual_covariance\tsigma_squared * identity")
             println(io,"fitting_status\tnot fitted; lambda not estimated")
         end
         println("Combined workflow: ",name)

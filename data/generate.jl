@@ -32,7 +32,7 @@ function main(args)
             println(io,c.name,'\t',length(c.t)-4,'\t',c.mode)
         end
     end
-    write(joinpath(out,"ORIGIN.txt"),"Generated once in Julia $(VERSION), seed 42.\nAll three checks use uniform_k8/data.csv and uniform_k8/knots.csv for the main example.\nFor cubic B-splines k is the basis size; each full knot vector has k+4 entries. The other knot cases reuse the same x/y values. duplicates_k6 is a separate stress-test dataset.\n")
+    write(joinpath(out,"ORIGIN.txt"),"Generated once in Julia $(VERSION), seed 42.\nBoth checks use uniform_k8/data.csv and uniform_k8/knots.csv for the main example.\nFor cubic B-splines k is the basis size; each full knot vector has k+4 entries. The other knot cases reuse the same x/y values. duplicates_k6 is a separate stress-test dataset.\n")
     println("Shared Julia data saved: ",out)
 end
 main(ARGS)

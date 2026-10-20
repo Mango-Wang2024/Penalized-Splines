@@ -2,19 +2,18 @@
 
 [Project overview](README.md) · [Mathematical explanation](DERIVATION.md) · [Recorded results](STAGE1_RESULTS.md)
 
-We separate construction from conversion so that agreement in the final model does not hide an error in an earlier step. Both languages use the same saved Julia-generated observations and matched spline settings.
+We check basis construction on its own, then compare the complete preparation of the mixed-model inputs. Both languages use the same saved Julia-generated observations and matched spline settings.
 
-## Three comparisons
+## Two comparisons
 
 | Check | Shared information | What we compare |
 | --- | --- | --- |
 | Basis construction | Predictor values and spline settings | Independently constructed R and Julia `B,S`, before conversion |
-| Conversion | Exactly the same R-generated `B,S` | R and Julia converted representations, including actual `lme` inputs |
-| Combined workflow | Raw observations and settings | Complete R preparation against complete Julia preparation |
+| Combined workflow | Raw observations and settings | Complete R preparation against complete Julia preparation, including the required fixed/random transformation |
 
 Construction and combined-workflow checks cover five cases. The captured-input conversion check uses the main example.
 
-Construction comparisons include basis values, derivatives, penalty, scaling, centering and evaluation beyond the training range. Conversion checks confirm that the curve, penalty and all coefficient directions are retained. Recording the R fitting inputs is also checked against a normal R fit, to ensure capture leaves its predictions and smoothing estimate unchanged.
+Construction comparisons include basis values, derivatives, penalty, scaling, centering and evaluation beyond the training range. The combined workflow checks the final fixed/random representation and confirms that the curve, penalty and all coefficient directions are retained. Recording the R fitting inputs is also checked against a normal R fit, to ensure capture leaves its predictions and smoothing estimate unchanged.
 
 ## What counts as agreement
 

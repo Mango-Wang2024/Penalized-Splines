@@ -4,6 +4,6 @@ degree	3
 penalty_derivative_order	2
 observations	200
 penalty_rank	6
-random_covariance	sigma_u_squared * identity
-residual_covariance	sigma_error_squared * identity
+random_covariance	tau_squared * identity
+residual_covariance	sigma_squared * identity
 fitting_status	not fitted; lambda not estimated

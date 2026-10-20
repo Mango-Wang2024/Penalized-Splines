@@ -1,3 +1,3 @@
 Generated once in Julia 1.13.1, seed 42.
-All three checks use uniform_k8/data.csv and uniform_k8/knots.csv for the main example.
+Both checks use uniform_k8/data.csv and uniform_k8/knots.csv for the main example.
 For cubic B-splines k is the basis size; each full knot vector has k+4 entries. The other knot cases reuse the same x/y values. duplicates_k6 is a separate stress-test dataset.

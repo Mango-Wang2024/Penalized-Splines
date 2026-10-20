@@ -32,6 +32,6 @@ Each case also has 61 evaluation points from −2.7 to 2.7 for checking basis va
 
 ## Connection to the results
 
-Basis construction has **13 comparisons per case**, giving 65 across five cases. The combined workflow has **7 comparisons per case**, giving 35. Conversion has **9 comparisons for the main `uniform_k8` case**, using identical R-generated `B,S` in both languages.
+Basis construction has **13 comparisons per case**, giving 65 across five cases. The combined workflow has **7 comparisons per case**, giving 35, and includes the required fixed/random preparation. The main `uniform_k8` case also provides the captured R fitting inputs.
 
 Saved observations, knots and evaluation points are under [data/inputs](data/inputs). Sources: the [Julia data definition](data/generate.jl), [recorded case settings](data/inputs/cases.tsv), and [cubic B-spline dimensions](https://stat.ethz.ch/R-manual/R-devel/library/splines/html/splineDesign.html).

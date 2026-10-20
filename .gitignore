@@ -4,9 +4,8 @@
 
 # Evidence linked from README.md and STAGE1_RESULTS.md.
 !spline_basis/outputs/shared/julia/checks.tsv
-!spline_conversion/outputs/shared/julia_conversion/validation.tsv
-!spline_conversion/outputs/shared/r_reference/reference_checks.csv
-!spline_conversion/outputs/shared/r_reference/INPUTS_EXPLAINED.txt
+!spline_workflow/outputs/shared/r_reference/lme_inputs/reference_checks.csv
+!spline_workflow/outputs/shared/r_reference/lme_inputs/INPUTS_EXPLAINED.txt
 !spline_workflow/outputs/shared/julia/checks.tsv
 !spline_workflow/outputs/shared/julia/uniform_k8/*.csv
 !spline_workflow/outputs/shared/julia/uniform_k8/model_settings.tsv

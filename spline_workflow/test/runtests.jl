@@ -1,12 +1,12 @@
 using Test, LinearAlgebra, Random
-include(joinpath(@__DIR__, "..", "src", "SplineConversion.jl"))
-using .SplineConversion
+include(joinpath(@__DIR__, "..", "src", "ModelInputs.jl"))
+using .ModelInputs
 
 @testset "Independent diagonal example" begin
     x = collect(range(-1,1; length=30))
     B = hcat(ones(30), x, x.^2, x.^3)
     S = Matrix(Diagonal([0.,0.,4.,9.]))
-    c = convert_spline(B,S; expected_rank=2)
+    c = prepare_inputs(B,S; expected_rank=2)
     @test size(c.X0) == (30,2)
     @test size(c.Z) == (30,2)
     @test c.penalty_rank == 2
@@ -28,7 +28,7 @@ end
     B = randn(rng,40,5)
     d = [0.,0.,2.,7.,11.]
     S = Q*Diagonal(d)*Q'
-    c = convert_spline(B,S)
+    c = prepare_inputs(B,S)
     expected_covariance = B*Q[:,3:5]*Diagonal(1 ./ d[3:5])*Q[:,3:5]'*B'
     @test c.penalty_rank == 3
     @test relative_error(c.Z*c.Z',expected_covariance) < 1e-11
@@ -44,23 +44,23 @@ end
 
 @testset "Unpenalized and fully penalized limits" begin
     B = Matrix{Float64}(I,3,3)
-    c0 = convert_spline(B,zeros(3,3))
+    c0 = prepare_inputs(B,zeros(3,3))
     @test size(c0.Z) == (3,0)
     @test c0.null_rank == 3
     @test space_projector(c0.X0) ≈ B
-    c1 = convert_spline(B,Matrix(Diagonal([1.,4.,9.])))
+    c1 = prepare_inputs(B,Matrix(Diagonal([1.,4.,9.])))
     @test size(c1.X0) == (3,0)
     @test c1.Z*c1.Z' ≈ Diagonal([1.,1/4,1/9])
 end
 
 @testset "Invalid inputs fail explicitly" begin
     B = Matrix{Float64}(I,2,2)
-    @test_throws DimensionMismatch convert_spline(B,zeros(3,3))
-    @test_throws ArgumentError convert_spline(B,[1. 1.;0. 1.])
-    @test_throws ArgumentError convert_spline(B,Matrix(Diagonal([1.,-1.])))
-    @test_throws ArgumentError convert_spline([NaN 0.;0. 1.],B)
-    @test_throws ArgumentError convert_spline(B,B;expected_rank=1)
-    @test_throws ArgumentError convert_spline(B,B;expected_rank=3)
+    @test_throws DimensionMismatch prepare_inputs(B,zeros(3,3))
+    @test_throws ArgumentError prepare_inputs(B,[1. 1.;0. 1.])
+    @test_throws ArgumentError prepare_inputs(B,Matrix(Diagonal([1.,-1.])))
+    @test_throws ArgumentError prepare_inputs([NaN 0.;0. 1.],B)
+    @test_throws ArgumentError prepare_inputs(B,B;expected_rank=1)
+    @test_throws ArgumentError prepare_inputs(B,B;expected_rank=3)
 end
 
-println("Julia mathematics checks passed. These tests do not establish mgcv compatibility.")
+println("Workflow preparation mathematics checks passed.")

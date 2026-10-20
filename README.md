@@ -4,17 +4,16 @@ We are developing a Julia approach to fitting smooth curves, with future integra
 
 ## How Stage 1 was checked
 
-We use three separate comparisons to evaluate construction and conversion independently, then check them together:
+We check basis construction first, then the complete preparation of the mixed-model inputs:
 
 1. **Basis construction only:** R and Julia independently construct `B,S` from the same observations and spline settings. No conversion runs in this check.
-2. **Conversion only:** both converters receive the exact same R-generated `B,S`. This keeps construction unchanged while evaluating the Julia conversion against R.
-3. **Combined workflow:** R constructs and converts its spline; Julia independently constructs and converts its own spline from the same raw inputs. We compare the final model representations.
+2. **Combined workflow:** R and Julia independently construct their spline and prepare `X_fixed,Z` from the same raw inputs. We compare the final model representations. The required fixed/random preparation runs inside this workflow; it is not a separate stage.
 
-The documented comparisons passed. [DATA.md](DATA.md) explains the observations and test cases; [DERIVATION.md](DERIVATION.md) explains the construction and conversion mathematics; [VALIDATION.md](VALIDATION.md) explains how correctness is checked; [STAGE1_RESULTS.md](STAGE1_RESULTS.md) records the numerical results and links to detailed checks.
+The documented comparisons passed. [DATA.md](DATA.md) explains the observations and test cases; [DERIVATION.md](DERIVATION.md) explains the construction and input-preparation mathematics; [VALIDATION.md](VALIDATION.md) explains how correctness is checked; [STAGE1_RESULTS.md](STAGE1_RESULTS.md) records the numerical results and links to detailed checks.
 
 ## Comparison flow
 
-![Three comparisons: independent basis construction from shared inputs; conversion using identical R-generated B and S; and independent complete workflows compared at the final representation.](assets/project_flow.png)
+![Two comparisons: independent basis construction from shared inputs, followed by independent complete workflows compared at the final model representation.](assets/project_flow.png)
 
 **Stage 1 covers this preparation.** Stage 2 will estimate coefficients and smoothing strength. Stage 3 will predict responses for new data.
 
@@ -49,7 +48,7 @@ The [referenced `gamm.r` call](https://github.com/cran/mgcv/blob/1b6a4c8374612da
 | `method` | Fitting method; the R reference uses REML |
 | `control` | Numerical stopping rules and limits |
 
-Understanding these inputs identifies the model that a Julia fitter must receive. The [captured R inputs](spline_conversion/outputs/shared/r_reference/INPUTS_EXPLAINED.txt) provide a concrete example; the [official `lme` documentation](https://stat.ethz.ch/R-manual/R-devel/library/nlme/html/lme.html) explains the arguments.
+Understanding these inputs identifies the model that a Julia fitter must receive. The [captured R inputs](spline_workflow/outputs/shared/r_reference/lme_inputs/INPUTS_EXPLAINED.txt) provide a concrete example; the [official `lme` documentation](https://stat.ethz.ch/R-manual/R-devel/library/nlme/html/lme.html) explains the arguments.
 
 ## Next steps
 

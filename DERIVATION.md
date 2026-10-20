@@ -2,7 +2,7 @@
 
 [Project overview](README.md) · [Validation method](VALIDATION.md)
 
-This document provides the mathematical explanation behind Stage 1. A superscript $\top$ denotes matrix transpose. The current spline is cubic, with a penalty on its second derivative, matching mgcv `bs="bs", m=c(3,2)`.
+This document explains basis construction and the fixed/random input preparation inside the combined Stage 1 workflow. A superscript $\top$ denotes matrix transpose. The current spline is cubic, with a penalty on its second derivative, matching mgcv `bs="bs", m=c(3,2)`.
 
 ## 1. Describe the curve and its bending
 
@@ -48,9 +48,9 @@ With raw weights $c=Hz$, the prepared curve is $Bz$, and its normalized penalty 
 
 Source: [mgcv scaling and constraints](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smoothCon.html).
 
-## 3. Separate penalized and unpenalized components
+## 3. Prepare fixed and random input columns
 
-The eigenvectors of $S$ identify independent coefficient directions. Split them into positive-penalty directions $U_+$, with positive eigenvalues in the diagonal matrix $D_+$, and zero-penalty directions $U_0$:
+The eigenvectors of $S$ identify coefficient directions with separate penalty contributions. Split them into positive-penalty directions $U_+$, with positive eigenvalues in the diagonal matrix $D_+$, and zero-penalty directions $U_0$:
 
 ```math
 \begin{aligned}
@@ -64,7 +64,7 @@ Rescale the positive directions by the inverse square roots of their eigenvalues
 ```math
 \begin{aligned}
 C&=[U_+D_+^{-1/2}\;\;U_0],\\
-z&=C\begin{bmatrix}u\\\alpha\end{bmatrix}.
+z&=C\begin{bmatrix}r\\\alpha\end{bmatrix}.
 \end{aligned}
 ```
 
@@ -75,12 +75,12 @@ X_0&=BU_0.
 \end{aligned}
 ```
 
-The weights $u$ belong to penalized components; $\alpha$ belongs to unpenalized components. Two identities explain the conversion:
+The weights $r$ belong to penalized components; $\alpha$ belongs to unpenalized components. Two identities explain the conversion:
 
 ```math
 \begin{aligned}
-Bz&=Zu+X_0\alpha,\\
-z^\top Sz&=u^\top u.
+Bz&=Zr+X_0\alpha,\\
+z^\top Sz&=r^\top r.
 \end{aligned}
 ```
 
@@ -93,7 +93,7 @@ Let $X$ contain ordinary terms such as an intercept. The same response model can
 ```math
 \begin{aligned}
 y&=X\beta+Bz+\varepsilon\\
- &=X_{\mathrm{fixed}}b+Zu+\varepsilon.
+ &=X_{\mathrm{fixed}}b+Zr+\varepsilon.
 \end{aligned}
 ```
 
@@ -101,8 +101,8 @@ where $X_{\mathrm{fixed}}=[X,\;X_0]$ and $b$ combines $\beta$ and $\alpha$. The 
 
 ```math
 \begin{aligned}
-u&\sim N(0,\sigma_u^2I),\\
-\varepsilon&\sim N(0,\sigma_\varepsilon^2I).
+r&\sim N(0,\tau^2I),\\
+\varepsilon&\sim N(0,\sigma^2I).
 \end{aligned}
 ```
 
@@ -110,8 +110,8 @@ $I$ is an identity matrix. All penalized coefficients share one variance. For fi
 
 ```math
 \begin{gathered}
-\lVert y-X_{\mathrm{fixed}}b-Zu\rVert^2+\lambda u^\top u,\\
-\lambda=\frac{\sigma_\varepsilon^2}{\sigma_u^2}.
+\lVert y-X_{\mathrm{fixed}}b-Zr\rVert^2+\lambda r^\top r,\\
+\lambda=\frac{\sigma^2}{\tau^2}.
 \end{gathered}
 ```
 
