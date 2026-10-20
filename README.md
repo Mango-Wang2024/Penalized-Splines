@@ -13,7 +13,7 @@ The documented comparisons passed. [DATA.md](DATA.md) explains the observations 
 
 ## Comparison flow
 
-![Two comparisons: independent basis construction from shared inputs, followed by independent complete workflows compared at the final model representation.](assets/project_flow.png)
+![Two comparisons: independent basis construction from shared inputs, followed by independent complete workflows compared at the final model representation.](assets/stage1_two_comparisons.png)
 
 **Stage 1 covers this preparation.** Stage 2 will estimate coefficients and smoothing strength. Stage 3 will predict responses for new data.
 
