@@ -69,7 +69,7 @@ run <- function() {
     count_per_case <- if(name=="Basis construction only")13L else 7L
     lines <- c(lines,"",paste0("## ",name,": results by case"),"",
       sprintf("Five test cases, with %d comparisons per case.",count_per_case),"",
-      "| Case | Raw basis size k | Passed | Largest scaled error |",
+      "| Case | Raw basis size $k$ | Passed | Largest scaled error |",
       "| --- | --- | --- | --- |")
     for(case in cases) {
       rows <- tab[tab$case==case,,drop=FALSE]
@@ -81,13 +81,13 @@ run <- function() {
   lines <- c(lines,"","## Shared inputs","",
     "Data and knot fingerprints match the shared files for all five cases. The captured R fitting inputs use the same main observations and knots.",
     paste0("Main data MD5: `",data_hash,"`. Main knots MD5: `",knots_hash,"`."),
-    sprintf("Cross-reference B and S scaled errors: %.3g and %.3g.",cross[1],cross[2]),"",
+    sprintf("Cross-reference $B$ and $S$ scaled errors: %.3g and %.3g.",cross[1],cross[2]),"",
     "## Detailed evidence","",
     sprintf("- [Basis construction checks](<%s>)",relative(file.path(basis,"julia","checks.tsv"))),
     sprintf("- [Combined workflow checks](<%s>)",relative(file.path(workflow,"julia","checks.tsv"))),
     sprintf("- [R fitting-input checks](<%s>)",relative(file.path(captured,"reference_checks.csv"))),"",
     "## Prepared model","",
-    sprintf("The [main Julia model inputs](<%s>) contain y, X_fixed and Z, together with B, S, the coefficient map C, training settings and variance assumptions.",relative(file.path(workflow,"julia","uniform_k8"))),"",
+    sprintf("The [main Julia model inputs](<%s>) contain $y$, $X_{\\mathrm{fixed}}$ and $Z$, together with $B$, $S$, the coefficient map $C$, training settings and variance assumptions.",relative(file.path(workflow,"julia","uniform_k8"))),"",
     paste0("R reference versions: ",md[["R_version"]],", mgcv ",md[["mgcv_version"]],", nlme ",md[["nlme_version"]],"."),"",
     "## Sources","",
     "- [mgcv cubic B-splines and curvature penalty](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth.construct.bs.smooth.spec.html)",

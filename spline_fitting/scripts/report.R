@@ -94,28 +94,26 @@ run <- function() {
   link <- function(label,path) paste0("[",label,"](",relative_path(path),")")
   fmt <- function(x) sprintf("%.9g",x)
   lines <- c("# Stage 2 results","",
-    "R and Julia independently construct the same spline model and estimate smoothing automatically with **REML**. R uses `mgcv::gamm` with `nlme::lme`; Julia uses prepared `FeTerm` and `ReMat` inputs with `MixedModels.LinearMixedModel`.","",
+    "Both branches repeat Stage 1 preparation from the same saved data, then fit with **REML**. R uses `mgcv::gamm` with `nlme::lme`; Julia uses prepared `FeTerm` and `ReMat` inputs with `MixedModels.LinearMixedModel`.","",
     sprintf("**%d/%d reference comparisons passed across five cases.** No smoothing parameter is fixed before fitting.",sum(checks$passed),nrow(checks)),"",
     "## Estimated smoothing and fitted curves","",
-    "The relative error compares each pair of variance or smoothing estimates. The fitted-curve error compares all 200 fitted responses in their original observation order, using the scaled norm defined in VALIDATION.md.","",
-    "| Case | R lambda | Julia lambda | Lambda relative error | Fitted-curve scaled error |",
+    "Each fit estimates $\\hat\\sigma^2$ and $\\hat\\tau^2$; $\\hat\\lambda=\\hat\\sigma^2/\\hat\\tau^2$ is derived from the same fit. It is not estimated in an additional fitting step.","",
+    "The table compares $\\hat\\lambda$ and all 200 fitted responses, $\\hat y_R$ and $\\hat y_{\\mathrm{Julia}}$, in their original observation order. The relative and scaled errors are defined in VALIDATION.md.","",
+    "| Case | R $\\hat\\lambda$ | Julia $\\hat\\lambda$ | $\\hat\\lambda$ relative error | Fitted-response scaled error |",
     "| --- | ---: | ---: | ---: | ---: |")
   for(i in seq_len(nrow(comparison))) lines <- c(lines,sprintf("| `%s` | %s | %s | %.2e | %.2e |",
     comparison$case[i],fmt(comparison$R_lambda[i]),fmt(comparison$Julia_lambda[i]),
     comparison$lambda_relative_error[i],comparison$fitted_scaled_error[i]))
-  lines <- c(lines,"","## Estimated variances","",
-    "All penalized spline directions share one variance, tau squared. The remaining observation noise has variance sigma squared. Their ratio is the smoothing parameter: lambda = sigma squared / tau squared.","",
-    "| Case | R noise variance | Julia noise variance | R spline variance | Julia spline variance |",
-    "| --- | ---: | ---: | ---: | ---: |")
-  for(i in seq_len(nrow(comparison))) lines <- c(lines,sprintf("| `%s` | %s | %s | %s | %s |",
-    comparison$case[i],fmt(r$sigma2[i]),fmt(j$sigma2[i]),fmt(r$tau2[i]),fmt(j$tau2[i])))
-  lines <- c(lines,"",sprintf("The largest relative variance error is **%.2e**. The acceptance thresholds are 1e-5 for smoothing and variances, and 1e-6 for fitted curves.",
-    max(comparison$sigma2_relative_error,comparison$tau2_relative_error)),"",
+  lines <- c(lines,"",
+    paste0("The ",link("detailed estimates",file.path(out,"comparison","estimates.tsv")),
+      " retain $\\hat\\sigma^2$ and $\\hat\\tau^2$ for every case."),
+    sprintf("Their largest relative error is **%.2e**. Acceptance thresholds are $10^{-5}$ for $\\hat\\lambda$ and both variances, and $10^{-6}$ for fitted responses.",
+      max(comparison$sigma2_relative_error,comparison$tau2_relative_error)),"",
     paste0("![R and Julia fitted curves](",relative_path(file.path(out,"comparison","fitted_curves.png")),")"),"",
+    "Gray points are the observed $y$ values supplied to both fitters; the dotted curve is the known simulation curve. The blue R and orange Julia curves show their fitted responses $\\hat y$ and nearly coincide.","",
     "## Supporting checks","",
     "Independent Julia tests check that the input adapter preserves the covariance model, REML objective and fitted coefficients. They also check invariance to rotated spline directions, the zero-variance boundary and invalid inputs.","",
     paste0(link("Detailed comparisons",file.path(out,"comparison","checks.tsv")),"; ",
-      link("all estimates",file.path(out,"comparison","estimates.tsv")),"; ",
       link("Julia test log",args[4]),". ",
       link("R fitting status",file.path(rdir,"fit_summary.tsv"))," and ",
       link("Julia fitting status",file.path(jdir,"fit_summary.tsv"))," record the individual fits."),"",

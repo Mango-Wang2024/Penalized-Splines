@@ -17,7 +17,7 @@ Mathematical tests completed before these comparisons. R fitting-input checks pa
 
 Five test cases, with 13 comparisons per case.
 
-| Case | Raw basis size k | Passed | Largest scaled error |
+| Case | Raw basis size $k$ | Passed | Largest scaled error |
 | --- | --- | --- | --- |
 | uniform_k8 | 8 | 13/13 | 3.33e-16 |
 | default_k8 | 8 | 13/13 | 1.15e-15 |
@@ -29,7 +29,7 @@ Five test cases, with 13 comparisons per case.
 
 Five test cases, with 7 comparisons per case.
 
-| Case | Raw basis size k | Passed | Largest scaled error |
+| Case | Raw basis size $k$ | Passed | Largest scaled error |
 | --- | --- | --- | --- |
 | uniform_k8 | 8 | 7/7 | 6.41e-15 |
 | default_k8 | 8 | 7/7 | 9.52e-15 |
@@ -41,7 +41,7 @@ Five test cases, with 7 comparisons per case.
 
 Data and knot fingerprints match the shared files for all five cases. The captured R fitting inputs use the same main observations and knots.
 Main data MD5: `d7f3ce440112190e44cd54269ce48790`. Main knots MD5: `6665cb09426afb769ec771f896515c87`.
-Cross-reference B and S scaled errors: 1.18e-15 and 1.2e-15.
+Cross-reference $B$ and $S$ scaled errors: 1.18e-15 and 1.2e-15.
 
 ## Detailed evidence
 
@@ -51,7 +51,7 @@ Cross-reference B and S scaled errors: 1.18e-15 and 1.2e-15.
 
 ## Prepared model
 
-The [main Julia model inputs](<spline_workflow/outputs/shared/julia/uniform_k8>) contain y, X_fixed and Z, together with B, S, the coefficient map C, training settings and variance assumptions.
+The [main Julia model inputs](<spline_workflow/outputs/shared/julia/uniform_k8>) contain $y$, $X_{\mathrm{fixed}}$ and $Z$, together with $B$, $S$, the coefficient map $C$, training settings and variance assumptions.
 
 R reference versions: R version 4.6.1 (2026-06-24), mgcv 1.9.4, nlme 3.1.169.
 

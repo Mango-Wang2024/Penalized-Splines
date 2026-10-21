@@ -136,7 +136,7 @@ y^*=Ty,\qquad X^*=TX_{\mathrm{fixed}},\qquad r^*=V_r^\top r.
 
 $D$ is diagonal. A thin QR decomposition of $Z$, followed by an SVD of its small triangular factor, provides these transformations without constructing a full observation-rotation matrix. Orthogonal rotations preserve squared lengths and the identity covariance matrices of $r$ and $\varepsilon$. The transformed model therefore has the same variance parameters and REML objective. The native scalar term has one level for each transformed spline direction and one shared variance; its levels are an internal representation of the spline.
 
-After fitting, coefficients and fitted responses are mapped back. MixedModels estimates $\theta=\tau/\sigma$, so the spline smoothing parameter is $\lambda=1/\theta^2$. If the estimated spline variance is zero, lambda is infinite and the penalized contribution vanishes.
+After fitting, coefficients and fitted responses are mapped back. MixedModels estimates $\theta=\tau/\sigma$, so the spline smoothing parameter is $\lambda=1/\theta^2$. If the estimated spline variance is zero, $\lambda$ is infinite and the penalized contribution vanishes.
 
 This adapter follows directly from the orthogonal identities above. Its implementation is checked against the original-coordinate Gaussian model in [VALIDATION.md](VALIDATION.md). Package sources: [MixedModels 5.9.0 constructor](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/linearmixedmodel.jl), [random-effect container](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/remat.jl), and [variance parameterization and REML](https://juliastats.org/MixedModels.jl/stable/optimization/).
 

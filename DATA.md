@@ -8,17 +8,17 @@ We use simulated observations generated once in Julia. R and Julia read the same
 
 Every case has 200 observations. The main dataset contains 198 randomly distributed predictor values between −2 and 2, plus the two endpoints. Each observation has:
 
-- **`x`:** the predictor value.
-- **`truth`:** the known curve, `sin(1.7x) + 0.15x`.
-- **`y`:** the curve plus normally distributed noise with standard deviation 0.35.
+- **`x`:** the predictor value $x$.
+- **`truth`:** the known curve, $f(x)=\sin(1.7x)+0.15x$.
+- **`y`:** the observed response $y=f(x)+\varepsilon$, with normally distributed noise of standard deviation 0.35.
 
-The basis depends on predictor values and spline settings. Stage 2 fits the observed responses `y`; the known curve helps interpret the simulation and is not supplied to the fitter.
+The basis depends on predictor values and spline settings. Stage 2 fits the observed responses $y$; the known curve helps interpret the simulation and is not supplied to the fitter.
 
 ## Five test cases
 
-The case names identify different data or spline settings. `k` is the number of raw basis functions; a full cubic knot vector has `k+4` entries.
+The case names identify different data or spline settings. $k$ is the number of raw basis functions; a full cubic knot vector has $k+4$ entries.
 
-| Case | k | Full knot entries | Purpose |
+| Case | $k$ | Full knot entries | Purpose |
 | --- | --- | --- | --- |
 | `uniform_k8` | 8 | 12 | Main case with an explicitly supplied uniform knot vector |
 | `default_k8` | 8 | 12 | Check that R and Julia independently obtain the same default knots |
