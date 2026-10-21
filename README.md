@@ -2,13 +2,29 @@
 
 We construct cubic B-splines in Julia, prepare their mixed-model inputs, and estimate smoothing with **MixedModels.jl**. R's **mgcv** and **nlme** provide the validation reference. Future work will connect this approach to Unfold for EEG analysis.
 
-The project follows **model preparation → fitting → prediction**. Stages 1 and 2 are implemented and checked against R; Stage 3 is next.
+The project follows **model preparation → fitting → prediction**. Stages 1 and 2 are implemented and checked against R; Stage 3 is planned.
 
 [DATA.md](DATA.md) explains the observations and test cases; [DERIVATION.md](DERIVATION.md) explains the mathematics; [VALIDATION.md](VALIDATION.md) defines the comparison criteria. [STAGE1_RESULTS.md](STAGE1_RESULTS.md) records input-preparation checks, and [STAGE2_RESULTS.md](STAGE2_RESULTS.md) records fitting results.
 
+The main dimensions below refer to our **200-observation example with $k=8$ raw basis functions**. Matrix dimensions are written as rows × columns; other test cases use different basis sizes.
+
 ## Stage 1: prepare the model inputs
 
-We use two comparisons to check preparation independently of fitting:
+**Purpose:** turn predictor values and spline settings into matrices that a mixed model can use.
+
+| Role | Quantity and meaning | Main dimensions |
+| --- | --- | --- |
+| Input | $x$: training predictor values | 200 values |
+| Input | Full knot vector: positions defining the spline pieces | 12 values |
+| Constructed | $B,S$: centered spline basis and matching curvature penalty | 200 × 7; 7 × 7 |
+| Output | $X_{\mathrm{fixed}}$: fixed-effect design | 200 × 2 |
+| Output | $Z$: penalized spline design | 200 × 6 |
+
+**Method and settings:** Julia uses our basis-construction and model-preparation functions; R uses mgcv as an independent reference. Both use cubic B-splines (degree 3), $k=8$ in the main example, a supplied or automatically calculated knot vector, and a curvature penalty that measures squared second derivatives.
+
+Centering separates the spline from the intercept, reducing eight raw basis columns to seven. $X_{\mathrm{fixed}}=[X,X_0]$ combines the intercept with the unpenalized spline component; $Z$ contains the six penalized components. Training knots, centering, penalty scaling and coefficient transformations are retained for prediction. Observed responses $y$ are used for fitting in Stage 2.
+
+We check preparation independently of fitting:
 
 1. **Basis construction only:** R and Julia independently construct $B,S$ from the same predictor values and spline settings. We compare them before fixed/random preparation.
 2. **Combined workflow:** each language constructs its spline and prepares $X_{\mathrm{fixed}},Z$ from the same raw inputs. We compare the final model representations.
@@ -19,12 +35,23 @@ We use two comparisons to check preparation independently of fitting:
 
 ## Stage 2: fit and estimate smoothing
 
-The Stage 2 test runs the validated Stage 1 preparation again, then fits both models with **REML**, which estimates variances while accounting for the fitted fixed effects. Both branches start from the same saved observations and spline settings:
+**Purpose:** use the prepared model and observed responses to learn the curve and its smoothing strength. The Stage 2 test repeats Stage 1 preparation in each branch, starting from the same saved observations and settings.
 
-- **R:** `mgcv::gamm` prepares the spline and calls `nlme::lme`.
-- **Julia:** our Stage 1 functions prepare $y,X_{\mathrm{fixed}},Z$. An adapter forms `FeTerm` and `ReMat` containers for `MixedModels.LinearMixedModel`, then `fit!` performs REML estimation.
+| Role | Quantity and meaning | Main dimensions |
+| --- | --- | --- |
+| Input | $y$: observed training responses | 200 values |
+| Input | $X_{\mathrm{fixed}},Z$: designs prepared in Stage 1 | 200 × 2; 200 × 6 |
+| Output | $b$: fitted fixed coefficients | 2 values |
+| Output | $r$: fitted penalized spline coefficients | 6 values |
+| Output | $\sigma^2,\tau^2$: noise variance and shared spline variance | One value each |
+| Output | $\lambda$: smoothing strength derived from the variances | One value |
+| Output | $\hat y$: fitted responses at the training predictor values | 200 values |
 
-Each fit estimates fixed coefficients $b$, penalized spline coefficients $r$, noise variance $\sigma^2$, and shared spline variance $\tau^2$. We keep the parameter symbols from the derivation; here they refer to fitted estimates. Using the fitted coefficients gives the training responses $\hat y$:
+**Tools:** R's `mgcv::gamm` prepares the spline and calls `nlme::lme`. Julia prepares its own matrices, packages them in `FeTerm` and `ReMat` containers, and fits with `MixedModels.LinearMixedModel` and `fit!`.
+
+**Essential settings:** REML estimates variances while accounting for fitted fixed effects. All six penalized coefficients share one Gaussian variance $\tau^2$; noise is independent Gaussian with variance $\sigma^2$, and observations have equal weights. Smoothing is estimated automatically rather than fixed beforehand.
+
+Using fitted coefficients and variances:
 
 ```math
 \hat y=X_{\mathrm{fixed}}b+Zr,
@@ -32,46 +59,30 @@ Each fit estimates fixed coefficients $b$, penalized spline coefficients $r$, no
 \lambda=\frac{\sigma^2}{\tau^2}.
 ```
 
-$\lambda$ is derived from the same variance fit, rather than estimated in an additional fitting step. A larger ratio means stronger smoothing. The hat on $\hat y$ distinguishes fitted responses from observed $y$.
+Parameter symbols follow the derivation; here they denote fitted estimates. The hat on $\hat y$ distinguishes fitted responses from observed $y$. A larger $\lambda$ means stronger smoothing; it is derived from the variance fit, without an additional fitting step.
 
 ### Comparison flow
 
 ![Stage 2 repeats preparation in separate R and Julia branches, fits each model with REML, then compares smoothing strength and fitted responses.](assets/stage2_fitting_flow.svg)
 
-The two main comparisons are **smoothing strength $\lambda$** and **fitted responses $\hat y$** across five cases. Variance estimates remain supporting checks. Coefficient coordinates can differ between equivalent representations, so raw coefficient entries are not the cross-language comparison. The [results](STAGE2_RESULTS.md) show one summary table and an overlaid curve plot, with detailed estimates linked there.
+The two main comparisons are **smoothing strength $\lambda$** and **fitted responses $\hat y$** across five cases. Variance estimates remain supporting checks. Equivalent representations can have different coefficient coordinates, so raw coefficient entries are not the cross-language comparison. The [results](STAGE2_RESULTS.md) include a summary table, an overlaid curve plot and links to detailed estimates.
 
-Sources: [mgcv fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html), [MixedModels constructors](https://juliastats.org/MixedModels.jl/stable/constructors/), and [MixedModels estimation](https://juliastats.org/MixedModels.jl/stable/optimization/). The fitting environment pins MixedModels 5.9.0 because the adapter uses its low-level container API.
+## Stage 3: predict at new predictor values — planned
 
-## Model and inputs
+**Purpose:** apply the fitted curve to new predictor values. Let $m$ be the number of new observations.
 
-A spline combines simple curve shapes, and a curvature penalty controls their bending. Our main example uses 200 simulated observations, $k=8$ raw basis functions and 12 full knot entries. Centering separates the spline from the intercept, leaving seven basis columns.
-
-| Input | Meaning | Main dimensions |
+| Role | Quantity and meaning | Main dimensions |
 | --- | --- | --- |
-| $y$ | Observed responses | 200 values |
-| $B$, $S$ | Spline basis and matching penalty | 200 × 7; 7 × 7 |
-| $X_{\mathrm{fixed}}$ | Intercept and unpenalized spline component | 200 × 2 |
-| $Z$ | Penalized spline components sharing variance $\tau^2$ | 200 × 6 |
+| Input | $x_{\mathrm{new}}$: new predictor values | $m$ values |
+| Input | Training knots and saved Stage 1 transformations | 12 knot values; transformations reused |
+| Input | Fitted coefficients $b,r$ from Stage 2 | 2 values; 6 values |
+| Constructed | $X_{\mathrm{fixed,new}},Z_{\mathrm{new}}$: designs evaluated at new values | $m$ × 2; $m$ × 6 |
+| Output | $\hat y_{\mathrm{new}}$: predicted responses | $m$ values |
 
-Training knots and transformations are retained for prediction. The repository includes the linked evidence tables, captured R inputs and main Julia model inputs.
+The planned Julia prediction step will reuse the training knots, centering, penalty scaling and coefficient transformations, then apply the fitted coefficients. The learned smoothing is already reflected in those coefficients. We will compare these predictions with R at the same new predictor values; observed responses at those points are not required to produce predictions.
 
-## Connection to the R fitting inputs
+After this, we plan to integrate with Unfold or UnfoldMixedModels where the required variance structure is supported with comparable efficiency, starting with controlled examples before EEG applications.
 
-The [referenced `gamm.r` call](https://github.com/cran/mgcv/blob/1b6a4c8374612da27e36420b4459e93acb183f2d/R/gamm.r#L1398) passes the prepared representation to `lme`:
+## Sources and package interfaces
 
-| R argument | Meaning in our project |
-| --- | --- |
-| `fixed.formula` | Describes the response and components represented by $X_{\mathrm{fixed}}$ |
-| `rand` | Describes the $Z$ components, grouping and shared variance |
-| `data` | Contains the observations and numerical matrices |
-| `correlation` | Residual relationships; our example assumes independent errors |
-| `weights` | Residual variability; our example assumes equal variability |
-| `method` | Fitting method; we use REML |
-| `control` | Numerical stopping rules and limits |
-
-The [captured R inputs](spline_workflow/outputs/shared/r_reference/lme_inputs/INPUTS_EXPLAINED.txt) provide a concrete example; the [official `lme` documentation](https://stat.ethz.ch/R-manual/R-devel/library/nlme/html/lme.html) explains the arguments.
-
-## Next steps
-
-- **Stage 3 — prediction:** evaluate the fitted model at new predictor values using its training knots, transformations and learned coefficients, then compare predictions with R.
-- **Unfold integration:** use Unfold or UnfoldMixedModels where the required variance structure is supported with comparable efficiency, starting with controlled examples before EEG applications.
+Sources: [mgcv fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html), [MixedModels constructors](https://juliastats.org/MixedModels.jl/stable/constructors/), and [MixedModels estimation](https://juliastats.org/MixedModels.jl/stable/optimization/). The [original R fitting call](https://github.com/cran/mgcv/blob/1b6a4c8374612da27e36420b4459e93acb183f2d/R/gamm.r#L1398) and [captured R inputs](spline_workflow/outputs/shared/r_reference/lme_inputs/INPUTS_EXPLAINED.txt) document how R packages the same fixed/random model. The Julia fitting environment pins MixedModels 5.9.0 because the adapter uses its low-level container API.
