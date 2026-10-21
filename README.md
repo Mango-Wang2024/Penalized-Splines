@@ -24,21 +24,21 @@ The Stage 2 test runs the validated Stage 1 preparation again, then fits both mo
 - **R:** `mgcv::gamm` prepares the spline and calls `nlme::lme`.
 - **Julia:** our Stage 1 functions prepare $y,X_{\mathrm{fixed}},Z$. An adapter forms `FeTerm` and `ReMat` containers for `MixedModels.LinearMixedModel`, then `fit!` performs REML estimation.
 
-Each fit learns fixed coefficients $\hat b$, penalized spline coefficients $\hat r$, noise variance $\hat\sigma^2$, and shared spline variance $\hat\tau^2$. These give the fitted responses $\hat y$ at the training observations and the smoothing parameter $\hat\lambda$:
+Each fit estimates fixed coefficients $b$, penalized spline coefficients $r$, noise variance $\sigma^2$, and shared spline variance $\tau^2$. We keep the parameter symbols from the derivation; here they refer to fitted estimates. Using the fitted coefficients gives the training responses $\hat y$:
 
 ```math
-\hat y=X_{\mathrm{fixed}}\hat b+Z\hat r,
+\hat y=X_{\mathrm{fixed}}b+Zr,
 \qquad
-\hat\lambda=\frac{\hat\sigma^2}{\hat\tau^2}.
+\lambda=\frac{\sigma^2}{\tau^2}.
 ```
 
-$\hat\lambda$ is derived from the same variance fit, rather than estimated in an additional fitting step. A larger ratio means stronger smoothing.
+$\lambda$ is derived from the same variance fit, rather than estimated in an additional fitting step. A larger ratio means stronger smoothing. The hat on $\hat y$ distinguishes fitted responses from observed $y$.
 
 ### Comparison flow
 
-![Stage 2 repeats preparation in separate R and Julia branches, fits each model with REML, then compares smoothing, variances and fitted responses.](assets/stage2_fitting_flow.svg)
+![Stage 2 repeats preparation in separate R and Julia branches, fits each model with REML, then compares smoothing strength and fitted responses.](assets/stage2_fitting_flow.svg)
 
-We compare $\hat\lambda$, $\hat\sigma^2$, $\hat\tau^2$, and the fitted responses $\hat y$ across five cases. Coefficient coordinates can differ between equivalent representations, so raw coefficient entries are not the cross-language comparison. The [results](STAGE2_RESULTS.md) show one summary table and an overlaid curve plot; detailed variance estimates remain linked there.
+The two main comparisons are **smoothing strength $\lambda$** and **fitted responses $\hat y$** across five cases. Variance estimates remain supporting checks. Coefficient coordinates can differ between equivalent representations, so raw coefficient entries are not the cross-language comparison. The [results](STAGE2_RESULTS.md) show one summary table and an overlaid curve plot, with detailed estimates linked there.
 
 Sources: [mgcv fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html), [MixedModels constructors](https://juliastats.org/MixedModels.jl/stable/constructors/), and [MixedModels estimation](https://juliastats.org/MixedModels.jl/stable/optimization/). The fitting environment pins MixedModels 5.9.0 because the adapter uses its low-level container API.
 

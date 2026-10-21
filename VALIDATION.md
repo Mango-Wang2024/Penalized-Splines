@@ -38,13 +38,14 @@ R and Julia independently construct and fit all five cases from the same saved p
 
 The model has one shared spline variance, $\tau^2$, and one residual variance, $\sigma^2$. Julia estimates $\theta=\tau/\sigma$ and obtains $\lambda=1/\theta^2$. R's spline variance is read independently from its fitted random-effect covariance, and its ratio to residual variance is checked against `gam$sp`. Both fits must converge.
 
-We compare:
+The two main output comparisons are:
 
-- **$\hat\lambda$, $\hat\sigma^2$, and $\hat\tau^2$:** absolute difference divided by the larger magnitude, with tolerance $10^{-5}$.
+- **Smoothing strength $\lambda$:** absolute difference divided by the larger magnitude, with tolerance $10^{-5}$.
 - **All fitted responses $\hat y$:** the scaled norm above, with tolerance $10^{-6}$.
-- **Inputs and model structure:** matching predictor, response and knot values, and exactly one shared spline variance in each model.
 
-The fitting tolerances allow small differences between numerical optimizers. Raw coefficient entries and package log-likelihood values are not used for cross-language agreement because coefficient coordinates and fixed-effect scaling can differ. Fitted responses are compared in the original observation coordinates. Since $\hat\lambda=\hat\sigma^2/\hat\tau^2$, the smoothing and variance comparisons describe related outputs of the same fit. Results and individual checks are in [STAGE2_RESULTS.md](STAGE2_RESULTS.md).
+Matching $\lambda$ checks smoothing strength; matching $\hat y$ checks the resulting fitted curve. Supporting checks compare $\sigma^2$ and $\tau^2$ with relative tolerance $10^{-5}$, because the same ratio can arise from different variance scales. They also verify matching predictor, response and knot values, and exactly one shared spline variance in each model. Parameter symbols follow the derivation; in the results they denote fitted estimates.
+
+The fitting tolerances allow small differences between numerical optimizers. Raw coefficient entries and package log-likelihood values are not used for cross-language agreement because coefficient coordinates and fixed-effect scaling can differ. Fitted responses are compared in the original observation coordinates. Results and individual checks are in [STAGE2_RESULTS.md](STAGE2_RESULTS.md).
 
 ### Checking the Julia input adapter
 
