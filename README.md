@@ -64,7 +64,7 @@ Parameter symbols follow the derivation; here they denote fitted estimates. The 
 
 ### Comparison flow
 
-![Stage 2 repeats preparation in separate R and Julia branches, fits each model with REML, then compares smoothing strength and fitted responses.](assets/stage2_fitting_flow.svg)
+![Stage 2 fits separate R and Julia models, shows coefficients b,r and variances sigma squared,tau squared, then compares smoothing strength and fitted responses.](assets/stage2_fitting_flow.svg)
 
 The two main comparisons are **smoothing strength $\lambda$** and **fitted responses $\hat y$** across five cases. Variance estimates remain supporting checks. Equivalent representations can have different coefficient coordinates, so raw coefficient entries are not the cross-language comparison. The [results](STAGE2_RESULTS.md) include a summary table, an overlaid curve plot and links to detailed estimates.
 
