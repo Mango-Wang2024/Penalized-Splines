@@ -1,7 +1,7 @@
 using DelimitedFiles, LinearAlgebra, MixedModels, StatsModels
 include(joinpath(@__DIR__,"..","..","spline_basis","src","BSpline.jl"))
 using .BSplineBasis
-include(joinpath(@__DIR__,"..","..","spline_workflow","src","ModelInputs.jl"))
+include(joinpath(@__DIR__,"..","..","model_preparation","src","ModelInputs.jl"))
 using .ModelInputs
 include(joinpath(@__DIR__,"..","src","SplineFit.jl"))
 using .SplineFit

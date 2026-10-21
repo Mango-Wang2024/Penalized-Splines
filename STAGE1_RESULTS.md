@@ -46,12 +46,12 @@ Cross-reference $B$ and $S$ scaled errors: 1.18e-15 and 1.2e-15.
 ## Detailed evidence
 
 - [Basis construction checks](<spline_basis/outputs/shared/julia/checks.tsv>)
-- [Combined workflow checks](<spline_workflow/outputs/shared/julia/checks.tsv>)
-- [R fitting-input checks](<spline_workflow/outputs/shared/r_reference/lme_inputs/reference_checks.csv>)
+- [Combined workflow checks](<model_preparation/outputs/shared/julia/checks.tsv>)
+- [R fitting-input checks](<model_preparation/outputs/shared/r_reference/lme_inputs/reference_checks.csv>)
 
 ## Prepared model
 
-The [main Julia model inputs](<spline_workflow/outputs/shared/julia/uniform_k8>) contain $y$, $X_{\mathrm{fixed}}$ and $Z$, together with $B$, $S$, the coefficient map $C$, training settings and variance assumptions.
+The [main Julia model inputs](<model_preparation/outputs/shared/julia/uniform_k8>) contain $y$, $X_{\mathrm{fixed}}$ and $Z$, together with $B$, $S$, the coefficient map $C$, training settings and variance assumptions.
 
 R reference versions: R version 4.6.1 (2026-06-24), mgcv 1.9.4, nlme 3.1.169.
 

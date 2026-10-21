@@ -12,7 +12,7 @@ The main dimensions below refer to our **200-observation example with $k=8$ raw 
 
 **Starts with:** 200 training predictor values $x$ and the spline settings: cubic B-splines (degree 3), $k=8$, a full vector of 12 knots, and an integrated squared-second-derivative penalty that controls curve bending. Knots can be supplied or calculated from the training predictor range.
 
-Julia constructs the basis and prepares the mixed-model matrices. R's mgcv provides an independent reference for the same steps.
+Julia constructs the basis in [spline_basis](spline_basis) and prepares the fixed/random model matrices in [model_preparation](model_preparation). R's mgcv provides an independent reference for the same steps.
 
 **Produces:** $X_{\mathrm{fixed}},Z$ for fitting, with training knots and transformations retained for prediction. The table also shows $B,S$, constructed along the way:
 
@@ -86,4 +86,4 @@ After this, we plan to integrate with Unfold or UnfoldMixedModels where the requ
 
 ## Sources and package interfaces
 
-Sources: [mgcv fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html), [MixedModels constructors](https://juliastats.org/MixedModels.jl/stable/constructors/), and [MixedModels estimation](https://juliastats.org/MixedModels.jl/stable/optimization/). The [original R fitting call](https://github.com/cran/mgcv/blob/1b6a4c8374612da27e36420b4459e93acb183f2d/R/gamm.r#L1398) and [captured R inputs](spline_workflow/outputs/shared/r_reference/lme_inputs/INPUTS_EXPLAINED.txt) document how R packages the same fixed/random model. The Julia fitting environment pins MixedModels 5.9.0 because the adapter uses its low-level container API.
+Sources: [mgcv fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html), [MixedModels constructors](https://juliastats.org/MixedModels.jl/stable/constructors/), and [MixedModels estimation](https://juliastats.org/MixedModels.jl/stable/optimization/). The [original R fitting call](https://github.com/cran/mgcv/blob/1b6a4c8374612da27e36420b4459e93acb183f2d/R/gamm.r#L1398) and [captured R inputs](model_preparation/outputs/shared/r_reference/lme_inputs/INPUTS_EXPLAINED.txt) document how R packages the same fixed/random model. The Julia fitting environment pins MixedModels 5.9.0 because the adapter uses its low-level container API.
