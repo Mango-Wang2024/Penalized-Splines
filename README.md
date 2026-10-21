@@ -10,19 +10,18 @@ The main dimensions below refer to our **200-observation example with $k=8$ raw 
 
 ## Stage 1: prepare the model inputs
 
-**Purpose:** turn predictor values and spline settings into matrices that a mixed model can use.
+We start with 200 training predictor values $x$ and the spline settings: cubic B-splines (degree 3), $k=8$, a full vector of 12 knots, and an integrated squared-second-derivative penalty that controls curve bending. Knots can be supplied or calculated from the training predictor range.
 
-| Role | Quantity and meaning | Main dimensions |
+Julia constructs the basis and prepares the mixed-model matrices. R's mgcv provides an independent reference for the same steps:
+
+| Quantity | What it represents | Main dimensions |
 | --- | --- | --- |
-| Input | $x$: training predictor values | 200 values |
-| Input | Full knot vector: positions defining the spline pieces | 12 values |
-| Constructed | $B,S$: centered spline basis and matching curvature penalty | 200 × 7; 7 × 7 |
-| Output | $X_{\mathrm{fixed}}$: fixed-effect design | 200 × 2 |
-| Output | $Z$: penalized spline design | 200 × 6 |
+| $B$ | Centered spline basis | 200 × 7 |
+| $S$ | Matching curvature penalty | 7 × 7 |
+| $X_{\mathrm{fixed}}$ | Intercept and unpenalized spline component | 200 × 2 |
+| $Z$ | Penalized spline components | 200 × 6 |
 
-**Method and settings:** Julia uses our basis-construction and model-preparation functions; R uses mgcv as an independent reference. Both use cubic B-splines (degree 3), $k=8$ in the main example, a supplied or automatically calculated knot vector, and a curvature penalty that measures squared second derivatives.
-
-Centering separates the spline from the intercept, reducing eight raw basis columns to seven. $X_{\mathrm{fixed}}=[X,X_0]$ combines the intercept with the unpenalized spline component; $Z$ contains the six penalized components. Training knots, centering, penalty scaling and coefficient transformations are retained for prediction. Observed responses $y$ are used for fitting in Stage 2.
+Centering separates the spline from the intercept, reducing eight raw basis columns to seven. $X_{\mathrm{fixed}}=[X,X_0]$ combines the ordinary intercept with the unpenalized spline component. Stage 1 supplies $X_{\mathrm{fixed}},Z$ to fitting and retains the training knots and transformations for prediction.
 
 We check preparation independently of fitting:
 
@@ -35,21 +34,19 @@ We check preparation independently of fitting:
 
 ## Stage 2: fit and estimate smoothing
 
-**Purpose:** use the prepared model and observed responses to learn the curve and its smoothing strength. The Stage 2 test repeats Stage 1 preparation in each branch, starting from the same saved observations and settings.
+We add the 200 observed responses $y$ to the Stage 1 matrices $X_{\mathrm{fixed}},Z$. The Stage 2 test repeats preparation in each branch from the same saved data and settings, then fits the model with REML.
 
-| Role | Quantity and meaning | Main dimensions |
+R's `mgcv::gamm` prepares the spline and calls `nlme::lme`. Julia packages its own matrices in `FeTerm` and `ReMat` containers for `MixedModels.LinearMixedModel`, then calls `fit!`. Each fit produces:
+
+| Quantity | What it represents | Main dimensions |
 | --- | --- | --- |
-| Input | $y$: observed training responses | 200 values |
-| Input | $X_{\mathrm{fixed}},Z$: designs prepared in Stage 1 | 200 × 2; 200 × 6 |
-| Output | $b$: fitted fixed coefficients | 2 values |
-| Output | $r$: fitted penalized spline coefficients | 6 values |
-| Output | $\sigma^2,\tau^2$: noise variance and shared spline variance | One value each |
-| Output | $\lambda$: smoothing strength derived from the variances | One value |
-| Output | $\hat y$: fitted responses at the training predictor values | 200 values |
+| $b$ | Fitted fixed coefficients | 2 values |
+| $r$ | Fitted penalized spline coefficients | 6 values |
+| $\sigma^2,\tau^2$ | Noise variance and shared spline variance | One value each |
+| $\lambda$ | Smoothing strength derived from the variances | One value |
+| $\hat y$ | Fitted responses at the training predictor values | 200 values |
 
-**Tools:** R's `mgcv::gamm` prepares the spline and calls `nlme::lme`. Julia prepares its own matrices, packages them in `FeTerm` and `ReMat` containers, and fits with `MixedModels.LinearMixedModel` and `fit!`.
-
-**Essential settings:** REML estimates variances while accounting for fitted fixed effects. All six penalized coefficients share one Gaussian variance $\tau^2$; noise is independent Gaussian with variance $\sigma^2$, and observations have equal weights. Smoothing is estimated automatically rather than fixed beforehand.
+REML estimates variances while accounting for fitted fixed effects. All six penalized coefficients share one Gaussian variance $\tau^2$; noise is independent Gaussian with variance $\sigma^2$, and observations have equal weights.
 
 Using fitted coefficients and variances:
 
@@ -69,17 +66,15 @@ The two main comparisons are **smoothing strength $\lambda$** and **fitted respo
 
 ## Stage 3: predict at new predictor values — planned
 
-**Purpose:** apply the fitted curve to new predictor values. Let $m$ be the number of new observations.
+We will apply the fitted curve to $m$ new predictor values $x_{\mathrm{new}}$, using the fitted coefficients $b,r$ and the training knots, centering, penalty scaling and coefficient transformations:
 
-| Role | Quantity and meaning | Main dimensions |
+| Quantity | What it represents | Main dimensions |
 | --- | --- | --- |
-| Input | $x_{\mathrm{new}}$: new predictor values | $m$ values |
-| Input | Training knots and saved Stage 1 transformations | 12 knot values; transformations reused |
-| Input | Fitted coefficients $b,r$ from Stage 2 | 2 values; 6 values |
-| Constructed | $X_{\mathrm{fixed,new}},Z_{\mathrm{new}}$: designs evaluated at new values | $m$ × 2; $m$ × 6 |
-| Output | $\hat y_{\mathrm{new}}$: predicted responses | $m$ values |
+| $X_{\mathrm{fixed,new}}$ | Fixed components evaluated at new predictor values | $m$ × 2 |
+| $Z_{\mathrm{new}}$ | Penalized components evaluated at new predictor values | $m$ × 6 |
+| $\hat y_{\mathrm{new}}$ | Predicted responses | $m$ values |
 
-The planned Julia prediction step will reuse the training knots, centering, penalty scaling and coefficient transformations, then apply the fitted coefficients. The learned smoothing is already reflected in those coefficients. We will compare these predictions with R at the same new predictor values; observed responses at those points are not required to produce predictions.
+The learned smoothing is already reflected in the fitted coefficients. We will compare Julia and R predictions at the same new predictor values. Observed responses at those points are not required to produce predictions.
 
 After this, we plan to integrate with Unfold or UnfoldMixedModels where the required variance structure is supported with comparable efficiency, starting with controlled examples before EEG applications.
 

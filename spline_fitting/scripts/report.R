@@ -71,7 +71,7 @@ run <- function() {
   png(file.path(out,"comparison","fitted_curves.png"),width=1400,height=720,res=150)
   par(mar=c(4.3,4.5,2.8,1.1),cex=1)
   plot(rf$x,rf$y,pch=16,col="#B1BBC780",xlab="Predictor x",ylab="Response y",
-       main="Automatic REML fit: R and Julia",cex.main=1.15)
+       main="REML fit: R and Julia",cex.main=1.15)
   lines(rf$x,rf$truth,col="#757575",lty=3,lwd=2)
   lines(rf$x,rf$fitted,col="#1675AE",lwd=3)
   lines(jf$x,jf$fitted,col="#D75E1D",lty=2,lwd=2)

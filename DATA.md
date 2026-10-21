@@ -34,6 +34,6 @@ Each case also has 61 evaluation points from −2.7 to 2.7 for checking basis va
 
 Basis construction has **13 comparisons per case**, giving 65 across five cases. The combined workflow has **7 comparisons per case**, giving 35, and includes the required fixed/random preparation. The main `uniform_k8` case also provides the captured R fitting inputs.
 
-Stage 2 reuses these same five cases and observed responses. Each fit estimates smoothing automatically; the [fitting results](STAGE2_RESULTS.md) compare R and Julia without changing the data or knots.
+Stage 2 reuses these same five cases and observed responses. Each fit estimates smoothing through REML; the [fitting results](STAGE2_RESULTS.md) compare R and Julia without changing the data or knots.
 
 Saved observations, knots and evaluation points are under [data/inputs](data/inputs). Sources: the [Julia data definition](data/generate.jl), [recorded case settings](data/inputs/cases.tsv), and [cubic B-spline dimensions](https://stat.ethz.ch/R-manual/R-devel/library/splines/html/splineDesign.html).
