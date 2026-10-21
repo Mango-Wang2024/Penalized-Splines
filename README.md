@@ -10,9 +10,11 @@ The main dimensions below refer to our **200-observation example with $k=8$ raw 
 
 ## Stage 1: prepare the model inputs
 
-We start with 200 training predictor values $x$ and the spline settings: cubic B-splines (degree 3), $k=8$, a full vector of 12 knots, and an integrated squared-second-derivative penalty that controls curve bending. Knots can be supplied or calculated from the training predictor range.
+**Starts with:** 200 training predictor values $x$ and the spline settings: cubic B-splines (degree 3), $k=8$, a full vector of 12 knots, and an integrated squared-second-derivative penalty that controls curve bending. Knots can be supplied or calculated from the training predictor range.
 
-Julia constructs the basis and prepares the mixed-model matrices. R's mgcv provides an independent reference for the same steps:
+Julia constructs the basis and prepares the mixed-model matrices. R's mgcv provides an independent reference for the same steps.
+
+**Produces:** $X_{\mathrm{fixed}},Z$ for fitting, with training knots and transformations retained for prediction. The table also shows $B,S$, constructed along the way:
 
 | Quantity | What it represents | Main dimensions |
 | --- | --- | --- |
@@ -21,7 +23,7 @@ Julia constructs the basis and prepares the mixed-model matrices. R's mgcv provi
 | $X_{\mathrm{fixed}}$ | Intercept and unpenalized spline component | 200 × 2 |
 | $Z$ | Penalized spline components | 200 × 6 |
 
-Centering separates the spline from the intercept, reducing eight raw basis columns to seven. $X_{\mathrm{fixed}}=[X,X_0]$ combines the ordinary intercept with the unpenalized spline component. Stage 1 supplies $X_{\mathrm{fixed}},Z$ to fitting and retains the training knots and transformations for prediction.
+Centering separates the spline from the intercept, reducing eight raw basis columns to seven. $X_{\mathrm{fixed}}=[X,X_0]$ combines the ordinary intercept with the unpenalized spline component.
 
 We check preparation independently of fitting:
 
@@ -30,13 +32,15 @@ We check preparation independently of fitting:
 
 ### Comparison flow
 
-![Stage 1 compares basis construction and the complete preparation of model inputs.](assets/stage1_two_comparisons.png)
+![Stage 1 follows independent R and Julia branches, compares B and S before fixed/random preparation, then compares the complete model representations.](assets/stage1_preparation_flow.svg)
 
 ## Stage 2: fit and estimate smoothing
 
-We add the 200 observed responses $y$ to the Stage 1 matrices $X_{\mathrm{fixed}},Z$. The Stage 2 test repeats preparation in each branch from the same saved data and settings, then fits the model with REML.
+**Starts with:** the 200 observed responses $y$ and the Stage 1 matrices $X_{\mathrm{fixed}},Z$. The Stage 2 test repeats preparation in each branch from the same saved data and settings, then fits the model with REML.
 
-R's `mgcv::gamm` prepares the spline and calls `nlme::lme`. Julia packages its own matrices in `FeTerm` and `ReMat` containers for `MixedModels.LinearMixedModel`, then calls `fit!`. Each fit produces:
+R's `mgcv::gamm` prepares the spline and calls `nlme::lme`. Julia packages its own matrices in `FeTerm` and `ReMat` containers for `MixedModels.LinearMixedModel`, then calls `fit!`.
+
+**Produces:** a fitted model containing the coefficients, variance estimates, smoothing strength and fitted responses below:
 
 | Quantity | What it represents | Main dimensions |
 | --- | --- | --- |
@@ -66,7 +70,9 @@ The two main comparisons are **smoothing strength $\lambda$** and **fitted respo
 
 ## Stage 3: predict at new predictor values — planned
 
-We will apply the fitted curve to $m$ new predictor values $x_{\mathrm{new}}$, using the fitted coefficients $b,r$ and the training knots, centering, penalty scaling and coefficient transformations:
+**Starts with:** $m$ new predictor values $x_{\mathrm{new}}$, the fitted coefficients $b,r$ from Stage 2, and the training knots and transformations from Stage 1.
+
+**Produces:** predicted responses, obtained by evaluating the fixed and penalized components at the new predictor values:
 
 | Quantity | What it represents | Main dimensions |
 | --- | --- | --- |
