@@ -46,7 +46,6 @@ R's `mgcv::gamm` prepares the spline and calls `nlme::lme`. Julia packages its o
 | --- | --- | --- |
 | $b$ | Fitted fixed coefficients | 2 values |
 | $\tau$ | Fitted penalized spline coefficients | 6 values |
-| $r$ | Shared standard deviation of the spline coefficients | One value |
 | $\sigma^2,r^2$ | Noise variance and shared spline variance | One value each |
 | $\lambda$ | Smoothing strength derived from the variances | One value |
 | $\hat y$ | Fitted responses at the training predictor values | 200 values |
