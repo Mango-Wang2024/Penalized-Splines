@@ -74,7 +74,7 @@ run <- function() {
   Z <- as.matrix(re$rand[[1]])
   U <- if (is.null(re$trans.U)) diag(ncol(B)) else re$trans.U
   D <- if (is.null(re$trans.D)) rep(1,ncol(B)) else re$trans.D
-  C <- sweep(U,2,D,"*") # z = C %*% c(r, alpha), for this single-penalty smooth.
+  C <- sweep(U,2,D,"*") # z = C %*% c(tau, alpha), for this single-penalty smooth.
   r <- ncol(Z)
   Xordinary <- matrix(1,n,1,dimnames=list(NULL,"intercept"))
   Xfixed <- cbind(Xordinary,X0)
@@ -112,7 +112,7 @@ run <- function() {
   meanings <- c(y="Observed responses",B="Constrained spline basis in original coordinates",
     S="Matching scaled spline penalty",X_ordinary="Ordinary fixed predictor: intercept",
     X0_r="Unpenalized spline columns",Z_r="Penalized and rescaled spline columns",
-    C_r="Map [r; alpha] back to original spline coefficients",
+    C_r="Map [tau; alpha] back to original spline coefficients",
     X_fixed_r="Intercept plus unpenalized spline components",
     X_fixed_lme="Fixed matrix from the actual captured lme formula/data",
     Z_lme="Random matrix from the actual captured lme random formula/data")

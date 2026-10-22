@@ -47,10 +47,10 @@ run <- function() {
       r$random_directions[i]==cases$k[i]-2L && j$random_directions[i]==cases$k[i]-2L &&
       r$shared_covariance_error[i]<1e-12
     check(name,"one shared spline variance",as.numeric(!one_variance),0)
-    check(name,"R variance-to-smoothing relationship",relative(r$lambda[i],r$sigma2[i]/r$tau2[i]),1e-10)
+    check(name,"R variance-to-smoothing relationship",relative(r$lambda[i],r$sigma2[i]/r$r2[i]),1e-10)
     check(name,"estimated lambda",relative(r$lambda[i],j$lambda[i]),1e-5)
     check(name,"estimated residual variance",relative(r$sigma2[i],j$sigma2[i]),1e-5)
-    check(name,"estimated spline variance",relative(r$tau2[i],j$tau2[i]),1e-5)
+    check(name,"estimated spline variance",relative(r$r2[i],j$r2[i]),1e-5)
     check(name,"fitted responses",scaled(rf$fitted,jf$fitted),1e-6)
   }
   checks <- do.call(rbind,checks)
@@ -60,8 +60,8 @@ run <- function() {
     lambda_relative_error=mapply(relative,r$lambda,j$lambda),
     R_sigma2=r$sigma2,Julia_sigma2=j$sigma2,
     sigma2_relative_error=mapply(relative,r$sigma2,j$sigma2),
-    R_tau2=r$tau2,Julia_tau2=j$tau2,
-    tau2_relative_error=mapply(relative,r$tau2,j$tau2),
+    R_r2=r$r2,Julia_r2=j$r2,
+    r2_relative_error=mapply(relative,r$r2,j$r2),
     fitted_scaled_error=checks$error[checks$check=="fitted responses"])
   write.table(comparison,file.path(out,"comparison","estimates.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
 
@@ -97,7 +97,7 @@ run <- function() {
     "Both branches repeat Stage 1 preparation from the same saved data, then fit with **REML**. R uses `mgcv::gamm` with `nlme::lme`; Julia uses prepared `FeTerm` and `ReMat` inputs with `MixedModels.LinearMixedModel`.","",
     sprintf("**%d/%d reference comparisons passed across five cases.** No smoothing parameter is fixed before fitting.",sum(checks$passed),nrow(checks)),"",
     "## Estimated smoothing and fitted curves","",
-    "Each fit estimates $\\sigma^2$ and $\\tau^2$; $\\lambda=\\sigma^2/\\tau^2$ is derived from the same fit. Parameter symbols follow the derivation and denote fitted estimates here.","",
+    "Each fit estimates $\\sigma^2$ and $r^2$; $\\lambda=\\sigma^2/r^2$ is derived from the same fit. Parameter symbols follow the derivation and denote fitted estimates here.","",
     "The table compares smoothing strength $\\lambda$ and all 200 fitted responses, $\\hat y_R$ and $\\hat y_{\\mathrm{Julia}}$, in their original observation order. Matching $\\lambda$ checks smoothing; matching $\\hat y$ checks the resulting curve. Acceptance thresholds are $10^{-5}$ for the relative error in $\\lambda$ and $10^{-6}$ for the scaled fitted-response error, as defined in VALIDATION.md.","",
     "| Case | R $\\lambda$ | Julia $\\lambda$ | $\\lambda$ relative error | Fitted-response scaled error |",
     "| --- | ---: | ---: | ---: | ---: |")
@@ -109,9 +109,9 @@ run <- function() {
     "Gray points are the observed $y$ values supplied to both fitters; the dotted curve is the known simulation curve. The blue R and orange Julia curves show their fitted responses $\\hat y$ and nearly coincide.","",
     "## Supporting checks","",
     paste0("The ",link("detailed estimates",file.path(out,"comparison","estimates.tsv")),
-      " retain $\\sigma^2$ and $\\tau^2$ for every case. These check the variance scale, which is not determined by their ratio alone."),
+      " retain $\\sigma^2$ and $r^2$ for every case. These check the variance scale, which is not determined by their ratio alone."),
     sprintf("Their largest relative error is **%.2e**, below the $10^{-5}$ threshold.",
-      max(comparison$sigma2_relative_error,comparison$tau2_relative_error)),"",
+      max(comparison$sigma2_relative_error,comparison$r2_relative_error)),"",
     "Independent Julia tests check that the input adapter preserves the covariance model, REML objective and fitted coefficients. They also check invariance to rotated spline directions, the zero-variance boundary and invalid inputs.","",
     paste0(link("Detailed comparisons",file.path(out,"comparison","checks.tsv")),"; ",
       link("Julia test log",args[4]),". ",

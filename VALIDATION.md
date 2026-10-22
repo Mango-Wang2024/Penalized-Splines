@@ -36,7 +36,7 @@ Numerical results remain in [STAGE1_RESULTS.md](STAGE1_RESULTS.md). Supporting m
 
 R and Julia independently construct and fit all five cases from the same saved predictor and response values and spline settings. R uses `mgcv::gamm` / `nlme::lme`; Julia uses the low-level `MixedModels.LinearMixedModel` constructor with prepared `FeTerm` and `ReMat` containers, followed by `fit!(model; REML=true)`. The Stage 2 test repeats Stage 1 preparation in each branch and estimates smoothing through REML.
 
-The model has one shared spline variance, $\tau^2$, and one residual variance, $\sigma^2$. Julia estimates $\theta=\tau/\sigma$ and obtains $\lambda=1/\theta^2$. R's spline variance is read independently from its fitted random-effect covariance, and its ratio to residual variance is checked against `gam$sp`. Both fits must converge.
+The model has one shared spline variance, $r^2$, and one residual variance, $\sigma^2$. Julia estimates $\theta=r/\sigma$ and obtains $\lambda=1/\theta^2$. R's spline variance is read independently from its fitted random-effect covariance, and its ratio to residual variance is checked against `gam$sp`. Both fits must converge.
 
 ### Error formulas and tolerances
 
@@ -49,7 +49,7 @@ E_{\lambda}=
 \leq 10^{-5}.
 ```
 
-This permits a relative difference of **0.001%**. The small guard $\epsilon_{\mathrm{mach}}$ is machine precision (about $2.22\times10^{-16}$), preventing division by zero. Variance comparisons use the same formula and threshold with $\sigma^2$ or $\tau^2$, checking the variance scale as well as its ratio.
+This permits a relative difference of **0.001%**. The small guard $\epsilon_{\mathrm{mach}}$ is machine precision (about $2.22\times10^{-16}$), preventing division by zero. Variance comparisons use the same formula and threshold with $\sigma^2$ or $r^2$, checking the variance scale as well as its ratio.
 
 For **fitted responses**, we combine differences at all 200 matching observations:
 

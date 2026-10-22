@@ -30,11 +30,11 @@ function main(args)
         end
         # Keep original spline coordinates for interpretation and later prediction.
         for (label,value) in ["knots"=>knots,"H"=>basis.H,"C"=>prepared.C,
-                              "fixed_coefficients"=>fit.beta,"random_coefficients"=>fit.r,
-                              "spline_coefficients"=>prepared.C*vcat(fit.r,fit.beta[2:end])]
+                              "fixed_coefficients"=>fit.beta,"random_coefficients"=>fit.tau,
+                              "spline_coefficients"=>prepared.C*vcat(fit.tau,fit.beta[2:end])]
             writedlm(joinpath(dst,label*".csv"),value,',')
         end
-        push!(rows,(;case=name,lambda=fit.lambda,sigma2=fit.sigma2,tau2=fit.tau2,
+        push!(rows,(;case=name,lambda=fit.lambda,sigma2=fit.sigma2,r2=fit.r2,r=fit.r,
           theta=fit.theta,random_directions=size(prepared.Z,2),
           variance_parameters=length(fit.prepared.model.θ),converged=true,method="REML",
           status=fit.status,objective=fit.objective,evaluations=fit.evaluations))
@@ -52,7 +52,7 @@ function main(args)
         println(io,"MixedModels\t",pkgversion(MixedModels))
         println(io,"StatsModels\t",pkgversion(StatsModels))
         println(io,"method\tREML")
-        println(io,"random_covariance\ttau_squared * identity")
+        println(io,"random_covariance\tr_squared * identity")
         println(io,"residual_covariance\tsigma_squared * identity")
     end
 end

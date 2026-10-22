@@ -56,7 +56,7 @@ function main(args)
             println(io,"penalty_derivative_order\t2")
             println(io,"observations\t",length(x))
             println(io,"penalty_rank\t",converted.penalty_rank)
-            println(io,"random_covariance\ttau_squared * identity")
+            println(io,"random_covariance\tr_squared * identity")
             println(io,"residual_covariance\tsigma_squared * identity")
             println(io,"fitting_status\tnot fitted; lambda not estimated")
         end

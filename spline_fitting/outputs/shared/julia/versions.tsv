@@ -3,5 +3,5 @@ Julia	1.13.1
 MixedModels	5.9.0
 StatsModels	0.7.10
 method	REML
-random_covariance	tau_squared * identity
+random_covariance	r_squared * identity
 residual_covariance	sigma_squared * identity

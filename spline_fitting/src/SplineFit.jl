@@ -76,17 +76,18 @@ function fit_reml(y::AbstractVector, X::AbstractMatrix, Z::AbstractMatrix)
     status = m.optsum.returnvalue
     status in (:SUCCESS,:STOPVAL_REACHED,:FTOL_REACHED,:XTOL_REACHED) ||
         error("MixedModels did not converge: $status")
-    theta = abs(only(m.θ)) # tau / sigma; not the spline smoothing parameter.
+    theta = abs(only(m.θ)) # r / sigma; not the spline smoothing parameter.
     sigma2 = MixedModels.varest(m)
-    tau2 = sigma2 * theta^2
+    r2 = sigma2 * theta^2
+    r = sqrt(r2) # Shared standard deviation; tau below is the coefficient vector.
     lambda = iszero(theta) ? Inf : inv(theta^2)
     beta = MixedModels.coef(m)
-    r = prepared.V * vec(only(MixedModels.ranef(m)))
+    tau = prepared.V * vec(only(MixedModels.ranef(m)))
     fitted = restore_observations(prepared,MixedModels.fitted(m))
-    reconstructed = prepared.X*beta+prepared.Z*r
+    reconstructed = prepared.X*beta+prepared.Z*tau
     isapprox(fitted,reconstructed;rtol=1e-10,atol=1e-10) || error("Fitted-value reconstruction failed")
     isfinite(sigma2) && sigma2>0 && all(isfinite,fitted) || error("Invalid fitted model")
-    return (;prepared,lambda,sigma2,tau2,theta,beta,r,fitted,status,
+    return (;prepared,lambda,sigma2,r2,r,theta,beta,tau,fitted,status,
             objective=MixedModels.objective(m),evaluations=m.optsum.feval)
 end
 

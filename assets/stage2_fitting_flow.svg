@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="870" viewBox="0 0 900 870" role="img" aria-labelledby="title desc">
 <title id="title">Stage 2: prepare, fit and compare</title>
-<desc id="desc">The same saved observations and spline settings enter separate R and Julia branches. Each repeats Stage 1 preparation and fits with REML. Each fitted model provides fixed coefficients b, penalized coefficients r, noise variance sigma squared and shared spline variance tau squared. These give smoothing strength lambda and fitted responses y-hat, shown in the main comparison. Variance estimates are retained as supporting checks.</desc>
+<desc id="desc">The same saved observations and spline settings enter separate R and Julia branches. Each repeats Stage 1 preparation and fits with REML. Each fitted model provides fixed coefficients b, penalized coefficients tau, noise variance sigma squared and shared spline variance r squared. These give smoothing strength lambda and fitted responses y-hat, shown in the main comparison. Variance estimates are retained as supporting checks.</desc>
 <rect width="900" height="870" fill="white"/>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#65798A"/></marker></defs>
 <g font-family="Arial, Helvetica, sans-serif" fill="#243746">
@@ -42,12 +42,12 @@
 <text x="665" y="559" font-size="18" font-weight="400" text-anchor="middle">Adapter + REML fitting</text>
 <rect x="60" y="608" width="350" height="86" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
 <text x="235" y="632" font-size="20" text-anchor="middle">R fitted model</text>
-<text x="235" y="659" font-size="18" text-anchor="middle">Coefficients:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">b, r</tspan></text>
-<text x="235" y="684" font-size="18" text-anchor="middle">Variances:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">σ², τ²</tspan></text>
+<text x="235" y="659" font-size="18" text-anchor="middle">Coefficients:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">b, τ</tspan></text>
+<text x="235" y="684" font-size="18" text-anchor="middle">Variances:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">σ², r²</tspan></text>
 <rect x="490" y="608" width="350" height="86" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
 <text x="665" y="632" font-size="20" text-anchor="middle">Julia fitted model</text>
-<text x="665" y="659" font-size="18" text-anchor="middle">Coefficients:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">b, r</tspan></text>
-<text x="665" y="684" font-size="18" text-anchor="middle">Variances:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">σ², τ²</tspan></text>
+<text x="665" y="659" font-size="18" text-anchor="middle">Coefficients:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">b, τ</tspan></text>
+<text x="665" y="684" font-size="18" text-anchor="middle">Variances:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">σ², r²</tspan></text>
 <rect x="210" y="756" width="480" height="88" rx="10" fill="#EEF7F3" stroke="#C8D3DC" stroke-width="1.4"/>
 <text x="450" y="787" font-size="21" font-weight="700" text-anchor="middle">Compare smoothing and fitted responses</text>
 <g font-family="Times New Roman, serif" fill="#243746">

@@ -64,7 +64,7 @@ Rescale the positive directions by the inverse square roots of their eigenvalues
 ```math
 \begin{aligned}
 C&=[U_+D_+^{-1/2}\;\;U_0],\\
-z&=C\begin{bmatrix}r\\\alpha\end{bmatrix}.
+z&=C\begin{bmatrix}\tau\\\alpha\end{bmatrix}.
 \end{aligned}
 ```
 
@@ -75,12 +75,12 @@ X_0&=BU_0.
 \end{aligned}
 ```
 
-The weights $r$ belong to penalized components; $\alpha$ belongs to unpenalized components. Two identities explain the conversion:
+The weights $\tau$ belong to penalized components; $\alpha$ belongs to unpenalized components. Two identities explain the conversion:
 
 ```math
 \begin{aligned}
-Bz&=Zr+X_0\alpha,\\
-z^\top Sz&=r^\top r.
+Bz&=Z\tau+X_0\alpha,\\
+z^\top Sz&=\tau^\top \tau.
 \end{aligned}
 ```
 
@@ -93,7 +93,7 @@ Let $X$ contain ordinary terms such as an intercept. The same response model can
 ```math
 \begin{aligned}
 y&=X\beta+Bz+\varepsilon\\
- &=X_{\mathrm{fixed}}b+Zr+\varepsilon.
+ &=X_{\mathrm{fixed}}b+Z\tau+\varepsilon.
 \end{aligned}
 ```
 
@@ -101,17 +101,17 @@ where $X_{\mathrm{fixed}}=[X,\;X_0]$ and $b$ combines $\beta$ and $\alpha$. The 
 
 ```math
 \begin{aligned}
-r&\sim N(0,\tau^2I),\\
+\tau&\sim N(0,r^2I),\\
 \varepsilon&\sim N(0,\sigma^2I).
 \end{aligned}
 ```
 
-$I$ is an identity matrix. All penalized coefficients share one variance. For fixed positive variances, their joint density leads to the penalized fitting objective:
+$I$ is an identity matrix. Here $\tau$ is the coefficient vector, $r$ is its shared standard deviation, and $r^2$ is the shared variance. For fixed positive variances, their joint density leads to the penalized fitting objective:
 
 ```math
 \begin{gathered}
-\lVert y-X_{\mathrm{fixed}}b-Zr\rVert^2+\lambda r^\top r,\\
-\lambda=\frac{\sigma^2}{\tau^2}.
+\lVert y-X_{\mathrm{fixed}}b-Z\tau\rVert^2+\lambda \tau^\top \tau,\\
+\lambda=\frac{\sigma^2}{r^2}.
 \end{gathered}
 ```
 
@@ -127,16 +127,16 @@ Sources: [penalized fitting objective](https://stat.ethz.ch/R-manual/R-devel/lib
 
 ## 5. Prepare native fitting containers
 
-MixedModels.jl receives the prepared fixed and random designs through `FeTerm` and `ReMat`. Our adapter preserves one common variance across all spline directions. To obtain a native scalar `ReMat`, it finds orthogonal matrices $T$ and $V_r$ such that:
+MixedModels.jl receives the prepared fixed and random designs through `FeTerm` and `ReMat`. Our adapter preserves one common variance across all spline directions. To obtain a native scalar `ReMat`, it finds orthogonal matrices $T$ and $V_{\tau}$ such that:
 
 ```math
-TZV_r=\begin{bmatrix}D\\0\end{bmatrix},\qquad
-y^*=Ty,\qquad X^*=TX_{\mathrm{fixed}},\qquad r^*=V_r^\top r.
+TZV_{\tau}=\begin{bmatrix}D\\0\end{bmatrix},\qquad
+y^*=Ty,\qquad X^*=TX_{\mathrm{fixed}},\qquad \tau^*=V_{\tau}^\top \tau.
 ```
 
-$D$ is diagonal. A thin QR decomposition of $Z$, followed by an SVD of its small triangular factor, provides these transformations without constructing a full observation-rotation matrix. Orthogonal rotations preserve squared lengths and the identity covariance matrices of $r$ and $\varepsilon$. The transformed model therefore has the same variance parameters and REML objective. The native scalar term has one level for each transformed spline direction and one shared variance; its levels are an internal representation of the spline.
+$D$ is diagonal. A thin QR decomposition of $Z$, followed by an SVD of its small triangular factor, provides these transformations without constructing a full observation-rotation matrix. Orthogonal rotations preserve squared lengths and the identity covariance matrices of $\tau$ and $\varepsilon$. The transformed model therefore has the same variance parameters and REML objective. The native scalar term has one level for each transformed spline direction and one shared variance; its levels are an internal representation of the spline.
 
-After fitting, coefficients and fitted responses are mapped back. MixedModels estimates $\theta=\tau/\sigma$, so the spline smoothing parameter is $\lambda=1/\theta^2$. If the estimated spline variance is zero, $\lambda$ is infinite and the penalized contribution vanishes.
+After fitting, coefficients and fitted responses are mapped back. MixedModels estimates $\theta=r/\sigma$, so the spline smoothing parameter is $\lambda=1/\theta^2$. If the estimated spline variance is zero, $\lambda$ is infinite and the penalized contribution vanishes.
 
 This adapter follows directly from the orthogonal identities above. Its implementation is checked against the original-coordinate Gaussian model in [VALIDATION.md](VALIDATION.md). Package sources: [MixedModels 5.9.0 constructor](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/linearmixedmodel.jl), [random-effect container](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/remat.jl), and [variance parameterization and REML](https://juliastats.org/MixedModels.jl/stable/optimization/).
 

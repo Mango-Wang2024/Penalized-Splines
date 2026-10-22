@@ -12,9 +12,9 @@ function marginal_check(y,X,Z,theta)
     residual=y-X*beta
     rss=dot(residual,V\residual)
     sigma2=rss/(n-p)
-    r=theta^2*Z'*(V\residual)
+    tau=theta^2*Z'*(V\residual)
     objective=logdet(V)+logdet(XtViX)+(n-p)*(1+log(2pi*sigma2))
-    return (;beta,r,sigma2,objective,fitted=X*beta+Z*r)
+    return (;beta,tau,sigma2,objective,fitted=X*beta+Z*tau)
 end
 
 @testset "Native MixedModels adapter and automatic REML" begin
@@ -39,10 +39,10 @@ end
     fit=fit_reml(y,X,Z)
     independent=marginal_check(y,X,Z,fit.theta)
     @test fit.status in (:SUCCESS,:STOPVAL_REACHED,:FTOL_REACHED,:XTOL_REACHED)
-    @test fit.lambda ≈ fit.sigma2/fit.tau2
+    @test fit.lambda ≈ fit.sigma2/fit.r2
     @test fit.lambda ≈ inv(fit.theta^2)
     @test fit.beta ≈ independent.beta rtol=1e-9
-    @test fit.r ≈ independent.r rtol=1e-9
+    @test fit.tau ≈ independent.tau rtol=1e-9
     @test fit.sigma2 ≈ independent.sigma2 rtol=1e-9
     @test fit.objective ≈ independent.objective rtol=1e-9
     @test fit.fitted ≈ independent.fitted rtol=1e-9
@@ -52,7 +52,7 @@ end
     @test fit.lambda ≈ rotated.lambda rtol=1e-5
     @test fit.fitted ≈ rotated.fitted rtol=1e-7
     @test fit.sigma2 ≈ rotated.sigma2 rtol=1e-6
-    @test fit.r ≈ Q*rotated.r rtol=1e-6
+    @test fit.tau ≈ Q*rotated.tau rtol=1e-6
     # An exactly linear signal with noise orthogonal to all spline directions
     # has its optimum at zero spline variance (infinite smoothing).
     W=hcat(X,Z)
@@ -60,7 +60,7 @@ end
     boundary=fit_reml(X*[1.0,2.0]+0.1noise,X,Z)
     @test iszero(boundary.theta)
     @test isinf(boundary.lambda)
-    @test iszero(boundary.tau2)
+    @test iszero(boundary.r2)
     @test boundary.fitted ≈ X*[1.0,2.0] atol=1e-10
     @test_throws DimensionMismatch build_model(y[2:end],X,Z)
     @test_throws DimensionMismatch build_model(y,X,Z[2:end,:])

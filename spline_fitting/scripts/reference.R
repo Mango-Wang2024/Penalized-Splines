@@ -31,19 +31,20 @@ run <- function() {
     ratio <- mean(diag(relative_cov))
     shared_error <- max(abs(relative_cov-diag(ratio,nrow(relative_cov))))
     sigma2 <- fit$lme$sigma^2
-    tau2 <- sigma2*ratio
+    r2 <- sigma2*ratio
+    r <- sqrt(r2)
     lambda <- unname(fit$gam$sp[1])
     fitted <- as.numeric(predict(fit$gam,newdata=dat,type="response"))
-    stopifnot(all(is.finite(c(lambda,sigma2,tau2,fitted))),sigma2>0,
-              tau2>0,nrow(relative_cov)==k-2L,shared_error<1e-12,
-              abs(lambda-sigma2/tau2)<1e-10*max(1,lambda),
+    stopifnot(all(is.finite(c(lambda,sigma2,r2,fitted))),sigma2>0,
+              r2>0,nrow(relative_cov)==k-2L,shared_error<1e-12,
+              abs(lambda-sigma2/r2)<1e-10*max(1,lambda),
               max(abs(fitted-as.numeric(stats::fitted(fit$lme))))<1e-9)
     write.csv(data.frame(x=dat$x,y=dat$y,truth=dat$truth,fitted=fitted),
               file.path(dst,"fitted.csv"),row.names=FALSE)
     write.table(matrix(fit$gam$smooth[[1]]$knots,ncol=1),file.path(dst,"knots.csv"),
                 sep=",",row.names=FALSE,col.names=FALSE)
     saveRDS(fit,file.path(dst,"model.rds"))
-    rows[[i]] <- data.frame(case=name,lambda=lambda,sigma2=sigma2,tau2=tau2,
+    rows[[i]] <- data.frame(case=name,lambda=lambda,sigma2=sigma2,r2=r2,r=r,
       random_directions=nrow(relative_cov),variance_parameters=1L,
       shared_covariance_error=shared_error,converged=TRUE,method="REML",
       status="lme returned without warnings")

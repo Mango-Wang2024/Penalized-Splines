@@ -1,2 +1,2 @@
 Test Summary:                                 | Pass  Total  Time
-Native MixedModels adapter and automatic REML |   31     31  3.5s
+Native MixedModels adapter and automatic REML |   31     31  3.7s

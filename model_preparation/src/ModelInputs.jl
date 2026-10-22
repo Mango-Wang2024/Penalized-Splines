@@ -10,9 +10,9 @@ relative_error(a, b) = norm(a - b) / max(1.0, norm(a), norm(b))
 Prepare fixed/random spline columns inside the combined workflow.
 
 Input B is n-by-p, and S is p-by-p. The returned coefficient map C satisfies
-    z = C * [r; alpha]
-    B*z = Z*r + X0*alpha
-    z'*S*z = r'*r.
+    z = C * [tau; alpha]
+    B*z = Z*tau + X0*alpha
+    z'*S*z = tau'*tau.
 
 This helper prepares a supplied basis and penalty for the combined workflow. It does NOT construct a
 spline basis, estimate lambda, or fit a mixed model.

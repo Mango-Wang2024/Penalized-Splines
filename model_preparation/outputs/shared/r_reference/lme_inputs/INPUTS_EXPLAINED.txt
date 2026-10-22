@@ -62,7 +62,7 @@ MATRIX DICTIONARY
                             Ordinary fixed predictor: intercept
                                      Unpenalized spline columns
                           Penalized and rescaled spline columns
-            Map [r; alpha] back to original spline coefficients
+          Map [tau; alpha] back to original spline coefficients
                    Intercept plus unpenalized spline components
          Fixed matrix from the actual captured lme formula/data
  Random matrix from the actual captured lme random formula/data

@@ -45,32 +45,33 @@ R's `mgcv::gamm` prepares the spline and calls `nlme::lme`. Julia packages its o
 | Quantity | What it represents | Main dimensions |
 | --- | --- | --- |
 | $b$ | Fitted fixed coefficients | 2 values |
-| $r$ | Fitted penalized spline coefficients | 6 values |
-| $\sigma^2,\tau^2$ | Noise variance and shared spline variance | One value each |
+| $\tau$ | Fitted penalized spline coefficients | 6 values |
+| $r$ | Shared standard deviation of the spline coefficients | One value |
+| $\sigma^2,r^2$ | Noise variance and shared spline variance | One value each |
 | $\lambda$ | Smoothing strength derived from the variances | One value |
 | $\hat y$ | Fitted responses at the training predictor values | 200 values |
 
-REML estimates variances while accounting for fitted fixed effects. All six penalized coefficients share one Gaussian variance $\tau^2$; noise is independent Gaussian with variance $\sigma^2$, and observations have equal weights.
+REML estimates variances while accounting for fitted fixed effects. All six penalized coefficients share one Gaussian variance $r^2$; noise is independent Gaussian with variance $\sigma^2$, and observations have equal weights.
 
 Using fitted coefficients and variances:
 
 ```math
-\hat y=X_{\mathrm{fixed}}b+Zr,
+\hat y=X_{\mathrm{fixed}}b+Z\tau,
 \qquad
-\lambda=\frac{\sigma^2}{\tau^2}.
+\lambda=\frac{\sigma^2}{r^2}.
 ```
 
 Parameter symbols follow the derivation; here they denote fitted estimates. The hat on $\hat y$ distinguishes fitted responses from observed $y$. A larger $\lambda$ means stronger smoothing; it is derived from the variance fit, without an additional fitting step.
 
 ### Comparison flow
 
-![Stage 2 fits separate R and Julia models, shows coefficients b,r and variances sigma squared,tau squared, then compares smoothing strength and fitted responses.](assets/stage2_fitting_flow.svg)
+![Stage 2 fits separate R and Julia models, shows coefficients b,tau and variances sigma squared,r squared, then compares smoothing strength and fitted responses.](assets/stage2_fitting_flow.svg)
 
 The two main comparisons are **smoothing strength $\lambda$** and **fitted responses $\hat y$** across five cases. Variance estimates remain supporting checks. Equivalent representations can have different coefficient coordinates, so raw coefficient entries are not the cross-language comparison. The [results](STAGE2_RESULTS.md) include a summary table, an overlaid curve plot and links to detailed estimates.
 
 ## Stage 3: predict at new predictor values — planned
 
-**Starts with:** $m$ new predictor values $x_{\mathrm{new}}$, the fitted coefficients $b,r$ from Stage 2, and the training knots and transformations from Stage 1.
+**Starts with:** $m$ new predictor values $x_{\mathrm{new}}$, the fitted coefficients $b,\tau$ from Stage 2, and the training knots and transformations from Stage 1.
 
 **Produces:** predicted responses, obtained by evaluating the fixed and penalized components at the new predictor values:
 

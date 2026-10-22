@@ -6,7 +6,7 @@ Both branches repeat Stage 1 preparation from the same saved data, then fit with
 
 ## Estimated smoothing and fitted curves
 
-Each fit estimates $\sigma^2$ and $\tau^2$; $\lambda=\sigma^2/\tau^2$ is derived from the same fit. Parameter symbols follow the derivation and denote fitted estimates here.
+Each fit estimates $\sigma^2$ and $r^2$; $\lambda=\sigma^2/r^2$ is derived from the same fit. Parameter symbols follow the derivation and denote fitted estimates here.
 
 The table compares smoothing strength $\lambda$ and all 200 fitted responses, $\hat y_R$ and $\hat y_{\mathrm{Julia}}$, in their original observation order. Matching $\lambda$ checks smoothing; matching $\hat y$ checks the resulting curve. Acceptance thresholds are $10^{-5}$ for the relative error in $\lambda$ and $10^{-6}$ for the scaled fitted-response error, as defined in VALIDATION.md.
 
@@ -24,7 +24,7 @@ Gray points are the observed $y$ values supplied to both fitters; the dotted cur
 
 ## Supporting checks
 
-The [detailed estimates](spline_fitting/outputs/shared/comparison/estimates.tsv) retain $\sigma^2$ and $\tau^2$ for every case. These check the variance scale, which is not determined by their ratio alone.
+The [detailed estimates](spline_fitting/outputs/shared/comparison/estimates.tsv) retain $\sigma^2$ and $r^2$ for every case. These check the variance scale, which is not determined by their ratio alone.
 Their largest relative error is **2.89e-07**, below the $10^{-5}$ threshold.
 
 Independent Julia tests check that the input adapter preserves the covariance model, REML objective and fitted coefficients. They also check invariance to rotated spline directions, the zero-variance boundary and invalid inputs.
