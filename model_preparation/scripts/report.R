@@ -30,6 +30,8 @@ run <- function() {
   }
   md <- read.delim(file.path(captured,"metadata.tsv"),stringsAsFactors=FALSE)
   md <- setNames(md$value,md$key)
+  julia_versions <- read.delim(file.path(basis,"julia","versions.tsv"),stringsAsFactors=FALSE)
+  julia_versions <- setNames(julia_versions$value,julia_versions$key)
   main <- file.path(inputs,"uniform_k8")
   data_hash <- unname(tools::md5sum(file.path(main,"data.csv")))
   knots_hash <- unname(tools::md5sum(file.path(main,"knots.csv")))
@@ -54,7 +56,7 @@ run <- function() {
     paste(c(rep("..",length(from)-i),tail),collapse="/")
   }
   lines <- c("# Stage 1 results","",
-    "Saved comparisons for cubic B-splines with one curvature penalty: mgcv bs=\"bs\", m=c(3,2). All comparisons use shared Julia-generated inputs.","",
+    "Saved comparisons for cubic B-splines with one curvature penalty: Julia uses BSplineKit; R uses mgcv bs=\"bs\", m=c(3,2). All comparisons use shared Julia-generated inputs.","",
     "Stage 1 checks basis construction and the combined workflow. The required fixed/random preparation is part of that workflow.","",
     "## Overall results","",
     "| Check | Passed | Largest scaled error |","| --- | --- | --- |")
@@ -89,6 +91,7 @@ run <- function() {
     "## Prepared model","",
     sprintf("The [main Julia model inputs](<%s>) contain $y$, $X_{\\mathrm{fixed}}$ and $Z$, together with $B$, $S$, the coefficient map $C$, training settings and variance assumptions.",relative(file.path(workflow,"julia","uniform_k8"))),"",
     paste0("R reference versions: ",md[["R_version"]],", mgcv ",md[["mgcv_version"]],", nlme ",md[["nlme_version"]],"."),"",
+    paste0("Julia ",julia_versions[["Julia"]],"; BSplineKit ",julia_versions[["BSplineKit"]],". Both stages use the pinned root Julia environment."),"",
     "## Sources","",
     "- [mgcv cubic B-splines and curvature penalty](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth.construct.bs.smooth.spec.html)",
     "- [Basis dimensions](https://stat.ethz.ch/R-manual/R-devel/library/splines/html/splineDesign.html)",

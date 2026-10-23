@@ -1,36 +1,36 @@
 case	check	scaled_error	max_abs_error	passed
-uniform_k8	fixed space: complete Julia vs complete R	6.465979812156822e-16	1.6046192152785466e-17	true
-uniform_k8	random covariance: complete Julia vs complete R	4.741070901759764e-15	4.1744385725905886e-14	true
+uniform_k8	fixed space: complete Julia vs complete R	2.2871208209394843e-15	1.1102230246251565e-16	true
+uniform_k8	random covariance: complete Julia vs complete R	1.3070754352621768e-14	1.3944401189291966e-13	true
 uniform_k8	curve preserved by Julia conversion	0.0	0.0	true
-uniform_k8	penalty preserved by Julia conversion	2.4265121161255583e-15	2.0904181858392637e-15	true
-uniform_k8	all basis directions retained	6.407999410103164e-15	5.773159728050814e-15	true
-uniform_k8	curve in common coefficient coordinates	5.38281178643378e-16	1.7763568394002505e-15	true
-uniform_k8	penalty in common coefficient coordinates	4.167385270196131e-15	3.9968028886505635e-15	true
-default_k8	fixed space: complete Julia vs complete R	1.5359541980878478e-15	7.979727989493313e-17	true
-default_k8	random covariance: complete Julia vs complete R	9.517477820684474e-15	9.769962616701378e-14	true
+uniform_k8	penalty preserved by Julia conversion	2.5924933451793746e-15	2.6645352591003757e-15	true
+uniform_k8	all basis directions retained	6.610527709370325e-15	7.049916206369744e-15	true
+uniform_k8	curve in common coefficient coordinates	5.014253786098019e-16	2.220446049250313e-15	true
+uniform_k8	penalty in common coefficient coordinates	4.8107314858971515e-15	7.327471962526033e-15	true
+default_k8	fixed space: complete Julia vs complete R	3.768288934300991e-15	1.700029006457271e-16	true
+default_k8	random covariance: complete Julia vs complete R	1.842900443727854e-14	1.9539925233402755e-13	true
 default_k8	curve preserved by Julia conversion	0.0	0.0	true
-default_k8	penalty preserved by Julia conversion	2.4265121161255583e-15	2.0904181858392637e-15	true
-default_k8	all basis directions retained	6.407999410103164e-15	5.773159728050814e-15	true
-default_k8	curve in common coefficient coordinates	9.057766913606282e-16	2.6645352591003757e-15	true
-default_k8	penalty in common coefficient coordinates	5.017749450060483e-15	4.440892098500626e-15	true
-uneven_k10	fixed space: complete Julia vs complete R	6.269566326525178e-15	2.3245294578089215e-16	true
-uneven_k10	random covariance: complete Julia vs complete R	1.7267950850960028e-14	9.663381206337363e-13	true
+default_k8	penalty preserved by Julia conversion	2.5924933451793746e-15	2.6645352591003757e-15	true
+default_k8	all basis directions retained	6.610527709370325e-15	7.049916206369744e-15	true
+default_k8	curve in common coefficient coordinates	6.985474219048551e-16	3.1086244689504383e-15	true
+default_k8	penalty in common coefficient coordinates	5.504675410021949e-15	7.549516567451064e-15	true
+uneven_k10	fixed space: complete Julia vs complete R	1.9484782569617063e-14	8.36136715420821e-16	true
+uneven_k10	random covariance: complete Julia vs complete R	5.128704739856223e-14	3.0127011996228248e-12	true
 uneven_k10	curve preserved by Julia conversion	0.0	0.0	true
-uneven_k10	penalty preserved by Julia conversion	4.581027149226075e-15	9.547918011776346e-15	true
-uneven_k10	all basis directions retained	4.860132478037749e-15	3.0743636802998964e-15	true
-uneven_k10	curve in common coefficient coordinates	4.4177535580593496e-16	4.440892098500626e-15	true
-uneven_k10	penalty in common coefficient coordinates	6.5216790133324e-15	1.3988810110276972e-14	true
-duplicates_k6	fixed space: complete Julia vs complete R	8.248566958479642e-16	3.122502256758253e-17	true
-duplicates_k6	random covariance: complete Julia vs complete R	3.500942393093009e-15	7.771561172376096e-15	true
+uneven_k10	penalty preserved by Julia conversion	5.183350886616206e-15	1.021405182655144e-14	true
+uneven_k10	all basis directions retained	4.723309726658815e-15	3.6637359812630166e-15	true
+uneven_k10	curve in common coefficient coordinates	4.777318612408758e-16	3.552713678800501e-15	true
+uneven_k10	penalty in common coefficient coordinates	1.090812326815377e-14	2.7533531010703882e-14	true
+duplicates_k6	fixed space: complete Julia vs complete R	6.408191464555298e-16	4.163336342344337e-17	true
+duplicates_k6	random covariance: complete Julia vs complete R	4.177586732265826e-15	8.881784197001252e-15	true
 duplicates_k6	curve preserved by Julia conversion	0.0	0.0	true
-duplicates_k6	penalty preserved by Julia conversion	1.136468289547793e-15	1.3322676295501878e-15	true
-duplicates_k6	all basis directions retained	5.1499199809764795e-15	2.345346139520643e-15	true
-duplicates_k6	curve in common coefficient coordinates	1.6098994804924556e-15	2.1094237467877974e-15	true
-duplicates_k6	penalty in common coefficient coordinates	3.786630805526191e-15	4.608086350091242e-15	true
-small_k5	fixed space: complete Julia vs complete R	7.367963024426445e-16	5.898059818321144e-17	true
-small_k5	random covariance: complete Julia vs complete R	1.6419794758723526e-15	1.2212453270876722e-15	true
+duplicates_k6	penalty preserved by Julia conversion	1.3713097566496204e-15	1.4408391699504575e-15	true
+duplicates_k6	all basis directions retained	5.558759953280587e-15	3.8441472227646045e-15	true
+duplicates_k6	curve in common coefficient coordinates	2.2023291508218284e-15	3.0808688933348094e-15	true
+duplicates_k6	penalty in common coefficient coordinates	4.611169991493404e-15	5.766439122236373e-15	true
+small_k5	fixed space: complete Julia vs complete R	8.651952216261222e-16	6.245004513516506e-17	true
+small_k5	random covariance: complete Julia vs complete R	1.69157882731302e-15	1.4432899320127035e-15	true
 small_k5	curve preserved by Julia conversion	0.0	0.0	true
-small_k5	penalty preserved by Julia conversion	1.618948776802897e-15	1.5543122344752192e-15	true
-small_k5	all basis directions retained	1.91649367473663e-15	6.800116025829084e-16	true
-small_k5	curve in common coefficient coordinates	1.5317607726548857e-15	1.2802259252708836e-15	true
-small_k5	penalty in common coefficient coordinates	1.808935988427845e-15	1.5299353963597075e-15	true
+small_k5	penalty preserved by Julia conversion	1.257577467990915e-15	1.3322676295501878e-15	true
+small_k5	all basis directions retained	2.7612576912220866e-15	1.3461454173580023e-15	true
+small_k5	curve in common coefficient coordinates	1.5024702905069834e-15	1.2732870313669764e-15	true
+small_k5	penalty in common coefficient coordinates	1.5856835978398343e-15	1.1810041919388609e-15	true

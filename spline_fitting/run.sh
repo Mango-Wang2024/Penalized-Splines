@@ -23,13 +23,13 @@ if [ ! -f "$root/data/inputs/cases.tsv" ]; then
     exit 1
 fi
 # Instantiate the pinned local environment, without changing a global environment.
-julia --startup-file=no --project="$project_dir" -e 'using Pkg; Pkg.instantiate()'
+julia --startup-file=no --project="$root" -e 'using Pkg; Pkg.instantiate()'
 mkdir -p "$out"
-if ! julia --startup-file=no --project="$project_dir" "$project_dir/test/runtests.jl" > "$out/unit_tests.txt" 2>&1; then
+if ! julia --startup-file=no --project="$root" "$project_dir/test/runtests.jl" > "$out/unit_tests.txt" 2>&1; then
     cat "$out/unit_tests.txt"
     exit 1
 fi
 cat "$out/unit_tests.txt"
 Rscript "$project_dir/scripts/reference.R" "$root/data/inputs" "$out/r_reference"
-julia --startup-file=no --project="$project_dir" "$project_dir/scripts/fit.jl" "$root/data/inputs" "$out/julia"
+julia --startup-file=no --project="$root" "$project_dir/scripts/fit.jl" "$root/data/inputs" "$out/julia"
 Rscript "$project_dir/scripts/report.R" "$root/data/inputs" "$out" "$report" "$out/unit_tests.txt"

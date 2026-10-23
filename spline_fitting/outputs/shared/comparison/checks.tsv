@@ -5,47 +5,47 @@ uniform_k8	R REML converged	0	0	TRUE
 uniform_k8	Julia REML converged	0	0	TRUE
 uniform_k8	one shared spline variance	0	0	TRUE
 uniform_k8	R variance-to-smoothing relationship	3.27805331068816e-15	1e-10	TRUE
-uniform_k8	estimated lambda	1.44528286762083e-07	1e-05	TRUE
-uniform_k8	estimated residual variance	3.24823090022295e-09	1e-05	TRUE
-uniform_k8	estimated spline variance	1.41280059398442e-07	1e-05	TRUE
-uniform_k8	fitted responses	1.50380667376766e-09	1e-06	TRUE
+uniform_k8	estimated lambda	1.40405736522387e-07	1e-05	TRUE
+uniform_k8	estimated residual variance	3.15557751154278e-09	1e-05	TRUE
+uniform_k8	estimated spline variance	1.37250162700674e-07	1e-05	TRUE
+uniform_k8	fitted responses	1.46091202449794e-09	1e-06	TRUE
 default_k8	same predictor and response values	1.68584548893866e-15	1e-12	TRUE
 default_k8	same constructed knots	2.07347364437611e-16	1e-12	TRUE
 default_k8	R REML converged	0	0	TRUE
 default_k8	Julia REML converged	0	0	TRUE
 default_k8	one shared spline variance	0	0	TRUE
 default_k8	R variance-to-smoothing relationship	2.7317110918903e-15	1e-10	TRUE
-default_k8	estimated lambda	1.4440022380036e-07	1e-05	TRUE
-default_k8	estimated residual variance	3.2453501656276e-09	1e-05	TRUE
-default_k8	estimated spline variance	1.41154871290574e-07	1e-05	TRUE
-default_k8	fitted responses	1.50247371453879e-09	1e-06	TRUE
+default_k8	estimated lambda	1.40277673560135e-07	1e-05	TRUE
+default_k8	estimated residual variance	3.15269677694716e-09	1e-05	TRUE
+default_k8	estimated spline variance	1.37124974592301e-07	1e-05	TRUE
+default_k8	fitted responses	1.45957906526893e-09	1e-06	TRUE
 uneven_k10	same predictor and response values	1.68584548893866e-15	1e-12	TRUE
 uneven_k10	same constructed knots	5.26801553078946e-17	1e-12	TRUE
 uneven_k10	R REML converged	0	0	TRUE
 uneven_k10	Julia REML converged	0	0	TRUE
 uneven_k10	one shared spline variance	0	0	TRUE
 uneven_k10	R variance-to-smoothing relationship	1.00398347938579e-15	1e-10	TRUE
-uneven_k10	estimated lambda	7.49081790521853e-08	1e-05	TRUE
-uneven_k10	estimated residual variance	1.92216244331784e-09	1e-05	TRUE
-uneven_k10	estimated spline variance	7.29860179743686e-08	1e-05	TRUE
-uneven_k10	fitted responses	9.50087007371949e-10	1e-06	TRUE
+uneven_k10	estimated lambda	7.01761354446742e-08	1e-05	TRUE
+uneven_k10	estimated residual variance	1.80073289928567e-09	1e-05	TRUE
+uneven_k10	estimated spline variance	6.83754038197005e-08	1e-05	TRUE
+uneven_k10	fitted responses	8.90070090405312e-10	1e-06	TRUE
 duplicates_k6	same predictor and response values	1.7351219445839e-15	1e-12	TRUE
 duplicates_k6	same constructed knots	1.04768562937494e-16	1e-12	TRUE
 duplicates_k6	R REML converged	0	0	TRUE
 duplicates_k6	Julia REML converged	0	0	TRUE
 duplicates_k6	one shared spline variance	0	0	TRUE
 duplicates_k6	R variance-to-smoothing relationship	2.986156911653e-15	1e-10	TRUE
-duplicates_k6	estimated lambda	4.61037615665291e-08	1e-05	TRUE
-duplicates_k6	estimated residual variance	8.8178074399365e-10	1e-05	TRUE
-duplicates_k6	estimated spline variance	4.52219839326538e-08	1e-05	TRUE
-duplicates_k6	fitted responses	2.27571482074675e-10	1e-06	TRUE
+duplicates_k6	estimated lambda	3.21390759439053e-08	1e-05	TRUE
+duplicates_k6	estimated residual variance	6.14693581591523e-10	1e-05	TRUE
+duplicates_k6	estimated spline variance	3.15243853417326e-08	1e-05	TRUE
+duplicates_k6	fitted responses	1.58641651611416e-10	1e-06	TRUE
 small_k5	same predictor and response values	1.68584548893866e-15	1e-12	TRUE
 small_k5	same constructed knots	0	1e-12	TRUE
 small_k5	R REML converged	0	0	TRUE
 small_k5	Julia REML converged	0	0	TRUE
 small_k5	one shared spline variance	0	0	TRUE
 small_k5	R variance-to-smoothing relationship	2.70457301166346e-15	1e-10	TRUE
-small_k5	estimated lambda	2.93710295677878e-07	1e-05	TRUE
-small_k5	estimated residual variance	4.36288107427297e-09	1e-05	TRUE
-small_k5	estimated spline variance	2.89347412948746e-07	1e-05	TRUE
-small_k5	fitted responses	2.05681097173321e-09	1e-06	TRUE
+small_k5	estimated lambda	5.37865920005779e-07	1e-05	TRUE
+small_k5	estimated residual variance	7.98965883263287e-09	1e-05	TRUE
+small_k5	estimated spline variance	5.29876262491248e-07	1e-05	TRUE
+small_k5	fitted responses	3.76660044913611e-09	1e-06	TRUE

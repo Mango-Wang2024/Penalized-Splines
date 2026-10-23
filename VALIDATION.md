@@ -2,7 +2,7 @@
 
 [Project overview](README.md) · [Mathematical explanation](DERIVATION.md) · [Stage 1 results](STAGE1_RESULTS.md) · [Stage 2 results](STAGE2_RESULTS.md)
 
-We check basis construction on its own, then compare the complete preparation of the mixed-model inputs. Both languages use the same saved Julia-generated observations and matched spline settings.
+We check basis construction on its own, then compare the complete preparation of the mixed-model inputs. Julia uses BSplineKit and R uses mgcv, with the same saved Julia-generated observations and matched spline settings. The existing mathematical checks and cross-language criteria also validate the BSplineKit-based implementation.
 
 ## Stage 1: two comparisons
 

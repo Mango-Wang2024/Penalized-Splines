@@ -4,6 +4,7 @@
 
 # Evidence linked from README.md and STAGE1_RESULTS.md.
 !spline_basis/outputs/shared/julia/checks.tsv
+!spline_basis/outputs/shared/julia/versions.tsv
 !model_preparation/outputs/shared/r_reference/lme_inputs/reference_checks.csv
 !model_preparation/outputs/shared/r_reference/lme_inputs/INPUTS_EXPLAINED.txt
 !model_preparation/outputs/shared/julia/checks.tsv

@@ -28,7 +28,9 @@ c^\top S_{\mathrm{raw}}c&=\int [f''(x)]^2\,dx.
 
 Integration covers the middle knot interval. Straight lines have zero second derivative, so constant and linear curves receive no penalty. This gives two unpenalized directions before centering. Uneven knot spacing is accounted for through the actual interval widths.
 
-Sources: [mgcv cubic B-splines and curvature penalties](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth.construct.bs.smooth.spec.html), [basis dimensions and derivatives](https://stat.ethz.ch/R-manual/R-devel/library/splines/html/splineDesign.html), [B-spline recurrence](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.BSpline.html#notes).
+The implementation uses BSplineKit for basis values, derivatives and the integral defining $S_{\mathrm{raw}}$. Its cubic basis has order 4 (degree 3); the number of basis functions remains $k$. Supplying our full knot vector without automatic augmentation preserves the mgcv basis and integration interval.
+
+Sources: [mgcv cubic B-splines and curvature penalties](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth.construct.bs.smooth.spec.html), [basis dimensions and derivatives](https://stat.ethz.ch/R-manual/R-devel/library/splines/html/splineDesign.html), [BSplineKit bases and full knots](https://jipolanco.github.io/BSplineKit.jl/stable/bsplines/), and [BSplineKit derivative integrals](https://jipolanco.github.io/BSplineKit.jl/stable/galerkin/).
 
 ## 2. Scale and center the spline
 

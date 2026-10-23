@@ -24,6 +24,13 @@ using .BSplineBasis
     @test evaluate_basis(t,x;derivative=2)*ones(4) ≈ zeros(3) atol=1e-13
     @test evaluate_basis(t,x;derivative=1)*greville ≈ ones(3) atol=1e-13
     @test evaluate_basis(t,x;derivative=2)*greville ≈ zeros(3) atol=1e-13
+    # The package adapter must retain endpoint values, duplicates and row order.
+    xe = [1.0,0.2,0.0,0.2,0.8]
+    expected_edges = hcat((1 .- xe).^3,3 .* xe.^3-6 .* xe.^2 .+4,
+                         -3 .* xe.^3+3 .* xe.^2+3 .* xe .+1,xe.^3)/6
+    @test evaluate_basis(t,xe) ≈ expected_edges atol=1e-13
+    @test evaluate_basis(t,xe;derivative=1)*greville ≈ ones(length(xe)) atol=1e-13
+    @test size(evaluate_basis(t,Float64[])) == (0,4)
 end
 
 @testset "Curvature penalty and centering" begin
@@ -42,7 +49,7 @@ end
     @test maximum(abs,vec(mean(c.B;dims=1)))<1e-12
     @test rank(c.S;rtol=1e-10)==k-2
     # Simpson integration independently checks the exact quadratic curvature
-    # products used by the implementation's two-point Gauss quadrature.
+    # products integrated by BSplineKit's Gauss quadrature.
     coeff = randn(MersenneTwister(42),k)
     integral = 0.0
     for j in 1:length(breaks)-1

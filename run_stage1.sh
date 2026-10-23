@@ -27,8 +27,9 @@ if [ -e "$report" ]; then
     printf '%s\n' 'The summary already exists. Supply a new output directory.' >&2
     exit 1
 fi
-julia --startup-file=no "$root/spline_basis/test/runtests.jl"
-julia --startup-file=no "$root/model_preparation/test/runtests.jl"
+julia --startup-file=no --project="$root" -e 'using Pkg; Pkg.instantiate()'
+julia --startup-file=no --project="$root" "$root/spline_basis/test/runtests.jl"
+julia --startup-file=no --project="$root" "$root/model_preparation/test/runtests.jl"
 sh "$root/spline_basis/run.sh" "$basis"
 sh "$root/model_preparation/run.sh" "$workflow"
 Rscript "$root/model_preparation/scripts/report.R" "$root/data/inputs" "$basis" "$workflow" "$report"

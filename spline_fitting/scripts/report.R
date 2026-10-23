@@ -120,10 +120,10 @@ run <- function() {
     "## Reproducibility","",
     paste0("Versions: ",version("R"),"; mgcv ",version("mgcv"),"; nlme ",version("nlme"),
       "; Julia ",version("Julia"),"; MixedModels ",version("MixedModels"),
-      "; StatsModels ",version("StatsModels"),"."),"",
+      "; StatsModels ",version("StatsModels"),"; BSplineKit ",version("BSplineKit"),"."),"",
     paste0("The same saved observations and five knot settings are reused from Stage 1. ",
       link("Input fingerprints",file.path(rdir,"source_checksums.tsv")),
-      " confirm the R source files; both languages' saved predictor, response and knot values are compared directly. The Julia dependency versions are pinned in `spline_fitting/Manifest.toml`."))
+      " confirm the R source files; both languages' saved predictor, response and knot values are compared directly. Both stages share the dependency versions pinned in the root `Manifest.toml`."))
   writeLines(lines,report)
   cat(sprintf("%d/%d Stage 2 comparisons passed\n",sum(checks$passed),nrow(checks)))
   if(!all(checks$passed)) stop("Stage 2 comparisons failed; see checks.tsv")

@@ -1,4 +1,5 @@
 using DelimitedFiles, LinearAlgebra, MixedModels, StatsModels
+import BSplineKit
 include(joinpath(@__DIR__,"..","..","spline_basis","src","BSpline.jl"))
 using .BSplineBasis
 include(joinpath(@__DIR__,"..","..","model_preparation","src","ModelInputs.jl"))
@@ -49,6 +50,7 @@ function main(args)
     open(joinpath(out,"versions.tsv"),"w") do io
         println(io,"key\tvalue")
         println(io,"Julia\t",VERSION)
+        println(io,"BSplineKit\t",pkgversion(BSplineKit))
         println(io,"MixedModels\t",pkgversion(MixedModels))
         println(io,"StatsModels\t",pkgversion(StatsModels))
         println(io,"method\tREML")

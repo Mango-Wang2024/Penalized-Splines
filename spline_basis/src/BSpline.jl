@@ -1,6 +1,7 @@
 module BSplineBasis
 
 using LinearAlgebra, Statistics
+import BSplineKit
 export default_knots, extend_knots, evaluate_basis, build_spline
 
 const DEGREE = 3
@@ -36,24 +37,12 @@ function default_knots(x,k::Int)
     return collect(range(xl-DEGREE*step,xu+DEGREE*step;length=k+DEGREE+1))
 end
 
-# Cox-de Boor recurrence, including first and second derivative recurrences.
-function basis_row(t,value,derivative)
-    values = Float64[t[i]<=value<t[i+1] for i in 1:length(t)-1]
-    first = zeros(length(values))
-    second = zeros(length(values))
-    for p in 1:DEGREE
-        count = length(values)-1
-        next_values,next_first,next_second = zeros(count),zeros(count),zeros(count)
-        for i in 1:count
-            a = t[i+p]-t[i]
-            b = t[i+p+1]-t[i+1]
-            next_values[i] = (value-t[i])/a*values[i]+(t[i+p+1]-value)/b*values[i+1]
-            next_first[i] = p/a*values[i]-p/b*values[i+1]
-            next_second[i] = p/a*first[i]-p/b*first[i+1]
-        end
-        values,first,second = next_values,next_first,next_second
-    end
-    return derivative==0 ? values : derivative==1 ? first : second
+# Full knots already include exterior knots; do not repeat or augment them.
+package_basis(t) = BSplineKit.BSplineBasis(BSplineKit.BSplineOrder(DEGREE+1),t;augment=Val(false))
+
+function basis_matrix(basis,x,derivative)
+    B = zeros(length(x),length(basis))
+    return BSplineKit.collocation_matrix!(B,basis,x,BSplineKit.Derivative(derivative);clip_threshold=0)
 end
 
 """Evaluate cubic B-spline shapes or derivatives, using mgcv's linear prediction tails."""
@@ -63,15 +52,15 @@ function evaluate_basis(knots,x;derivative::Int=0)
     xv = Float64.(collect(x))
     all(isfinite,xv) || throw(ArgumentError("Predictors must be finite"))
     lo,hi = t[4],t[end-3]
-    B = zeros(length(xv),length(t)-4)
-    for (i,value) in enumerate(xv)
-        if lo<=value<=hi
-            B[i,:] = basis_row(t,value,derivative)
-        elseif derivative<2
-            endpoint = value<lo ? lo : hi
-            slope = basis_row(t,endpoint,1)
-            B[i,:] = derivative==1 ? slope : basis_row(t,endpoint,0)+(value-endpoint)*slope
-        end
+    basis = package_basis(t)
+    clipped = clamp.(xv,lo,hi)
+    B = basis_matrix(basis,clipped,derivative)
+    outside = findall(i->xv[i]<lo || xv[i]>hi,eachindex(xv))
+    if derivative==0 && !isempty(outside)
+        slope = basis_matrix(basis,clipped[outside],1)
+        B[outside,:] += (xv[outside]-clipped[outside]).*slope
+    elseif derivative==2
+        B[outside,:] .= 0
     end
     return B
 end
@@ -86,17 +75,10 @@ function build_spline(x,knots)
     all(v->t[4]<=v<=t[end-3],xv) || throw(ArgumentError("Training predictors must lie inside the middle knot interval"))
     B_raw = evaluate_basis(t,xv)
     D2 = evaluate_basis(t,xv;derivative=2)
-    S_raw = zeros(k,k)
-    # Cubic second derivatives are linear on each interval; two-point Gauss
-    # quadrature integrates their products exactly, including uneven spacing.
-    for j in 4:length(t)-4
-        h = t[j+1]-t[j]
-        mid = (t[j]+t[j+1])/2
-        points = [mid-h/(2sqrt(3)),mid+h/(2sqrt(3))]
-        D = evaluate_basis(t,points;derivative=2)
-        S_raw += h/2*(D'*D)
-    end
-    S_raw = Matrix(Symmetric(S_raw))
+    # Galerkin integration covers [t[4],t[end-3]], matching mgcv's penalty domain.
+    # Both factors are second derivatives: S_raw[i,j] = integral(b_i'' * b_j'').
+    second = BSplineKit.Derivative(2)
+    S_raw = Matrix(BSplineKit.galerkin_matrix(package_basis(t),(second,second),Matrix{Float64}))
     penalty_scale = opnorm(S_raw,1)/opnorm(B_raw,Inf)^2
     S_scaled = S_raw/penalty_scale
     constraint = vec(mean(B_raw;dims=1))

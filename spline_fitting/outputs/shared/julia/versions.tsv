@@ -1,5 +1,6 @@
 key	value
 Julia	1.13.1
+BSplineKit	0.19.3
 MixedModels	5.9.0
 StatsModels	0.7.10
 method	REML

@@ -1,4 +1,5 @@
 using DelimitedFiles, LinearAlgebra, Statistics
+import BSplineKit
 include(joinpath(@__DIR__,"..","src","BSpline.jl"))
 using .BSplineBasis
 
@@ -50,5 +51,10 @@ function main(args)
     worst=maximum(r.scaled_error for r in records)
     println("$passed/$(length(records)) checks passed; largest scaled error = $worst")
     all(r->r.passed,records)||error("Matrix comparisons failed; see checks.tsv")
+    open(joinpath(out,"versions.tsv"),"w") do io
+        println(io,"key\tvalue")
+        println(io,"Julia\t",VERSION)
+        println(io,"BSplineKit\t",pkgversion(BSplineKit))
+    end
 end
 main(ARGS)
