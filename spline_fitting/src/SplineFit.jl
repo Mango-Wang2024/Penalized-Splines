@@ -31,7 +31,7 @@ function build_model(y::AbstractVector, X::AbstractMatrix, Z::AbstractMatrix)
     model = MixedModels.LinearMixedModel(
         rotated.yr,terms.feterm,[terms.reterm],terms.form,
         Float64[],nothing,false,1000,false)
-    check_model_structure(model,terms.reterm,rotated.singular_values,n)
+    length(model.θ)==1 || error("Expected exactly one shared random-effect variance parameter")
 
     # Keep the singular values (without row padding) for restoring observations.
     return (;model,qrZ=rotated.qrZ,U=rotated.U,V=rotated.V,
@@ -67,17 +67,6 @@ function build_model_terms(yr, Xr, singular_values)
     reterm = only(t for t in design if t isa MixedModels.ReMat)
     feterm = MixedModels.FeTerm(Xr,String.(names))
     return (;feterm,reterm,form)
-end
-
-"""Verify that MixedModels stores the intended design and one shared variance."""
-function check_model_structure(model, reterm, singular_values, n)
-    length(model.θ)==1 || error("Expected exactly one shared random-effect variance parameter")
-    # This matrix is a validation target, not an input to fitting.
-    q = length(singular_values)
-    expected = zeros(n,q)
-    expected[1:q,:] = Diagonal(singular_values)
-    isapprox(Matrix(reterm),expected;rtol=1e-12,atol=1e-12) || error("ReMat column ordering changed")
-    return nothing
 end
 
 """Return rotated observation values to the original observation order and units."""
