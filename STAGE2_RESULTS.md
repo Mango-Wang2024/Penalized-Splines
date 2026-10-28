@@ -16,7 +16,7 @@ The table compares smoothing strength $\lambda$ and all 200 fitted responses, $\
 | `default_k8` | 0.609630551 | 0.609630636 | 1.40e-07 | 1.46e-09 |
 | `uneven_k10` | 4.42327209 | 4.42327177 | 7.02e-08 | 8.90e-10 |
 | `duplicates_k6` | 0.0534448003 | 0.053444802 | 3.21e-08 | 1.59e-10 |
-| `small_k5` | 0.00962105738 | 0.00962105221 | 5.38e-07 | 3.77e-09 |
+| `small_k5` | 0.00962105738 | 0.00962105268 | 4.89e-07 | 3.42e-09 |
 
 ![R and Julia fitted curves](spline_fitting/outputs/shared/comparison/fitted_curves.png)
 
@@ -25,7 +25,7 @@ Gray points are the observed $y$ values supplied to both fitters; the dotted cur
 ## Supporting checks
 
 The [detailed estimates](spline_fitting/outputs/shared/comparison/estimates.tsv) retain $\sigma^2$ and $r^2$ for every case. These check the variance scale, which is not determined by their ratio alone.
-Their largest relative error is **5.30e-07**, below the $10^{-5}$ threshold.
+Their largest relative error is **4.82e-07**, below the $10^{-5}$ threshold.
 
 Independent Julia tests check that the input adapter preserves the covariance model, REML objective and fitted coefficients. They also check invariance to rotated spline directions, the zero-variance boundary and invalid inputs.
 

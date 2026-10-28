@@ -25,17 +25,40 @@ function build_model(y::AbstractVector, X::AbstractMatrix, Z::AbstractMatrix)
     p>0 && q>0 && n>p+q || throw(ArgumentError("Require fixed columns, penalized columns and n > p+q"))
     all(isfinite,yf) && all(isfinite,Xf) && all(isfinite,Zf) || throw(ArgumentError("Model inputs must be finite"))
     rank(Xf)==p || throw(ArgumentError("Fixed-effect columns must be linearly independent"))
+
+    rotated = rotate_inputs(yf,Xf,Zf)
+    terms = build_model_terms(rotated.yr,rotated.Xr,rotated.singular_values)
+    model = MixedModels.LinearMixedModel(
+        rotated.yr,terms.feterm,[terms.reterm],terms.form,
+        Float64[],nothing,false,1000,false)
+    check_model_structure(model,terms.reterm,rotated.singular_values,n)
+
+    # Keep the singular values (without row padding) for restoring observations.
+    return (;model,qrZ=rotated.qrZ,U=rotated.U,V=rotated.V,
+             loading=rotated.singular_values,y=yf,X=Xf,Z=Zf)
+end
+
+"""Find QR/SVD coordinates and transform the response and fixed effects together."""
+function rotate_inputs(yf, Xf, Zf)
+    q = size(Zf,2)
     qrZ = qr(Zf)
     parts = svd(Matrix(qrZ.R))
     minimum(parts.S)>1e-10*maximum(parts.S) || throw(ArgumentError("Penalized spline columns must be linearly independent"))
     rotated = qrZ.Q' * hcat(yf,Xf)
     rotated[1:q,:] = parts.U' * rotated[1:q,:]
     yr, Xr = rotated[:,1], rotated[:,2:end]
-    loading = vcat(parts.S,zeros(n-q))
+    return (;yr,Xr,qrZ,U=parts.U,V=parts.V,singular_values=parts.S)
+end
+
+"""Package transformed inputs as the formula, FeTerm and scalar ReMat."""
+function build_model_terms(yr, Xr, singular_values)
+    n, p = size(Xr)
+    q = length(singular_values)
+    row_loadings = vcat(singular_values,zeros(n-q))
     labels = ["spline_"*lpad(string(i),length(string(q)),'0') for i in 1:q]
     group = vcat(labels,fill(first(labels),n-q))
     names = Symbol.("fixed_" .* string.(1:p))
-    tbl = merge((response=yr,loading=loading,spline=group),NamedTuple{Tuple(names)}(Tuple(eachcol(Xr))))
+    tbl = merge((response=yr,loading=row_loadings,spline=group),NamedTuple{Tuple(names)}(Tuple(eachcol(Xr))))
     fixed = foldl(+,term.(names);init=term(0))
     random = (@formula(response ~ (0 + loading | spline))).rhs
     formula = FormulaTerm(term(:response),fixed+random)
@@ -43,13 +66,18 @@ function build_model(y::AbstractVector, X::AbstractMatrix, Z::AbstractMatrix)
     _, design = StatsModels.modelcols(form,tbl)
     reterm = only(t for t in design if t isa MixedModels.ReMat)
     feterm = MixedModels.FeTerm(Xr,String.(names))
-    # Low-level constructor with prepared FeTerm/ReMat, as required by the model.
-    model = MixedModels.LinearMixedModel(yr,feterm,[reterm],form,Float64[],nothing,false,1000,false)
+    return (;feterm,reterm,form)
+end
+
+"""Verify that MixedModels stores the intended design and one shared variance."""
+function check_model_structure(model, reterm, singular_values, n)
     length(model.θ)==1 || error("Expected exactly one shared random-effect variance parameter")
+    # This matrix is a validation target, not an input to fitting.
+    q = length(singular_values)
     expected = zeros(n,q)
-    expected[1:q,:] = Diagonal(parts.S)
+    expected[1:q,:] = Diagonal(singular_values)
     isapprox(Matrix(reterm),expected;rtol=1e-12,atol=1e-12) || error("ReMat column ordering changed")
-    return (;model,qrZ,U=parts.U,V=parts.V,loading=parts.S,y=yf,X=Xf,Z=Zf)
+    return nothing
 end
 
 """Return rotated observation values to the original observation order and units."""
@@ -64,14 +92,10 @@ function restore_observations(prepared, values::AbstractVecOrMat)
     return prepared.qrZ.Q * out
 end
 
-"""Estimate the shared variance ratio automatically with MixedModels REML."""
+"""Estimate the shared variance ratio with REML and default optimizer settings."""
 function fit_reml(y::AbstractVector, X::AbstractMatrix, Z::AbstractMatrix)
     prepared = build_model(y,X,Z)
     m = prepared.model
-    m.optsum.ftol_rel = 1e-12
-    m.optsum.ftol_abs = 1e-10
-    m.optsum.xtol_rel = 1e-10
-    m.optsum.maxfeval = 10000
     MixedModels.fit!(m;REML=true,progress=false)
     status = m.optsum.returnvalue
     status in (:SUCCESS,:STOPVAL_REACHED,:FTOL_REACHED,:XTOL_REACHED) ||

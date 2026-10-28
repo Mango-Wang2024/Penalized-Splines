@@ -45,7 +45,7 @@ small_k5	R REML converged	0	0	TRUE
 small_k5	Julia REML converged	0	0	TRUE
 small_k5	one shared spline variance	0	0	TRUE
 small_k5	R variance-to-smoothing relationship	2.70457301166346e-15	1e-10	TRUE
-small_k5	estimated lambda	5.37865920005779e-07	1e-05	TRUE
-small_k5	estimated residual variance	7.98965883263287e-09	1e-05	TRUE
-small_k5	estimated spline variance	5.29876262491248e-07	1e-05	TRUE
-small_k5	fitted responses	3.76660044913611e-09	1e-06	TRUE
+small_k5	estimated lambda	4.88822463260065e-07	1e-05	TRUE
+small_k5	estimated residual variance	7.26114397390428e-09	1e-05	TRUE
+small_k5	estimated spline variance	4.81561319914306e-07	1e-05	TRUE
+small_k5	fitted responses	3.42315234707699e-09	1e-06	TRUE
