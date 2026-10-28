@@ -20,7 +20,7 @@ Colour represents the numerical entry value: red is positive, blue is negative, 
 
 <a href="xr_heatmap.png"><img src="xr_heatmap.png" alt="Fixed model parts after rotation" width="480"></a>
 
-The fitting adapter derives an orthogonal row transformation $T$ from QR and SVD calculations on `Zf`, then computes $X_r = T X_f$. The columns retain their model roles, while each new row combines original observation rows. This changes the colour pattern.
+The `rotate_inputs` helper derives an orthogonal row transformation $T$ from QR and SVD calculations on `Zf`, then computes $X_r = T X_f$. The columns retain their model roles, while each new row combines original observation rows. This changes the colour pattern.
 
 The response and random-effect design are transformed consistently to preserve the model. The response is rotated independently of the fixed-effect columns; placing them side by side with `hcat` does not mix them.
 
@@ -28,8 +28,8 @@ The response and random-effect design are transformed consistently to preserve t
 
 <a href="loading_heatmap.png"><img src="loading_heatmap.png" alt="Loading vector, rows 1-10" width="480"></a>
 
-The local `loading` vector contains the six singular values of `Zf`, followed by 194 zeros. Its nonzero values form the diagonal of the transformed random-effect design. The figure shows the first ten rows; all later entries are zero. All 200 observations remain in the fit.
+`build_model_terms` creates the table's `loading` column as `row_loadings`: six singular values followed by 194 zeros. The nonzero values form the diagonal of the transformed random-effect design. The figure shows the first ten entries. All 200 observations remain in the fit. The returned `prepared.loading` stores only the six singular values.
 
 These are singular values of the design matrix `Zf`, distinct from the eigenvalues of the penalty matrix $S$.
 
-**Sources:** [shared observations and knots](../data/inputs/uniform_k8/), [BSplineKit-based construction](../spline_basis/src/BSpline.jl#L69), [spline input preparation](../model_preparation/src/ModelInputs.jl#L20), and [QR/SVD fitting adapter](../spline_fitting/src/SplineFit.jl#L28). The [derivation](../DERIVATION.md) explains the basis and penalty transformations.
+**Sources:** [shared observations and knots](../data/inputs/uniform_k8/), [BSplineKit-based construction](../spline_basis/src/BSpline.jl#L69), [spline input preparation](../model_preparation/src/ModelInputs.jl#L20), [input rotation](../spline_fitting/src/SplineFit.jl#L42), and [model terms and loading](../spline_fitting/src/SplineFit.jl#L54). The [derivation](../DERIVATION.md) explains the basis and penalty transformations. Related discussion: [adapter review #1](https://github.com/Mango-Wang2024/Penalized-Splines/issues/1).
