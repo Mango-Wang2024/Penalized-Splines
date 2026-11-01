@@ -2,7 +2,7 @@
 
 These plots use Julia's `uniform_k8` example: 200 observations and a raw spline basis of size `k = 8`. After centering, the spline has six penalized directions and one unpenalized straight trend. The plotted entries are computed before REML fitting.
 
-Colour represents the numerical entry value: red is positive, blue is negative, and white is zero or near zero. `Xf` and `Xr` share the same colour limits.
+Colour represents the numerical entry value: red is positive, blue is negative, and white is zero or near zero. `Xf` and `Xr` share the same colour limits; `loading` and `Zr` share the same positive colour scale.
 
 ## Zf: penalized spline part
 
@@ -23,6 +23,18 @@ Colour represents the numerical entry value: red is positive, blue is negative, 
 The `rotate_inputs` helper derives an orthogonal row transformation $T$ from QR and SVD calculations on `Zf`, then computes $X_r = T X_f$. The columns retain their model roles, while each new row combines original observation rows. This changes the colour pattern.
 
 The response and random-effect design are transformed consistently to preserve the model. The response is rotated independently of the fixed-effect columns; placing them side by side with `hcat` does not mix them.
+
+## Zr: penalized spline part after rotation
+
+<a href="zr_heatmap.png"><img src="zr_heatmap.png" alt="Rotated penalized spline design Zr, rows 1-10" width="480"></a>
+
+`Zr` denotes the 200 × 6 random-effect design stored in MixedModels' `ReMat`. The observation rotation $T$ and the SVD coefficient rotation $V$ give:
+
+```math
+Z_r = T Z_f V = \begin{bmatrix} \operatorname{diag}(d_1,\ldots,d_6) \\ 0_{194\times6} \end{bmatrix}.
+```
+
+The six diagonal values are the singular values used in `loading`. The heatmap shows rows 1–10 so the diagonal is visible; rows 7–200 are all zero. Each nonzero entry connects one rotated observation coordinate to one rotated spline coefficient.
 
 ## loading: values used to package the random-effect design
 
