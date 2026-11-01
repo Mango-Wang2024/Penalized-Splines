@@ -42,6 +42,8 @@ We check preparation independently of fitting:
 
 R's `mgcv::gamm` prepares the spline and calls `nlme::lme`. Julia packages its own matrices in `FeTerm` and `ReMat` containers for `MixedModels.LinearMixedModel`, then calls `fit!`.
 
+**Input adaptation:** R's [nlme fitting routine](https://github.com/cran/nlme/blob/3.1-169/src/matrix.c#L195-L223) uses QR to transform model blocks. Our [Julia adapter](spline_fitting/src/SplineFit.jl#L42-L50) uses QR followed by SVD of its triangular factor to form a diagonal random-effect block for `ReMat`. It applies the matching observation rotation to $y$ and $X_{\mathrm{fixed}}$. Under the shared-variance assumptions below, these orthogonal transformations preserve the model. After fitting, [`restore_observations`](spline_fitting/src/SplineFit.jl#L73-L81) reverses the observation rotation so fitted responses correspond to the original data points.
+
 **Produces:** a fitted model containing the coefficients, variance estimates, smoothing strength and fitted responses below:
 
 | Quantity | What it represents | Main dimensions |
