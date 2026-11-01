@@ -12,11 +12,9 @@ Colour represents the numerical entry value: red is positive, blue is negative, 
 
 ## Xr: the same fixed parts after rotation
 
-<a href="xr_heatmap.png"><img src="xr_heatmap.png" alt="Fixed model parts after rotation, rows 1-10" width="480"></a>
+<a href="xr_heatmap.png"><img src="xr_heatmap.png" alt="Fixed model parts after rotation" width="480"></a>
 
 The `rotate_inputs` helper derives an orthogonal row transformation $T$ from QR and SVD calculations on the prepared penalized design `Zf`, then computes $X_r = T X_f$. The columns retain their model roles, while each new row combines original observation rows. This changes the colour pattern.
-
-The figure enlarges rows 1–10 of the full 200 × 2 matrix; labels are rounded to two decimal places. Rows 11–200 also contain nonzero values and remain in the fit.
 
 The response and random-effect design are transformed consistently to preserve the model. The response is rotated independently of the fixed-effect columns; placing them side by side with `hcat` does not mix them.
 
