@@ -2,7 +2,7 @@
 
 These plots use Julia's `uniform_k8` example: 200 observations and a raw spline basis of size `k = 8`. After centering, the spline has six penalized directions and one unpenalized straight trend. The plotted entries are computed before REML fitting.
 
-Colour represents the numerical entry value: red is positive, blue is negative, and white is zero or near zero. `Xf` and `Xr` share the same colour limits; `loading` and `Zr` share the same positive colour scale.
+Colour represents the numerical entry value: red is positive, blue is negative, and white is zero or near zero. `Xf` and `Xr` share the same nonlinear colour scale (`asinh(value / 0.01)`) to make small nonzero entries easier to see; their colourbar labels show the original values. `loading` and `Zr` share the same positive colour scale.
 
 ## Xf: fixed model parts before rotation
 
