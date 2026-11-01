@@ -8,13 +8,13 @@ function marginal_check(y,X,Z,theta)
     n,p=size(X)
     V=cholesky(Symmetric(Matrix{Float64}(I,n,n)+theta^2*(Z*Z')))
     XtViX=cholesky(Symmetric(X'*(V\X)))
-    beta=XtViX\(X'*(V\y))
-    residual=y-X*beta
+    b=XtViX\(X'*(V\y))
+    residual=y-X*b
     rss=dot(residual,V\residual)
     sigma2=rss/(n-p)
     tau=theta^2*Z'*(V\residual)
     objective=logdet(V)+logdet(XtViX)+(n-p)*(1+log(2pi*sigma2))
-    return (;beta,tau,sigma2,objective,fitted=X*beta+Z*tau)
+    return (;b,tau,sigma2,objective,fitted=X*b+Z*tau)
 end
 
 @testset "Native MixedModels adapter and automatic REML" begin
@@ -41,7 +41,7 @@ end
     @test fit.status in (:SUCCESS,:STOPVAL_REACHED,:FTOL_REACHED,:XTOL_REACHED)
     @test fit.lambda ≈ fit.sigma2/fit.r2
     @test fit.lambda ≈ inv(fit.theta^2)
-    @test fit.beta ≈ independent.beta rtol=1e-9
+    @test fit.b ≈ independent.b rtol=1e-9
     @test fit.tau ≈ independent.tau rtol=1e-9
     @test fit.sigma2 ≈ independent.sigma2 rtol=1e-9
     @test fit.objective ≈ independent.objective rtol=1e-9

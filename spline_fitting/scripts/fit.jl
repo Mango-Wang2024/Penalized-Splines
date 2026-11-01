@@ -31,8 +31,8 @@ function main(args)
         end
         # Keep original spline coordinates for interpretation and later prediction.
         for (label,value) in ["knots"=>knots,"H"=>basis.H,"C"=>prepared.C,
-                              "fixed_coefficients"=>fit.beta,"random_coefficients"=>fit.tau,
-                              "spline_coefficients"=>prepared.C*vcat(fit.tau,fit.beta[2:end])]
+                              "fixed_coefficients"=>fit.b,"random_coefficients"=>fit.tau,
+                              "spline_coefficients"=>prepared.C*vcat(fit.tau,fit.b[2:end])]
             writedlm(joinpath(dst,label*".csv"),value,',')
         end
         push!(rows,(;case=name,lambda=fit.lambda,sigma2=fit.sigma2,r2=fit.r2,r=fit.r,
