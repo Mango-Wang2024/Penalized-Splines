@@ -27,7 +27,7 @@ Largest scaled difference in training fitted responses: **1.70e-08**; on the sha
 
 <a href="spline_fitting/outputs/shared/comparison/fitted_surfaces.png"><img src="spline_fitting/outputs/shared/comparison/fitted_surfaces.png" alt="Known, R and Julia response surfaces and their difference" width="800"></a>
 
-The first three panels share the same response scale. The fourth isolates the small R/Julia difference on the same grid. The known surface is a simulation reference; only the noisy observations are used for fitting.
+Panels (a–c) share the same viewing angle and response limits. Panel (d) shows Julia minus R with a symmetric colour scale centred at zero; the multiplier above its colourbar gives the scale. Its maximum absolute difference is **2.59e-09**. The known surface is a simulation reference; only the noisy observations are used for fitting.
 
 <a href="spline_fitting/outputs/shared/comparison/component_curves.png"><img src="spline_fitting/outputs/shared/comparison/component_curves.png" alt="Centered additive spline components" width="800"></a>
 

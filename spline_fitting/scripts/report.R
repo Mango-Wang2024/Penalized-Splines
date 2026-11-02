@@ -56,21 +56,8 @@ run <- function() {
   main <- cases[1];raw <- read.csv(file.path(inputs,main,"data.csv"));keys <- read.delim(file.path(inputs,main,"terms.tsv"))$predictor
   rg <- read.csv(file.path(rdir,main,"grid.csv"));jg <- read.csv(file.path(jdir,main,"grid.csv"));grid <- read.csv(file.path(inputs,main,"grid.csv"))
   if(length(keys)==2L) {
-    x <- sort(unique(grid[[keys[1]]]));y <- sort(unique(grid[[keys[2]]]));stopifnot(nrow(grid)==length(x)*length(y))
-    to_surface <- function(values)matrix(values,length(x),length(y))
-    png(file.path(dst,"fitted_surfaces.png"),width=2100,height=1600,res=240,type="quartz")
-    par(mfrow=c(2,2),mar=c(2,2,2.5,1),cex=.85)
-    limits <- range(grid$truth,rg$fitted,jg$fitted)
-    surface <- function(v,title,col)persp(x,y,to_surface(v),theta=-40,phi=25,expand=.65,col=col,border="#FFFFFF80",shade=.25,
-      xlab=keys[1],ylab=keys[2],zlab="Response",zlim=limits,ticktype="detailed",main=title)
-    surface(grid$truth,"(a) Known surface","#C0CED8");surface(rg$fitted,"(b) R: mgcv / nlme","#73A9C7");surface(jg$fitted,"(c) Julia: MixedModels","#E7A16D")
-    difference <- to_surface(jg$fitted-rg$fitted);lim <- max(abs(difference),.Machine$double.eps)
-    par(mar=c(4,4,2.5,2))
-    image(x,y,difference,col=colorRampPalette(c("#2166AC","white","#B2182B"))(255),zlim=c(-lim,lim),
-      xlab=keys[1],ylab=keys[2],main="(d) Julia − R",useRaster=TRUE)
-    contour(x,y,difference,add=TRUE,nlevels=5,labcex=.65)
-    mtext(sprintf("Largest absolute difference: %.2e",lim),side=3,line=.25,cex=.7)
-    dev.off()
+    source(file.path(project,"assets","plot_surfaces.R"))
+    surface_stats <- plot_response_surfaces(grid,rg,jg,keys,file.path(dst,"fitted_surfaces.png"))
   }
   rc <- read.csv(file.path(rdir,main,"components.csv"));jc <- read.csv(file.path(jdir,main,"components.csv"))
   png(file.path(dst,"component_curves.png"),width=1800,height=700*ceiling(length(keys)/2),res=200,type="quartz")
@@ -99,7 +86,7 @@ run <- function() {
   lines <- c(lines,"",sprintf("Largest scaled difference in training fitted responses: **%.2e**; on the shared evaluation grid: **%.2e**.",max(checks$error[checks$check=="fitted responses"]),max(checks$error[checks$check=="grid predictions"])),"",
     "## Joint response and individual components","")
   if(length(keys)==2L)lines <- c(lines,image_tag(file.path(dst,"fitted_surfaces.png"),"Known, R and Julia response surfaces and their difference"),"",
-    "The first three panels share the same response scale. The fourth isolates the small R/Julia difference on the same grid. The known surface is a simulation reference; only the noisy observations are used for fitting.","")
+    sprintf("Panels (a–c) share the same viewing angle and response limits. Panel (d) shows Julia minus R with a symmetric colour scale centred at zero; the multiplier above its colourbar gives the scale. Its maximum absolute difference is **%.2e**. The known surface is a simulation reference; only the noisy observations are used for fitting.",surface_stats$maximum_absolute_difference),"")
   lines <- c(lines,image_tag(file.path(dst,"component_curves.png"),"Centered additive spline components"),"",
     "Each panel isolates one spline contribution. Known components are centered over the training observations to match the fitted smooths; their removed average levels belong to the overall intercept.","",
     "## Supporting checks","",
