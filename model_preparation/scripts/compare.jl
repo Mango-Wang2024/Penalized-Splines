@@ -1,76 +1,57 @@
 using DelimitedFiles, LinearAlgebra
-include(joinpath(@__DIR__,"..","..","spline_basis","src","BSpline.jl"))
-using .BSplineBasis
-include(joinpath(@__DIR__,"..","src","ModelInputs.jl"))
-using .ModelInputs
-
+include(joinpath(@__DIR__,"../../spline_basis/src/BSpline.jl"));using .BSplineBasis
+include(joinpath(@__DIR__,"../src/ModelInputs.jl"));using .ModelInputs
+include(joinpath(@__DIR__,"../../data/SharedData.jl"));using .SharedData
 function main(args)
     root=dirname(@__DIR__)
-    inputs=length(args)>=1 ? abspath(args[1]) : joinpath(root,"..","data","inputs")
-    reference=length(args)>=2 ? abspath(args[2]) : joinpath(root,"outputs","shared","r_reference")
-    out=length(args)>=3 ? abspath(args[3]) : joinpath(root,"outputs","shared","julia")
-    isdir(out)&&!isempty(readdir(out))&&error("Julia output directory is not empty; choose a new run directory")
-    cases=readdlm(joinpath(inputs,"cases.tsv"),'\t',String;skipstart=1)
-    threshold=1e-8
-    records=NamedTuple[]
-    function check(case,label,a,b)
-        size(a)==size(b)||error("$case: $label dimensions disagree")
+    inputs=length(args)>=1 ? abspath(args[1]) : joinpath(root,"../data/inputs")
+    reference=length(args)>=2 ? abspath(args[2]) : joinpath(root,"outputs/shared/r_reference")
+    out=length(args)>=3 ? abspath(args[3]) : joinpath(root,"outputs/shared/julia")
+    isdir(out)&&!isempty(readdir(out))&&error("Output directory is not empty")
+    mkpath(out);records=NamedTuple[]
+    function check(case,component,label,a,b)
+        size(a)==size(b)||error("$case/$component: dimensions disagree")
         err=relative_error(a,b)
-        push!(records,(;case,check=label,scaled_error=err,max_abs_error=maximum(abs,a-b;init=0.0),passed=err<threshold))
+        push!(records,(;case,component,check=label,scaled_error=err,max_abs_error=maximum(abs,a-b;init=0.0),passed=err<1e-8))
     end
-    mkpath(out)
-    for i in axes(cases,1)
-        name=cases[i,1];k=parse(Int,cases[i,2]);mode=cases[i,3]
-        p=joinpath(inputs,name);rpath=joinpath(reference,name)
-        data=readdlm(joinpath(p,"data.csv"),',',Float64;skipstart=1)
-        x,y=data[:,1],data[:,2]
-        # Construction reads the shared raw inputs only, never R basis outputs.
-        knots=mode=="default" ? default_knots(x,k) : vec(readdlm(joinpath(p,"knots.csv"),',',Float64))
-        basis=build_spline(x,knots)
-        converted=prepare_inputs(basis.B,basis.S;expected_rank=k-2)
-        X_fixed=hcat(ones(length(x)),converted.X0)
-        load(name)=Matrix{Float64}(readdlm(joinpath(rpath,name*".csv"),',',Float64))
-        Xr,X0r,Zr,Cr=load("X_fixed"),load("X0"),load("Z"),load("C")
-        target=Matrix(Diagonal(vcat(ones(k-2),zeros(1))))
-        check(name,"fixed space: complete Julia vs complete R",space_projector(X_fixed),space_projector(Xr))
-        check(name,"random covariance: complete Julia vs complete R",converted.Z*converted.Z',Zr*Zr')
-        check(name,"curve preserved by Julia conversion",basis.B*converted.C,hcat(converted.Z,converted.X0))
-        check(name,"penalty preserved by Julia conversion",converted.C'*basis.S*converted.C,target)
-        check(name,"all basis directions retained",space_projector(basis.B),space_projector(hcat(converted.Z,converted.X0)))
-        # Compare all coefficient directions after mapping into R coordinates.
-        mapping=Cr\converted.C
-        check(name,"curve in common coefficient coordinates",hcat(converted.Z,converted.X0),hcat(Zr,X0r)*mapping)
-        check(name,"penalty in common coefficient coordinates",mapping'*target*mapping,target)
-        rank(converted.C)==k-1||error("$name: conversion lost coefficient directions")
+    for name in case_names(inputs)
+        case=load_case(inputs,name)
+        bases=[build_spline(t.x,t.mode=="default" ? default_knots(t.x,t.k) : t.knots) for t in case.terms]
+        p=prepare_additive(bases;names=case.names)
+        Xr=readdlm(joinpath(reference,name,"X_fixed.csv"),',',Float64)
+        check(name,"all","combined fixed space",space_projector(p.X_fixed),space_projector(Xr))
         dst=joinpath(out,name);mkpath(dst)
-        for (label,M) in ["y"=>reshape(y,:,1),"B"=>basis.B,"S"=>basis.S,
-                         "X_fixed"=>X_fixed,"X0"=>converted.X0,"Z"=>converted.Z,
-                         "C"=>converted.C,"knots"=>reshape(knots,:,1),"H"=>basis.H,
-                         "penalty_scale"=>reshape([basis.penalty_scale],1,1)]
-            writedlm(joinpath(dst,label*".csv"),M,',')
+        writedlm(joinpath(dst,"X_fixed.csv"),p.X_fixed,',');writedlm(joinpath(dst,"y.csv"),case.y,',')
+        cp(joinpath(case.path,"terms.tsv"),joinpath(dst,"terms.tsv"))
+        for j in eachindex(bases)
+            term=case.terms[j];basis=bases[j];c=p.components[j]
+            load(label)=readdlm(joinpath(reference,name,term.name,label*".csv"),',',Float64)
+            Zr,X0r,Cr=load("Z"),load("X0"),load("C")
+            target=Matrix(Diagonal(vcat(ones(c.penalty_rank),zeros(c.null_rank))))
+            check(name,term.name,"random covariance",c.Z*c.Z',Zr*Zr')
+            check(name,term.name,"curve preserved",basis.B*c.C,hcat(c.Z,c.X0))
+            check(name,term.name,"normalized penalty",c.C'*basis.S*c.C,target)
+            check(name,term.name,"all spline directions retained",space_projector(basis.B),space_projector(hcat(c.Z,c.X0)))
+            mapping=Cr\c.C
+            check(name,term.name,"curve in common coordinates",hcat(c.Z,c.X0),hcat(Zr,X0r)*mapping)
+            check(name,term.name,"penalty in common coordinates",mapping'*target*mapping,target)
+            path=joinpath(dst,term.name);mkpath(path)
+            for (label,M) in ["B_raw"=>basis.B_raw,"B"=>basis.B,"S"=>basis.S,"X0"=>c.X0,"Z"=>c.Z,
+                              "C"=>c.C,"knots"=>reshape(basis.knots,:,1),"H"=>basis.H,"penalty_scale"=>reshape([basis.penalty_scale],1,1)]
+                writedlm(joinpath(path,label*".csv"),M,',')
+            end
         end
         open(joinpath(dst,"model_settings.tsv"),"w") do io
-            println(io,"key\tvalue")
-            println(io,"spline_type\tbs")
-            println(io,"degree\t3")
-            println(io,"penalty_derivative_order\t2")
-            println(io,"observations\t",length(x))
-            println(io,"penalty_rank\t",converted.penalty_rank)
-            println(io,"random_covariance\tr_squared * identity")
-            println(io,"residual_covariance\tsigma_squared * identity")
-            println(io,"fitting_status\tnot fitted; lambda not estimated")
+            println(io,"key\tvalue\ncomponents\t",length(bases),"\nobservations\t",length(case.y),
+                    "\nrandom_covariance\tone r_j_squared * identity per component\nresidual_covariance\tsigma_squared * identity")
         end
-        println("Combined workflow: ",name)
+        println("Combined preparation: ",name)
     end
     open(joinpath(out,"checks.tsv"),"w") do io
-        println(io,"case\tcheck\tscaled_error\tmax_abs_error\tpassed")
-        for r in records
-            println(io,r.case,'\t',r.check,'\t',r.scaled_error,'\t',r.max_abs_error,'\t',r.passed)
-        end
+        println(io,"case\tcomponent\tcheck\tscaled_error\tmax_abs_error\tpassed")
+        for r in records;println(io,join(string.(values(r)),'\t'));end
     end
-    passed=count(r->r.passed,records)
-    worst=maximum(r.scaled_error for r in records)
-    println("$passed/$(length(records)) combined-workflow checks passed; largest scaled error = $worst")
-    all(r->r.passed,records)||error("Combined workflow comparisons failed; see checks.tsv")
+    all(r.passed for r in records)||error("Combined preparation comparisons failed")
+    println(length(records),"/",length(records)," combined preparation checks passed")
 end
 main(ARGS)

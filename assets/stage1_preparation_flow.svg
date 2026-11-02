@@ -1,42 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="660" viewBox="0 0 900 660" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="620" viewBox="0 0 880 620" role="img" aria-labelledby="title desc">
 <title id="title">Stage 1: prepare and compare</title>
-<desc id="desc">Shared predictor values and spline settings enter independent R and Julia branches. The first comparison checks the constructed basis B and penalty S. Each branch then prepares its own fixed and random model inputs, X fixed and Z. The second comparison checks the complete model representations. The branches remain separate throughout preparation.</desc>
-<rect width="900" height="660" fill="white"/>
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#65798A"/></marker></defs>
-<g font-family="Arial, Helvetica, sans-serif" fill="#243746">
-<text x="450" y="38" font-size="24" font-weight="700" text-anchor="middle">Stage 1: prepare and compare</text>
-<g fill="none" stroke="#65798A" stroke-width="1.8">
-<path d="M 450 132 V 154 H 235 V 204" marker-end="url(#arrow)"/>
-<path d="M 450 154 H 665 V 204" marker-end="url(#arrow)"/>
-<path d="M 235 280 V 412" marker-end="url(#arrow)"/>
-<path d="M 665 280 V 412" marker-end="url(#arrow)"/>
-<path d="M 235 343 H 294" marker-end="url(#arrow)"/>
-<path d="M 665 343 H 606" marker-end="url(#arrow)"/>
-<path d="M 235 496 V 526 H 665 V 496"/>
-<path d="M 450 526 V 550" marker-end="url(#arrow)"/>
-</g>
-<circle cx="235" cy="343" r="3" fill="#65798A"/>
-<circle cx="665" cy="343" r="3" fill="#65798A"/>
-<rect x="220" y="66" width="460" height="66" rx="10" fill="#EEF4F9" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="450" y="93" font-size="20" text-anchor="middle">Same predictor values</text>
-<text x="450" y="119" font-size="20" text-anchor="middle">and spline settings</text>
-<rect x="60" y="210" width="350" height="70" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="235" y="238" font-size="20" text-anchor="middle">R / mgcv</text>
-<text x="235" y="265" font-size="20" text-anchor="middle">Construct B, S</text>
-<rect x="490" y="210" width="350" height="70" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="665" y="238" font-size="20" text-anchor="middle">Julia</text>
-<text x="665" y="265" font-size="20" text-anchor="middle">Construct B, S</text>
-<rect x="300" y="306" width="300" height="74" rx="10" fill="#EEF7F3" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="450" y="335" font-size="21" font-weight="700" text-anchor="middle">1. Basis construction</text>
-<text x="450" y="363" font-size="20" text-anchor="middle">Compare B and S</text>
-<rect x="60" y="418" width="350" height="78" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="235" y="448" font-size="20" text-anchor="middle">R: prepare model inputs</text>
-<text x="235" y="478" font-family="Times New Roman, serif" font-size="22" font-style="italic" text-anchor="middle">X<tspan baseline-shift="sub" font-size="14" font-style="normal">fixed</tspan><tspan baseline-shift="baseline" font-size="22">, Z</tspan></text>
-<rect x="490" y="418" width="350" height="78" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="665" y="448" font-size="20" text-anchor="middle">Julia: prepare model inputs</text>
-<text x="665" y="478" font-family="Times New Roman, serif" font-size="22" font-style="italic" text-anchor="middle">X<tspan baseline-shift="sub" font-size="14" font-style="normal">fixed</tspan><tspan baseline-shift="baseline" font-size="22">, Z</tspan></text>
-<rect x="210" y="556" width="480" height="80" rx="10" fill="#EEF7F3" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="450" y="586" font-size="21" font-weight="700" text-anchor="middle">2. Combined workflow</text>
-<text x="450" y="618" font-size="20" text-anchor="middle">Compare final model representations</text>
-</g>
-</svg>
+<desc id="desc">Independent R and Julia branches for stage 1: prepare and compare.</desc>
+<rect width="880" height="620" fill="white"/>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#687F90"/></marker></defs>
+<g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#243746" text-anchor="middle">
+<text x="440" y="35" font-size="23" font-weight="700">Stage 1: prepare and compare</text>
+<rect x="205" y="60" width="470" height="65" rx="9" fill="#EDF4F9" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="440.0" y="86.0">Same predictor values, responses</text>
+<text x="440.0" y="111.0">and per-predictor spline settings</text>
+<path d="M440 125V145H230V170" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M440 125V145H650V170" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="65" y="175" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="230.0" y="209.5">R / mgcv</text>
+<text x="230.0" y="234.5">Construct each Bⱼ and Sⱼ</text>
+<rect x="485" y="175" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="650.0" y="209.5">Julia / BSplineKit</text>
+<text x="650.0" y="234.5">Construct each Bⱼ and Sⱼ</text>
+<path d="M230 257V288" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M650 257V288" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="65" y="293" width="750" height="82" rx="9" fill="#ECF6F0" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="440" y="327">Compare each Bⱼ and Sⱼ</text>
+<text x="440" y="352">Basis construction checked before fixed/random preparation</text>
+<path d="M230 375V406" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M650 375V406" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="65" y="411" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="230.0" y="458.0">R: prepare Xfixed and Z₁, …, Zₘ</text>
+<rect x="485" y="411" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="650.0" y="458.0">Julia: prepare Xfixed and Z₁, …, Zₘ</text>
+<path d="M230 493V537H440V550" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M650 493V537H440V550" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="140" y="555" width="600" height="50" rx="9" fill="#ECF6F0" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="440.0" y="586.0">Compare fixed space and each component’s covariance factor</text>
+</g></svg>

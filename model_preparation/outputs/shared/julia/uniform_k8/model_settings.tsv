@@ -1,9 +1,5 @@
 key	value
-spline_type	bs
-degree	3
-penalty_derivative_order	2
+components	2
 observations	200
-penalty_rank	6
-random_covariance	r_squared * identity
+random_covariance	one r_j_squared * identity per component
 residual_covariance	sigma_squared * identity
-fitting_status	not fitted; lambda not estimated

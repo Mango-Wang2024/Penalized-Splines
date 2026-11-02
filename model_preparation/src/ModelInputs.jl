@@ -1,7 +1,7 @@
 module ModelInputs
 
 using LinearAlgebra
-export prepare_inputs, relative_error, space_projector
+export prepare_inputs, prepare_additive, prediction_inputs, relative_error, space_projector
 
 """Scaled numerical difference; the denominator has a floor of one."""
 relative_error(a, b) = norm(a - b) / max(1.0, norm(a), norm(b))
@@ -47,6 +47,44 @@ function prepare_inputs(B::AbstractMatrix, S::AbstractMatrix;
     return (; B=Bf, S=Sf, C, Z=transformed[:, 1:r],
              X0=transformed[:, r+1:end], penalty_rank=r,
              null_rank=p-r, eigenvalues=values, scales, rank_tolerance=tol)
+end
+
+"""Prepare any number of centered spline components and assemble their fixed columns."""
+function prepare_additive(bases;names=["x"*string(j) for j in eachindex(bases)],ordinary=nothing)
+    isempty(bases) && throw(ArgumentError("Supply at least one spline component"))
+    length(names)==length(bases) && length(unique(names))==length(names) || throw(ArgumentError("Use one distinct name per component"))
+    n=size(first(bases).B,1)
+    X=ordinary===nothing ? ones(n,1) : Matrix{Float64}(ordinary)
+    size(X,1)==n || throw(DimensionMismatch("Ordinary fixed columns must share observation rows"))
+    components=[prepare_inputs(b.B,b.S) for b in bases]
+    all(size(c.B,1)==n for c in components) || throw(DimensionMismatch("Spline components must share observation rows"))
+    offset=size(X,2)
+    fixed_ranges=UnitRange{Int}[]
+    for c in components
+        push!(fixed_ranges,(offset+1):(offset+size(c.X0,2)))
+        offset+=size(c.X0,2)
+    end
+    X_fixed=hcat(X,(c.X0 for c in components)...)
+    rank(X_fixed)==size(X_fixed,2) || throw(ArgumentError("Combined fixed columns must be linearly independent"))
+    return (;names=String.(names),components,X_fixed,Z_blocks=[c.Z for c in components],
+             fixed_ranges,ordinary_columns=size(X,2))
+end
+
+"""Evaluate training transformations at new points; do not recenter the new rows."""
+function prediction_inputs(bases,prepared,raw_matrices;ordinary=nothing)
+    length(raw_matrices)==length(bases)==length(prepared.components) || throw(DimensionMismatch("Component counts disagree"))
+    n=size(first(raw_matrices),1)
+    X=ordinary===nothing ? ones(n,prepared.ordinary_columns) : Matrix{Float64}(ordinary)
+    ordinary===nothing && prepared.ordinary_columns!=1 && throw(ArgumentError("Supply new ordinary fixed columns"))
+    size(X)==(n,prepared.ordinary_columns) || throw(DimensionMismatch("New ordinary fixed matrix has incorrect dimensions"))
+    Z_blocks=Matrix{Float64}[];unpenalized=Matrix{Float64}[]
+    for (basis,component,raw) in zip(bases,prepared.components,raw_matrices)
+        size(raw)==(n,size(basis.B_raw,2)) || throw(DimensionMismatch("New raw basis has incorrect dimensions"))
+        transformed=raw*basis.H*component.C
+        r=component.penalty_rank
+        push!(Z_blocks,transformed[:,1:r]);push!(unpenalized,transformed[:,r+1:end])
+    end
+    return (;X_fixed=hcat(X,unpenalized...),Z_blocks)
 end
 
 """Orthogonal projector onto the column space, including rank-deficient inputs."""

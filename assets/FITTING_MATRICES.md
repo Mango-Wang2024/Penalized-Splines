@@ -1,56 +1,51 @@
-# Matrices used for spline fitting
+# Matrices used for additive spline fitting
 
-Julia's `uniform_k8` example has 200 observations and eight raw basis functions. The panels show model inputs before REML fitting, in construction order.
+The main example has 200 observations and two spline components, each with eight raw basis functions. Columns from $x_1$ come first, followed by those from $x_2$; dashed lines mark their boundary. These are the actual saved Julia matrices.
 
-<a href="fitting_matrices.png"><img src="fitting_matrices.png" alt="Four matrix heatmaps in order: raw spline basis B_raw, centered basis B, penalized design Zf, and rotated penalized design Zr" width="800"></a>
+<a href="fitting_matrices.png"><img src="fitting_matrices.png" alt="Raw basis, centered basis, penalized design and rotated penalized design for two additive splines" width="800"></a>
 
-- **(a) $B_{\mathrm{raw}}$ (200 × 8):** raw B-spline values. Each column is one basis function evaluated at the observations.
-- **(b) $B$ (200 × 7):** the centered basis, $B=B_{\mathrm{raw}}H$. The centering transformation $H$ imposes a mean-zero constraint, separating the spline from the intercept.
-- **(c) $Z_f$ (200 × 6):** penalized directions of $B$, rescaled using the penalty matrix $S$. The remaining unpenalized direction forms $X_0$.
-- **(d) $Z_r$ (200 × 6):** the `ReMat` design after QR/SVD observation rotation $T$ and coefficient rotation $V$: $Z_r=T Z_f V$. Its six diagonal entries are singular values of $Z_f$. Only rows 1–10 are shown; rows 7–200 are zero. All observations remain in the model.
+- **(a) $B_{\mathrm{raw}}$ (200 × 16):** both raw bases side by side. Each entry is one basis function evaluated at that observation's predictor value.
+- **(b) $B$ (200 × 14):** the centered bases, $B_j=B_{\mathrm{raw},j}H_j$. Each spline's average level is separated from the overall intercept.
+- **(c) $Z_f=[Z_1,Z_2]$ (200 × 12):** penalized basis directions, rescaled using each penalty matrix. The two unpenalized directions are included in $X_f$.
+- **(d) $Z_r=[TZ_1V_1,TZ_2V_2]$ (200 × 12):** the adapted random-effect designs. Only rows 1–16 are shown; rows 13–200 are zero. All 200 observations remain in the model.
 
-Colour indicates each matrix entry: red is positive, blue is negative, and white is zero or near zero. Each panel has its own linear colour scale.
-
-The individual `Xf` and `Xr` plots below share the same nonlinear colour scale (`asinh(value / 0.01)`), with colourbar labels showing the original values. `loading` and the individual `Zr` plot share the same positive colour scale.
+Colour represents entry values: red is positive, blue is negative, and white is zero or near zero. Each panel has its own linear scale. Rows are ordered by $x_1$; $x_2$ remains independently ordered, explaining its less gradual colour pattern.
 
 ## Xf: fixed model parts before rotation
 
-<a href="xf_heatmap.png"><img src="xf_heatmap.png" alt="Fixed model parts before rotation" width="480"></a>
+<a href="xf_heatmap.png"><img src="xf_heatmap.png" alt="Combined fixed design before rotation" width="480"></a>
 
-`Xf` combines the ordinary fixed part $X$ and the unpenalized spline part $X_0$, giving 200 rows and two columns. In this example, $X$ is a column of ones, so its colour is uniform. $X_0$ is a centered straight trend, so its values change gradually across observations.
+$X_f=[X,X_{0,1},X_{0,2}]$ has 200 rows and three columns: the ordinary fixed part and one unpenalized spline trend for each predictor. Here $X$ is a column of ones. $X_f$ and $X_r$ share the same nonlinear colour scale, `asinh(value / 0.01)`, with labels showing original values.
 
 ## Xr: the same fixed parts after rotation
 
-<a href="xr_heatmap.png"><img src="xr_heatmap.png" alt="Fixed model parts after rotation" width="480"></a>
+<a href="xr_heatmap.png"><img src="xr_heatmap.png" alt="Combined fixed design after the common observation rotation" width="480"></a>
 
-The `rotate_inputs` helper derives an orthogonal row transformation $T$ from QR and SVD calculations on the prepared penalized design `Zf`, then computes $X_r = T X_f$. The columns retain their model roles, while each new row combines original observation rows. This changes the colour pattern.
+The adapter computes $X_r=TX_f$. Each new row is a weighted combination of original observation rows; columns keep their model roles. The same row transformation is applied to $y$ and every random-effect block. `hcat(y,Xf)` places columns side by side and transforms them independently.
 
-The response and random-effect design are transformed consistently to preserve the model. The response is rotated independently of the fixed-effect columns; placing them side by side with `hcat` does not mix them.
+## Zf: penalized spline parts before rotation
 
-## Zf: penalized spline part before rotation
+<a href="zf_heatmap.png"><img src="zf_heatmap.png" alt="Penalized designs of both spline components" width="480"></a>
 
-<a href="zf_heatmap.png"><img src="zf_heatmap.png" alt="Penalized spline design Zf" width="480"></a>
+Each six-column block is $Z_j=B_jU_{+,j}D_{+,j}^{-1/2}$. Its columns describe penalized shapes for that predictor. The two blocks remain separate in the model, so each can have its own smoothing strength.
 
-`Zf` is the prepared matrix $Z$, with 200 rows and six columns. Each column contains one penalized basis function's values at the observations. It is obtained from the centered basis $B$ using the positive-eigenvalue directions of the penalty matrix $S$, with rescaling. The smooth colour bands reflect basis functions evaluated at ordered predictor values.
+## Zr: penalized spline parts after rotation
 
-## Zr: penalized spline part after rotation
+<a href="zr_heatmap.png"><img src="zr_heatmap.png" alt="Rotated random-effect designs, first sixteen rows" width="480"></a>
 
-<a href="zr_heatmap.png"><img src="zr_heatmap.png" alt="Rotated penalized spline design Zr, rows 1-10" width="480"></a>
+A common row rotation $T$ and separate coefficient rotations $V_j$ produce $Z_{r,j}=TZ_jV_j$. With multiple spline components, the upper block is generally dense. Coefficient directions are rotated only within their own component, preserving its variance $r_j^2I$.
 
-`Zr` denotes the 200 × 6 random-effect design stored in MixedModels' `ReMat`. The observation rotation $T$ and the SVD coefficient rotation $V$ give:
+## loading: relative covariance factor after fitting
+
+<a href="loading_heatmap.png"><img src="loading_heatmap.png" alt="Block diagonal relative covariance factor with one shared value per component" width="480"></a>
+
+Here the loading plot shows the fitted relative covariance factor:
 
 ```math
-Z_r = T Z_f V = \begin{bmatrix} \mathrm{diag}(d_1,\ldots,d_6) \\ 0_{194\times6} \end{bmatrix}.
+\Lambda=\operatorname{blockdiag}(\theta_1I_6,\theta_2I_6),
+\qquad\theta_j=r_j/\sigma.
 ```
 
-The six diagonal values are the singular values used in `loading`. The heatmap shows rows 1–10 so the diagonal is visible; rows 7–200 are all zero. Each nonzero entry connects one rotated observation coordinate to one rotated spline coefficient.
+Each diagonal block repeats one component's fitted scale; off-diagonal entries are zero. This replaces the old single-component row-loading illustration. Unlike the preceding design matrices, $\Lambda$ is obtained after REML fitting. It contains variance scales, not penalty eigenvalues or design singular values.
 
-## loading: values used to package the random-effect design
-
-<a href="loading_heatmap.png"><img src="loading_heatmap.png" alt="Loading vector, rows 1-10" width="480"></a>
-
-`build_model_terms` creates the table's `loading` column as `row_loadings`: six singular values followed by 194 zeros. The nonzero values form the diagonal of the transformed random-effect design. The figure shows the first ten entries. All 200 observations remain in the fit. The returned `prepared.loading` stores only the six singular values.
-
-These are singular values of the design matrix `Zf`, distinct from the eigenvalues of the penalty matrix $S$.
-
-**Sources:** [shared observations and knots](../data/inputs/uniform_k8/), [BSplineKit-based construction](../spline_basis/src/BSpline.jl#L69), [spline input preparation](../model_preparation/src/ModelInputs.jl#L20), [input rotation](../spline_fitting/src/SplineFit.jl#L42), and [model terms and loading](../spline_fitting/src/SplineFit.jl#L54). The [derivation](../DERIVATION.md) explains the basis and penalty transformations. Related discussion: [adapter review #1](https://github.com/Mango-Wang2024/Penalized-Splines/issues/1).
+**Sources:** [shared observations and settings](../data/inputs/uniform_k8/), [BSplineKit construction](../spline_basis/src/BSpline.jl), [component preparation](../model_preparation/src/ModelInputs.jl), [input rotation and restoration](../spline_fitting/src/SplineFit.jl), [shared variance storage](../spline_fitting/src/SharedVariance.jl), and the [plot generator](plot_matrices.R). The [derivation](../DERIVATION.md) explains the transformations.

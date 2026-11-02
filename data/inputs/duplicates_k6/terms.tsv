@@ -1,0 +1,3 @@
+predictor	k	knot_mode
+x1	6	explicit
+x2	8	explicit

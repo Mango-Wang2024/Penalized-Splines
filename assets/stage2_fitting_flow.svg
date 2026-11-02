@@ -1,59 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="870" viewBox="0 0 900 870" role="img" aria-labelledby="title desc">
-<title id="title">Stage 2: prepare, fit and compare</title>
-<desc id="desc">The same saved observations and spline settings enter separate R and Julia branches. Each repeats Stage 1 preparation and fits with REML. Each fitted model provides fixed coefficients b, penalized coefficients tau, noise variance sigma squared and shared spline variance r squared. These give smoothing strength lambda and fitted responses y-hat, shown in the main comparison. Variance estimates are retained as supporting checks.</desc>
-<rect width="900" height="870" fill="white"/>
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#65798A"/></marker></defs>
-<g font-family="Arial, Helvetica, sans-serif" fill="#243746">
-<text x="450" y="38" font-size="24" font-weight="700" text-anchor="middle">Stage 2: prepare, fit and compare</text>
-<rect x="18" y="178" width="864" height="242" rx="14" fill="#FAFCFD" stroke="#E2E8ED"/>
-<rect x="18" y="448" width="864" height="266" rx="14" fill="#FAFCFD" stroke="#E2E8ED"/>
-<text x="450" y="207" font-size="22" font-weight="700" text-anchor="middle">Stage 1 preparation (reused)</text>
-<text x="450" y="480" font-size="22" font-weight="700" text-anchor="middle">Stage 2: REML fitting</text>
-<path d="M 450 132 V 154 H 235" fill="none" stroke="#65798A" stroke-width="1.8"/>
-<path d="M 450 154 H 665" fill="none" stroke="#65798A" stroke-width="1.8"/>
-<path d="M 235 154 V 230" fill="none" stroke="#65798A" stroke-width="1.8" marker-end="url(#arrow)"/>
-<path d="M 235 294 V 324" fill="none" stroke="#65798A" stroke-width="1.8" marker-end="url(#arrow)"/>
-<path d="M 235 406 V 498" fill="none" stroke="#65798A" stroke-width="1.8" marker-end="url(#arrow)"/>
-<path d="M 235 576 V 602" fill="none" stroke="#65798A" stroke-width="1.8" marker-end="url(#arrow)"/>
-<path d="M 665 154 V 230" fill="none" stroke="#65798A" stroke-width="1.8" marker-end="url(#arrow)"/>
-<path d="M 665 294 V 324" fill="none" stroke="#65798A" stroke-width="1.8" marker-end="url(#arrow)"/>
-<path d="M 665 406 V 498" fill="none" stroke="#65798A" stroke-width="1.8" marker-end="url(#arrow)"/>
-<path d="M 665 576 V 602" fill="none" stroke="#65798A" stroke-width="1.8" marker-end="url(#arrow)"/>
-<path d="M 235 694 V 736 H 665 V 694" fill="none" stroke="#65798A" stroke-width="1.8"/>
-<path d="M 450 736 V 750" fill="none" stroke="#65798A" stroke-width="1.8" marker-end="url(#arrow)"/>
-<rect x="220" y="66" width="460" height="66" rx="10" fill="#EEF4F9" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="450" y="93" font-size="20" font-weight="400" text-anchor="middle">Same saved observations</text>
-<text x="450" y="119" font-size="20" font-weight="400" text-anchor="middle">and spline settings</text>
-<rect x="60" y="236" width="350" height="58" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="235" y="272" font-size="20" font-weight="400" text-anchor="middle">R / mgcv preparation</text>
-<rect x="490" y="236" width="350" height="58" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="665" y="272" font-size="20" font-weight="400" text-anchor="middle">Julia Stage 1 preparation</text>
-<rect x="60" y="330" width="350" height="76" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="235" y="358" font-size="20" font-weight="400" text-anchor="middle">R model inputs</text>
-<text x="235" y="389" font-family="Times New Roman, serif" font-style="italic" font-size="22" text-anchor="middle">y, X<tspan baseline-shift="sub" font-size="14" font-style="normal">fixed</tspan><tspan baseline-shift="baseline" font-size="22">, Z</tspan></text>
-<rect x="490" y="330" width="350" height="76" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="665" y="358" font-size="20" font-weight="400" text-anchor="middle">Julia model inputs</text>
-<text x="665" y="389" font-family="Times New Roman, serif" font-style="italic" font-size="22" text-anchor="middle">y, X<tspan baseline-shift="sub" font-size="14" font-style="normal">fixed</tspan><tspan baseline-shift="baseline" font-size="22">, Z</tspan></text>
-<rect x="60" y="504" width="350" height="72" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="235" y="533" font-size="20" font-weight="400" text-anchor="middle">R: nlme::lme</text>
-<text x="235" y="559" font-size="18" font-weight="400" text-anchor="middle">REML fitting</text>
-<rect x="490" y="504" width="350" height="72" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="665" y="533" font-size="20" font-weight="400" text-anchor="middle">Julia: MixedModels</text>
-<text x="665" y="559" font-size="18" font-weight="400" text-anchor="middle">Adapter + REML fitting</text>
-<rect x="60" y="608" width="350" height="86" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="235" y="632" font-size="20" text-anchor="middle">R fitted model</text>
-<text x="235" y="659" font-size="18" text-anchor="middle">Coefficients:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">b, τ</tspan></text>
-<text x="235" y="684" font-size="18" text-anchor="middle">Variances:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">σ², r²</tspan></text>
-<rect x="490" y="608" width="350" height="86" rx="10" fill="#FFFFFF" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="665" y="632" font-size="20" text-anchor="middle">Julia fitted model</text>
-<text x="665" y="659" font-size="18" text-anchor="middle">Coefficients:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">b, τ</tspan></text>
-<text x="665" y="684" font-size="18" text-anchor="middle">Variances:<tspan dx="6" font-family="Times New Roman, serif" font-style="italic" font-size="22">σ², r²</tspan></text>
-<rect x="210" y="756" width="480" height="88" rx="10" fill="#EEF7F3" stroke="#C8D3DC" stroke-width="1.4"/>
-<text x="450" y="787" font-size="21" font-weight="700" text-anchor="middle">Compare smoothing and fitted responses</text>
-<g font-family="Times New Roman, serif" fill="#243746">
-<text x="410" y="822" font-style="italic" font-size="25" text-anchor="middle">λ</text>
-<text x="490" y="822" font-style="italic" font-size="25" text-anchor="middle">y</text>
-<path d="M 486 798 L 490 794 L 494 798" stroke="#243746" stroke-width="1.3" fill="none"/>
-<text x="450" y="822" font-size="23" text-anchor="middle">and</text>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="620" viewBox="0 0 880 620" role="img" aria-labelledby="title desc">
+<title id="title">Stage 2: fit and compare</title>
+<desc id="desc">Independent R and Julia branches for stage 2: fit and compare.</desc>
+<rect width="880" height="620" fill="white"/>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#687F90"/></marker></defs>
+<g font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#243746" text-anchor="middle">
+<text x="440" y="35" font-size="23" font-weight="700">Stage 2: fit and compare</text>
+<rect x="205" y="60" width="470" height="65" rx="9" fill="#EDF4F9" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="440.0" y="86.0">Same predictor values, responses</text>
+<text x="440.0" y="111.0">and per-predictor spline settings</text>
+<path d="M440 125V145H230V170" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M440 125V145H650V170" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="65" y="175" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="230.0" y="209.5">R: repeat Stage 1</text>
+<text x="230.0" y="234.5">Prepare Xfixed and Z₁, …, Zₘ</text>
+<rect x="485" y="175" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="650.0" y="209.5">Julia: repeat Stage 1</text>
+<text x="650.0" y="234.5">Prepare Xfixed and Z₁, …, Zₘ</text>
+<path d="M230 257V288" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M650 257V288" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="65" y="293" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="230.0" y="327.5">R / nlme</text>
+<text x="230.0" y="352.5">Joint REML fit</text>
+<rect x="485" y="293" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="650.0" y="327.5">Julia / MixedModels</text>
+<text x="650.0" y="352.5">Adapt inputs → joint REML fit</text>
+<path d="M230 375V406" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M650 375V406" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="65" y="411" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="230.0" y="445.5">Coefficients: b, τ₁, …, τₘ</text>
+<text x="230.0" y="470.5">Variances: σ², r₁², …, rₘ²</text>
+<rect x="485" y="411" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="650.0" y="445.5">Coefficients: b, τ₁, …, τₘ</text>
+<text x="650.0" y="470.5">Variances: σ², r₁², …, rₘ²</text>
+<path d="M230 493V537H440V550" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M650 493V537H440V550" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="140" y="555" width="600" height="50" rx="9" fill="#ECF6F0" stroke="#CAD5DE" stroke-width="1.4"/>
+<text x="440.0" y="586.0">Compare each λⱼ and the resulting fitted responses</text>
 </g></svg>

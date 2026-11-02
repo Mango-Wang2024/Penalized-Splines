@@ -1,8 +1,6 @@
-# Keep generated output local, except the published evidence listed below.
+# Generated outputs remain local, except the evidence linked by the reports.
 **/outputs/**
 !**/outputs/**/
-
-# Evidence linked from README.md and STAGE1_RESULTS.md.
 !spline_basis/outputs/shared/julia/checks.tsv
 !spline_basis/outputs/shared/julia/versions.tsv
 !model_preparation/outputs/shared/r_reference/lme_inputs/reference_checks.csv
@@ -10,19 +8,27 @@
 !model_preparation/outputs/shared/julia/checks.tsv
 !model_preparation/outputs/shared/julia/uniform_k8/*.csv
 !model_preparation/outputs/shared/julia/uniform_k8/model_settings.tsv
+!model_preparation/outputs/shared/julia/uniform_k8/terms.tsv
+!model_preparation/outputs/shared/julia/uniform_k8/*/*.csv
 
-# Stage 2 fitting evidence; serialized R models and other arrays stay local.
+# Fitting evidence; serialized models and other dense arrays stay local.
 !spline_fitting/outputs/shared/unit_tests.txt
 !spline_fitting/outputs/shared/comparison/*.tsv
-!spline_fitting/outputs/shared/comparison/fitted_curves.png
+!spline_fitting/outputs/shared/comparison/fitted_surfaces.png
+!spline_fitting/outputs/shared/comparison/component_curves.png
 !spline_fitting/outputs/shared/r_reference/fit_summary.tsv
+!spline_fitting/outputs/shared/r_reference/component_estimates.tsv
 !spline_fitting/outputs/shared/r_reference/source_checksums.tsv
 !spline_fitting/outputs/shared/r_reference/versions.tsv
 !spline_fitting/outputs/shared/julia/fit_summary.tsv
+!spline_fitting/outputs/shared/julia/component_estimates.tsv
 !spline_fitting/outputs/shared/julia/versions.tsv
 !spline_fitting/outputs/shared/r_reference/*/fitted.csv
-!spline_fitting/outputs/shared/r_reference/*/knots.csv
+!spline_fitting/outputs/shared/r_reference/*/components.csv
+!spline_fitting/outputs/shared/r_reference/*/grid.csv
+!spline_fitting/outputs/shared/r_reference/*/*/knots.csv
 !spline_fitting/outputs/shared/julia/*/fitted.csv
-!spline_fitting/outputs/shared/julia/*/knots.csv
-
+!spline_fitting/outputs/shared/julia/*/components.csv
+!spline_fitting/outputs/shared/julia/*/grid.csv
+!spline_fitting/outputs/shared/julia/*/*/knots.csv
 .DS_Store

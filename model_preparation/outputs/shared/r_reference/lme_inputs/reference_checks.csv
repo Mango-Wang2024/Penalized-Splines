@@ -1,8 +1,11 @@
-"check","relative_error","passed"
-"wrapper predictions vs normal gamm",0,TRUE
-"wrapper smoothing vs normal gamm",0,TRUE
-"response passed to lme",0,TRUE
-"curve identity",0,TRUE
-"normalized penalty",2.57070345155532e-15,TRUE
-"fixed space: smooth2random vs actual lme",0,TRUE
-"random covariance: smooth2random vs actual lme",0,TRUE
+"component","check","relative_error","passed"
+"all","wrapped vs normal predictions",0,TRUE
+"all","wrapped vs normal smoothing",0,TRUE
+"all","original response passed to lme",0,TRUE
+"x1","curve identity",0,TRUE
+"x1","normalized penalty",2.57070345155532e-15,TRUE
+"x1","random covariance passed to lme",0,TRUE
+"x2","curve identity",0,TRUE
+"x2","normalized penalty",2.588530051323e-15,TRUE
+"x2","random covariance passed to lme",0,TRUE
+"all","combined fixed space passed to lme",0,TRUE

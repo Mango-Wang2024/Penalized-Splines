@@ -1,39 +1,42 @@
 # Data and test cases
 
-[Project overview](README.md) · [Results by case](STAGE1_RESULTS.md)
+[Project overview](README.md) · [Stage 1 results](STAGE1_RESULTS.md) · [Stage 2 results](STAGE2_RESULTS.md)
 
-We use simulated observations generated once in Julia. R and Julia read the same saved values, so the comparisons share their data. The random seed is 42.
+Julia generates the observations once; both languages read the same saved values. The example has **200 observations, two predictors and one response**:
 
-## Observations
+```math
+\begin{aligned}
+f_1(x_1)&=\sin(1.7x_1)+0.15x_1,\\
+f_2(x_2)&=0.5\cos(1.2x_2),\\
+y&=f_1(x_1)+f_2(x_2)+\varepsilon,
+\qquad\varepsilon\sim N(0,0.35^2).
+\end{aligned}
+```
 
-Every case has 200 observations. The main dataset contains 198 randomly distributed predictor values between −2 and 2, plus the two endpoints. Each observation has:
+The predictors are generated independently between −2 and 2. $x_1$ is sorted and includes both endpoints; $x_2$ retains its independent row order. Each row pairs its own $x_1,x_2,y$. Seeds are 42 for $x_1$, 43 for $x_2$, and 44 for noise.
 
-- **`x`:** the predictor value $x$.
-- **`truth`:** the known curve, $f(x)=\sin(1.7x)+0.15x$.
-- **`y`:** the observed response $y=f(x)+\varepsilon$, with normally distributed noise of standard deviation 0.35.
+`data.csv` contains `x1`, `x2`, `y`, the two known component values, and their sum `truth`. Only predictor values and noisy responses are used for fitting. Known curves are retained to interpret the simulation.
 
-The basis depends on predictor values and spline settings. Stage 2 fits the observed responses $y$; the known curve helps interpret the simulation and is not supplied to the fitter.
+## Five cases
 
-## Five test cases
+Each predictor has its own settings. $k_j$ is its raw basis size; a full cubic knot vector has $k_j+4$ entries.
 
-The case names identify different data or spline settings. $k$ is the number of raw basis functions; a full cubic knot vector has $k+4$ entries.
+| Case | $k_1$ | $k_2$ | Purpose |
+| --- | ---: | ---: | --- |
+| `uniform_k8` | 8 | 8 | Main example; explicitly supplied uniform knots |
+| `default_k8` | 8 | 8 | Each language independently calculates the default knots |
+| `uneven_k10` | 10 | 6 | Uneven knots for $x_1$; different basis sizes across components |
+| `duplicates_k6` | 6 | 8 | Repeated $x_1$ values: 40 distinct values, each repeated five times |
+| `small_k5` | 5 | 5 | Smaller bases for both components |
 
-| Case | $k$ | Full knot entries | Purpose |
-| --- | --- | --- | --- |
-| `uniform_k8` | 8 | 12 | Main case with an explicitly supplied uniform knot vector |
-| `default_k8` | 8 | 12 | Check that R and Julia independently obtain the same default knots |
-| `uneven_k10` | 10 | 14 | Check uneven knot spacing and a larger basis |
-| `duplicates_k6` | 6 | 10 | Check repeated predictor values: 40 distinct values, each repeated five times |
-| `small_k5` | 5 | 9 | Check a smaller basis |
+Four cases share the same observations. The repeated-value case changes $x_1$ and the corresponding response, while retaining $x_2$ and the same noise realization. Explicit and default uniform cases obtain the same knots through different paths.
 
-Four cases share exactly the same observations. `duplicates_k6` has its own predictor values and noisy responses. The explicit and default eight-function cases use the same knot vector but obtain it differently, allowing that step to be checked independently.
+## Saved information
 
-Each case also has 61 evaluation points from −2.7 to 2.7 for checking basis values within and beyond the training range.
+[Each case](data/inputs/) contains its observations, a `terms.tsv` list of predictors and spline settings, and separate knot and evaluation files for each predictor. The term list lets preparation and fitting accept a variable number of predictors without changing their functions.
 
-## Connection to the results
+Each predictor also has 61 evaluation points from −2.7 to 2.7 for basis and extrapolation checks. A shared 31 × 31 grid within the training ranges supplies 961 predictor pairs for comparing fitted response surfaces. This grid is used after fitting and does not train the model.
 
-Basis construction has **13 comparisons per case**, giving 65 across five cases. The combined workflow has **7 comparisons per case**, giving 35, and includes the required fixed/random preparation. The main `uniform_k8` case also provides the captured R fitting inputs.
+Stage 1 has 13 basis comparisons per component and case: **130 in total**. Complete preparation has one joint fixed-space check and six checks per component: **65 in total**. The main case also captures the actual R fitting inputs. Stage 2 fits all five cases jointly and compares both smoothing strengths and the resulting responses.
 
-Stage 2 reuses these same five cases and observed responses. Each fit estimates smoothing through REML; the [fitting results](STAGE2_RESULTS.md) compare R and Julia without changing the data or knots.
-
-Saved observations, knots and evaluation points are under [data/inputs](data/inputs). Sources: the [Julia data definition](data/generate.jl), [recorded case settings](data/inputs/cases.tsv), and [cubic B-spline dimensions](https://stat.ethz.ch/R-manual/R-devel/library/splines/html/splineDesign.html).
+Sources: [Julia data definition](data/generate.jl), [saved case list](data/inputs/cases.tsv), and [cubic B-spline dimensions](https://stat.ethz.ch/R-manual/R-devel/library/splines/html/splineDesign.html).

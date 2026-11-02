@@ -1,38 +1,44 @@
 # Stage 2 results
 
-Both branches repeat Stage 1 preparation from the same saved data, then fit with **REML**. R uses `mgcv::gamm` with `nlme::lme`; Julia uses prepared `FeTerm` and `ReMat` inputs with `MixedModels.LinearMixedModel`.
+R and Julia independently prepare and fit the same additive model. R uses `mgcv::gamm` / `nlme::lme`; Julia uses `MixedModels.jl`. REML jointly estimates a separate spline variance for each predictor and one common noise variance.
 
-**50/50 reference comparisons passed across five cases.** No smoothing parameter is fixed before fitting.
+**90/90 comparisons passed across 5 cases.** Spline-component counts: 2.
 
-## Estimated smoothing and fitted curves
+## Smoothing estimates
 
-Each fit estimates $\sigma^2$ and $r^2$; $\lambda=\sigma^2/r^2$ is derived from the same fit. Parameter symbols follow the derivation and denote fitted estimates here.
+Each component has its own $\lambda_j=\sigma^2/r_j^2$. The table compares these smoothing strengths; the variance values and their errors are retained in the detailed estimates.
 
-The table compares smoothing strength $\lambda$ and all 200 fitted responses, $\hat y_R$ and $\hat y_{\mathrm{Julia}}$, in their original observation order. Matching $\lambda$ checks smoothing; matching $\hat y$ checks the resulting curve. Acceptance thresholds are $10^{-5}$ for the relative error in $\lambda$ and $10^{-6}$ for the scaled fitted-response error, as defined in VALIDATION.md.
+| Case | Component | R $\lambda_j$ | Julia $\lambda_j$ | Relative error |
+| --- | --- | ---: | ---: | ---: |
+| `uniform_k8` | $x_1$ | 0.56176456 | 0.56176461 | 9.21e-08 |
+| `uniform_k8` | $x_2$ | 5.4194393 | 5.4194392 | 1.80e-08 |
+| `default_k8` | $x_1$ | 0.56176456 | 0.56176461 | 9.22e-08 |
+| `default_k8` | $x_2$ | 5.4194393 | 5.4194392 | 1.81e-08 |
+| `uneven_k10` | $x_1$ | 4.1679192 | 4.167919 | 3.98e-08 |
+| `uneven_k10` | $x_2$ | 0.83912958 | 0.83912974 | 1.91e-07 |
+| `duplicates_k6` | $x_1$ | 0.079999323 | 0.079999328 | 6.02e-08 |
+| `duplicates_k6` | $x_2$ | 5.2855236 | 5.2855236 | 5.04e-09 |
+| `small_k5` | $x_1$ | 0.0085183673 | 0.008518378 | 1.26e-06 |
+| `small_k5` | $x_2$ | 0.20653478 | 0.2065351 | 1.53e-06 |
 
-| Case | R $\lambda$ | Julia $\lambda$ | $\lambda$ relative error | Fitted-response scaled error |
-| --- | ---: | ---: | ---: | ---: |
-| `uniform_k8` | 0.60963055 | 0.609630636 | 1.40e-07 | 1.46e-09 |
-| `default_k8` | 0.609630551 | 0.609630636 | 1.40e-07 | 1.46e-09 |
-| `uneven_k10` | 4.42327209 | 4.42327177 | 7.02e-08 | 8.90e-10 |
-| `duplicates_k6` | 0.0534448003 | 0.053444802 | 3.21e-08 | 1.59e-10 |
-| `small_k5` | 0.00962105738 | 0.00962105268 | 4.89e-07 | 3.42e-09 |
+Largest scaled difference in training fitted responses: **1.70e-08**; on the shared evaluation grid: **1.93e-08**.
 
-![R and Julia fitted curves](spline_fitting/outputs/shared/comparison/fitted_curves.png)
+## Joint response and individual components
 
-Gray points are the observed $y$ values supplied to both fitters; the dotted curve is the known simulation curve. The blue R and orange Julia curves show their fitted responses $\hat y$ and nearly coincide.
+<a href="spline_fitting/outputs/shared/comparison/fitted_surfaces.png"><img src="spline_fitting/outputs/shared/comparison/fitted_surfaces.png" alt="Known, R and Julia response surfaces and their difference" width="800"></a>
+
+The first three panels share the same response scale. The fourth isolates the small R/Julia difference on the same grid. The known surface is a simulation reference; only the noisy observations are used for fitting.
+
+<a href="spline_fitting/outputs/shared/comparison/component_curves.png"><img src="spline_fitting/outputs/shared/comparison/component_curves.png" alt="Centered additive spline components" width="800"></a>
+
+Each panel isolates one spline contribution. Known components are centered over the training observations to match the fitted smooths; their removed average levels belong to the overall intercept.
 
 ## Supporting checks
 
-The [detailed estimates](spline_fitting/outputs/shared/comparison/estimates.tsv) retain $\sigma^2$ and $r^2$ for every case. These check the variance scale, which is not determined by their ratio alone.
-Their largest relative error is **4.82e-07**, below the $10^{-5}$ threshold.
+[Individual comparisons](spline_fitting/outputs/shared/comparison/checks.tsv) and [detailed estimates](spline_fitting/outputs/shared/comparison/estimates.tsv) record all cases. The acceptance criteria are defined in [VALIDATION.md](VALIDATION.md).
 
-Independent Julia tests check that the input adapter preserves the covariance model, REML objective and fitted coefficients. They also check invariance to rotated spline directions, the zero-variance boundary and invalid inputs.
+[Julia unit tests](spline_fitting/outputs/shared/unit_tests.txt) independently check covariance, the REML objective, coefficients and restoration of observation coordinates for 1, 2, 3 and 10 components, including unequal block sizes and the zero-variance boundary.
 
-[Detailed comparisons](spline_fitting/outputs/shared/comparison/checks.tsv); [Julia test log](spline_fitting/outputs/shared/unit_tests.txt). [R fitting status](spline_fitting/outputs/shared/r_reference/fit_summary.tsv) and [Julia fitting status](spline_fitting/outputs/shared/julia/fit_summary.tsv) record the individual fits.
+[R fitting status](spline_fitting/outputs/shared/r_reference/fit_summary.tsv); [Julia fitting status](spline_fitting/outputs/shared/julia/fit_summary.tsv); [source fingerprints](spline_fitting/outputs/shared/r_reference/source_checksums.tsv).
 
-## Reproducibility
-
-Versions: R version 4.6.1 (2026-06-24); mgcv 1.9.4; nlme 3.1.169; Julia 1.13.1; MixedModels 5.9.0; StatsModels 0.7.10; BSplineKit 0.19.3.
-
-The same saved observations and five knot settings are reused from Stage 1. [Input fingerprints](spline_fitting/outputs/shared/r_reference/source_checksums.tsv) confirm the R source files; both languages' saved predictor, response and knot values are compared directly. Both stages share the dependency versions pinned in the root `Manifest.toml`.
+Both languages use the same saved observations, per-predictor settings and evaluation grid. Package versions are recorded in each branch's `versions.tsv`; Julia dependencies are pinned by the root `Manifest.toml`.

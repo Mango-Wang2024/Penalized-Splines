@@ -1,60 +1,45 @@
 #!/usr/bin/env Rscript
-# Independently construct reference matrices from Julia's saved predictor values.
 run <- function() {
-  if (!requireNamespace("mgcv",quietly=TRUE)) stop("Install mgcv before running this script")
   suppressPackageStartupMessages(library(mgcv))
   file_arg <- grep("^--file=",commandArgs(),value=TRUE)
-  script_path <- gsub("~+~"," ",sub("^--file=","",file_arg),fixed=TRUE)
-  root <- dirname(dirname(normalizePath(script_path)))
+  script <- gsub("~+~"," ",sub("^--file=","",file_arg),fixed=TRUE)
+  root <- dirname(dirname(normalizePath(script)));project <- dirname(root)
+  source(file.path(project,"data","shared.R"))
   args <- commandArgs(trailingOnly=TRUE)
-  inputs <- if(length(args)>=1L)args[1] else file.path(dirname(root),"data","inputs")
+  inputs <- if(length(args)>=1L)args[1] else file.path(project,"data","inputs")
   out <- if(length(args)>=2L)args[2] else file.path(root,"outputs","shared","r_reference")
-  if(dir.exists(out)&&length(list.files(out,all.files=TRUE,no..=TRUE))) stop("Reference directory is not empty; choose a new run directory")
-  cases <- read.delim(file.path(inputs,"cases.tsv"),stringsAsFactors=FALSE)
-  source_checksums <- data.frame(case=character(),data_md5=character(),knots_md5=character())
-  dir.create(out,recursive=TRUE,showWarnings=FALSE)
-  save_matrix <- function(M,name,dir) {
-    M <- as.matrix(M)
-    # Preserve enough decimal digits for a Float64 round trip.
-    strings <- matrix(sprintf("%.17g",as.numeric(M)),nrow(M),ncol(M))
-    write.table(strings,file.path(dir,paste0(name,".csv")),sep=",",quote=FALSE,row.names=FALSE,col.names=FALSE)
+  if(dir.exists(out)&&length(list.files(out,all.files=TRUE,no..=TRUE)))stop("Output directory is not empty")
+  dir.create(out,recursive=TRUE)
+  checksums <- list();index <- 0L
+  for(name in read.delim(file.path(inputs,"cases.tsv"))$case) {
+    case <- load_case(inputs,name)
+    dst <- file.path(out,name);dir.create(dst)
+    write.table(case$terms,file.path(dst,"terms.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
+    for(j in seq_len(nrow(case$terms))) {
+      key <- case$terms$predictor[j];k <- case$terms$k[j]
+      path <- file.path(dst,key);dir.create(path)
+      spec <- eval(parse(text=sprintf("s(%s,k=%d,bs='bs',m=c(3,2))",key,k)))
+      supplied <- if(case$terms$knot_mode[j]=="default")NULL else case$knots[key]
+      raw <- smoothCon(spec,case$data,knots=supplied,absorb.cons=FALSE,scale.penalty=FALSE,diagonal.penalty=FALSE,sparse.cons=0)[[1]]
+      scaled <- smoothCon(spec,case$data,knots=supplied,absorb.cons=FALSE,scale.penalty=TRUE,diagonal.penalty=FALSE,sparse.cons=0)[[1]]
+      prepared <- smoothCon(spec,case$data,knots=supplied,absorb.cons=TRUE,scale.penalty=TRUE,diagonal.penalty=FALSE,sparse.cons=0)[[1]]
+      qrc <- attr(prepared,"qrc")
+      stopifnot(inherits(qrc,"qr"),attr(prepared,"nCons")==1L)
+      H <- qr.Q(qrc,complete=TRUE)[,-1,drop=FALSE]
+      xe <- scan(file.path(case$path,paste0("evaluation_",key,".csv")),quiet=TRUE)
+      new <- setNames(data.frame(xe),key)
+      matrices <- list(knots=matrix(raw$knots,ncol=1),D2=splines::splineDesign(raw$knots,case$data[[key]],ord=4,derivs=2),
+        B_raw=raw$X,S_raw=raw$S[[1]],constraint=t(raw$C),penalty_scale=matrix(scaled$S.scale[1],1,1),
+        S_scaled=scaled$S[[1]],H=H,B=prepared$X,S=prepared$S[[1]],B_eval_raw=PredictMat(raw,new),B_eval=PredictMat(prepared,new))
+      for(nm in names(matrices))save_matrix(matrices[[nm]],nm,path)
+      saveRDS(list(raw=raw,scaled=scaled,prepared=prepared),file.path(path,"objects.rds"))
+      index <- index+1L
+      checksums[[index]] <- data.frame(case=name,component=key,data_md5=unname(tools::md5sum(file.path(case$path,"data.csv"))),
+        knots_md5=unname(tools::md5sum(file.path(case$path,paste0("knots_",key,".csv")))))
+      cat("R basis:",name,key,"\n")
+    }
   }
-  for(i in seq_len(nrow(cases))) {
-    name <- cases$case[i];k <- cases$k[i]
-    p <- file.path(inputs,name);dst <- file.path(out,name)
-    dir.create(dst,showWarnings=FALSE)
-    dat <- read.csv(file.path(p,"data.csv"))
-    source_checksums <- rbind(source_checksums,data.frame(case=name,
-      data_md5=unname(tools::md5sum(file.path(p,"data.csv"))),
-      knots_md5=unname(tools::md5sum(file.path(p,"knots.csv")))))
-    t <- scan(file.path(p,"knots.csv"),quiet=TRUE)
-    xe <- scan(file.path(p,"evaluation_x.csv"),quiet=TRUE)
-    supplied <- if(cases$knot_mode[i]=="default")NULL else list(x=t)
-    spec <- s(x,k=k,bs="bs",m=c(3,2))
-    raw <- smoothCon(spec,dat,knots=supplied,absorb.cons=FALSE,scale.penalty=FALSE,
-                     diagonal.penalty=FALSE,sparse.cons=0)[[1]]
-    scaled <- smoothCon(spec,dat,knots=supplied,absorb.cons=FALSE,scale.penalty=TRUE,
-                        diagonal.penalty=FALSE,sparse.cons=0)[[1]]
-    prepared <- smoothCon(spec,dat,knots=supplied,absorb.cons=TRUE,scale.penalty=TRUE,
-                          diagonal.penalty=FALSE,sparse.cons=0)[[1]]
-    qrc <- attr(prepared,"qrc")
-    if(!inherits(qrc,"qr")||nrow(qrc$qr)!=k||attr(prepared,"nCons")!=1L)
-      stop("This example requires one full centering constraint")
-    H <- qr.Q(qrc,complete=TRUE)[,-1,drop=FALSE]
-    matrices <- list(knots=matrix(raw$knots,ncol=1),D2=splines::splineDesign(raw$knots,dat$x,ord=4,derivs=2),
-      B_raw=raw$X,S_raw=raw$S[[1]],constraint=t(raw$C),
-      penalty_scale=matrix(scaled$S.scale[1],1,1),S_scaled=scaled$S[[1]],
-      H=H,B=prepared$X,S=prepared$S[[1]],
-      B_eval_raw=PredictMat(raw,data.frame(x=xe)),
-      B_eval=PredictMat(prepared,data.frame(x=xe)))
-    for(nm in names(matrices))save_matrix(matrices[[nm]],nm,dst)
-    saveRDS(list(raw=raw,scaled=scaled,prepared=prepared),file.path(dst,"objects.rds"))
-    cat("R reference:",name,"|",nrow(dat),"observations |",k,"basis functions |",length(raw$knots),"full knot entries\n")
-  }
-  metadata <- data.frame(key=c("R_version","mgcv_version","spline_type","degree","penalty_derivative_order","constraint","penalty_scaling"),
-    value=c(R.version.string,as.character(packageVersion("mgcv")),"bs","3","2","one mean-zero constraint","one-norm(S_raw) / infinity-norm(B_raw)^2"))
-  write.table(metadata,file.path(out,"metadata.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
-  write.csv(source_checksums,file.path(out,"source_checksums.csv"),row.names=FALSE)
-  writeLines(capture.output(sessionInfo()),file.path(out,"sessionInfo.txt"))
+  write.csv(do.call(rbind,checksums),file.path(out,"source_checksums.csv"),row.names=FALSE)
+  write.table(data.frame(key=c("R","mgcv"),value=c(R.version.string,as.character(packageVersion("mgcv")))),file.path(out,"versions.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
 }
 run()

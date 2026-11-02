@@ -1,2 +1,4 @@
-Test Summary:                                 | Pass  Total  Time
-Native MixedModels adapter and automatic REML |   31     31  3.3s
+Test Summary:                                  | Pass  Total  Time
+Variable component counts and shared variances |   82     82  7.1s
+Test Summary:                                    | Pass  Total  Time
+Component rotations, boundary and invalid inputs |   14     14  1.1s

@@ -88,62 +88,76 @@ z^\top Sz&=\tau^\top \tau.
 
 The curve is unchanged, and the penalty becomes the sum of squared penalized weights. Every coefficient direction is retained. Source: [mgcv conversion and coefficient mapping](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth2random.html).
 
-## 4. Link smoothing to random-effect variance
+## 4. Assemble any number of additive splines
 
-Let $X$ contain ordinary terms such as an intercept. The same response model can be written as:
-
-```math
-\begin{aligned}
-y&=X\beta+Bz+\varepsilon\\
- &=X_{\mathrm{fixed}}b+Z\tau+\varepsilon.
-\end{aligned}
-```
-
-where $X_{\mathrm{fixed}}=[X,\;X_0]$ and $b$ combines $\beta$ and $\alpha$. The mixed model assumes independent Gaussian vectors:
+Steps 1–3 apply separately to each predictor. For $m$ predictors, join the unpenalized parts to the ordinary fixed matrix, while retaining separate penalized blocks:
 
 ```math
-\begin{aligned}
-\tau&\sim N(0,r^2I),\\
-\varepsilon&\sim N(0,\sigma^2I).
-\end{aligned}
+X_{\mathrm{fixed}}=[X,X_{0,1},\ldots,X_{0,m}],\qquad
+b=[\beta^\top,\alpha_1^\top,\ldots,\alpha_m^\top]^\top.
 ```
-
-$I$ is an identity matrix. Here $\tau$ is the coefficient vector, $r$ is its shared standard deviation, and $r^2$ is the shared variance. For fixed positive variances, their joint density leads to the penalized fitting objective:
 
 ```math
-\begin{gathered}
-\lVert y-X_{\mathrm{fixed}}b-Z\tau\rVert^2+\lambda \tau^\top \tau,\\
-\lambda=\frac{\sigma^2}{r^2}.
-\end{gathered}
+y=X_{\mathrm{fixed}}b+\sum_{j=1}^{m}Z_j\tau_j+\varepsilon,
+\qquad \tau_j\sim N(0,r_j^2I),\qquad
+\varepsilon\sim N(0,\sigma^2I).
 ```
 
-Using the identities above, this equals the original objective:
+The random coefficient vectors and noise are mutually independent. Here $\tau_j$ is a vector of spline coefficients, $r_j$ is its shared standard deviation, and $\sigma$ is the noise standard deviation. For fixed positive variances, the joint density gives the coefficient-fitting objective:
 
 ```math
-\lVert y-X\beta-Bz\rVert^2+\lambda z^\top Sz.
+\left\|y-X_{\mathrm{fixed}}b-\sum_j Z_j\tau_j\right\|^2
++\sum_j\lambda_j\tau_j^\top\tau_j,
+\qquad\lambda_j=\frac{\sigma^2}{r_j^2}.
 ```
 
-Thus variance-based smoothing and the spline penalty describe the same coefficient-fitting problem. Stage 2 estimates the variances through REML. These random effects represent spline shapes; separate participant groups are not required.
-
-Sources: [penalized fitting objective](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/magic.html), [smooths represented as mixed models](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html).
-
-## 5. Prepare native fitting containers
-
-MixedModels.jl receives the prepared fixed and random designs through `FeTerm` and `ReMat`. Our adapter preserves one common variance across all spline directions. To obtain a native scalar `ReMat`, it finds orthogonal matrices $T$ and $V_{\tau}$ such that:
+Each spline receives its own smoothing strength. REML estimates the variances jointly; the ratios give the smoothing parameters. The implied response covariance is:
 
 ```math
-TZV_{\tau}=\begin{bmatrix}D\\0\end{bmatrix},\qquad
-y^*=Ty,\qquad X^*=TX_{\mathrm{fixed}},\qquad \tau^*=V_{\tau}^\top \tau.
+\operatorname{Var}(y)=\sigma^2I+\sum_j r_j^2 Z_jZ_j^\top.
 ```
 
-$D$ is diagonal. A thin QR decomposition of $Z$, followed by an SVD of its small triangular factor, provides these transformations without constructing a full observation-rotation matrix. Orthogonal rotations preserve squared lengths and the identity covariance matrices of $\tau$ and $\varepsilon$. The transformed model therefore has the same variance parameters and REML objective. The native scalar term has one level for each transformed spline direction and one shared variance; its levels are an internal representation of the spline.
+This identity also explains why Stage 1 compares each $Z_jZ_j^\top$: equivalent coefficient coordinates must represent the same contribution to covariance. Spline random effects represent curve shapes; participant groups are not required.
 
-After fitting, coefficients and fitted responses are mapped back. MixedModels estimates $\theta=r/\sigma$, so the spline smoothing parameter is $\lambda=1/\theta^2$. If the estimated spline variance is zero, $\lambda$ is infinite and the penalized contribution vanishes.
+Sources: [penalized fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/magic.html), [smooths as mixed models](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html).
 
-This adapter follows directly from the orthogonal identities above. Its implementation is checked against the original-coordinate Gaussian model in [VALIDATION.md](VALIDATION.md). Package sources: [MixedModels 5.9.0 constructor](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/linearmixedmodel.jl), [random-effect container](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/remat.jl), and [variance parameterization and REML](https://juliastats.org/MixedModels.jl/stable/optimization/).
+## 5. Adapt the designs to fitting containers
 
-## Training settings and prediction
+The [Julia adapter](spline_fitting/src/SplineFit.jl) concatenates the penalized matrices only to find one common observation rotation. Write the combined design as $Z_f=[Z_1,\ldots,Z_m]=Q[R;0]$, and factor its small triangular matrix as $R=U D V^\top$. Define:
 
-The inspected mgcv 1.9.4 default uses uniform knots over a predictor range expanded by 0.1% at each end, plus exterior knots. Explicit uneven knots are also supported. The current model uses strictly increasing full knots.
+```math
+T=\operatorname{blockdiag}(U^\top,I)Q^\top,
+\qquad y_r=Ty,\qquad X_r=TX_{\mathrm{fixed}}.
+```
 
-Future predictions will retain the training knots, centering, scaling and conversion. Outside the middle knot interval, the basis follows mgcv's linear extrapolation. Source: [mgcv construction and extrapolation](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth.construct.bs.smooth.spec.html); the [development source](https://github.com/cran/mgcv/blob/master/R/smooth.r) may change, while the recorded results identify the reference versions used.
+The code applies $Q^\top$ implicitly, without forming a full observation matrix. Its line `Q' * hcat(y, X_fixed)` places the columns side by side and transforms each independently:
+
+```math
+T[y\;X_{\mathrm{fixed}}]=[Ty\;TX_{\mathrm{fixed}}].
+```
+
+No response column is added to a fixed-effect column. Next, each component receives its own orthogonal coefficient rotation $V_j$, obtained from an SVD of its columns of $R$:
+
+```math
+Z_{r,j}=TZ_jV_j,\qquad \tau_{r,j}=V_j^\top\tau_j.
+```
+
+A single spline can become diagonal under these transformations. With multiple splines, the upper part of $Z_{r,j}$ is generally dense; rows below the total penalized rank are zero. The row transformation is common to all model terms, and coefficient rotations stay **within** their component. Rotating coefficient directions between components could mix different variances and would change the model.
+
+Orthogonality preserves squared residual lengths and the covariance $r_j^2I$ within each component. Each block therefore retains one variance parameter. Its native `MixedModels.ReMat` stores a dense multi-column term with one synthetic grouping level. [SharedVariance.jl](spline_fitting/src/SharedVariance.jl) ties that term's diagonal covariance entries to one parameter $\theta_j=r_j/\sigma$; off-diagonal entries remain zero. This wrapper uses the pinned MixedModels 5.9.0 low-level API.
+
+The transformed model has the same covariance structure and REML objective. After fitting, coefficients return through $\tau_j=V_j\tau_{r,j}$, and `restore_observations` applies $T^\top$ to fitted responses. Thus each returned fitted value again corresponds to one original data row.
+
+R uses its own internal QR operations in [nlme](https://github.com/cran/nlme/blob/3.1-169/src/matrix.c#L195-L223). Agreement is required for the model and fitted results, not for identical internal rotations.
+
+Sources: pinned [MixedModels constructor](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/linearmixedmodel.jl), [random-term storage](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/remat.jl), and [estimation](https://juliastats.org/MixedModels.jl/stable/optimization/).
+
+## 6. Evaluate the fitted model at new predictor values
+
+Retain each component's training knots, $H_j$ and $C_j$. Evaluate its raw basis at the new predictor values and apply those same transformations to obtain $X_{0,j,\mathrm{new}}$ and $Z_{j,\mathrm{new}}$. Do not recompute centering from the new rows.
+
+```math
+\hat y_{\mathrm{new}}=X_{\mathrm{fixed,new}}b+\sum_j Z_{j,\mathrm{new}}\tau_j.
+```
+
+The current two-predictor grid comparison uses this formula. The model has additive components; interactions would require an additional model specification.

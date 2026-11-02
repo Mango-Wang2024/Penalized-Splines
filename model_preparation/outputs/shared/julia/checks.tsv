@@ -1,36 +1,66 @@
-case	check	scaled_error	max_abs_error	passed
-uniform_k8	fixed space: complete Julia vs complete R	2.2871208209394843e-15	1.1102230246251565e-16	true
-uniform_k8	random covariance: complete Julia vs complete R	1.3070754352621768e-14	1.3944401189291966e-13	true
-uniform_k8	curve preserved by Julia conversion	0.0	0.0	true
-uniform_k8	penalty preserved by Julia conversion	2.5924933451793746e-15	2.6645352591003757e-15	true
-uniform_k8	all basis directions retained	6.610527709370325e-15	7.049916206369744e-15	true
-uniform_k8	curve in common coefficient coordinates	5.014253786098019e-16	2.220446049250313e-15	true
-uniform_k8	penalty in common coefficient coordinates	4.8107314858971515e-15	7.327471962526033e-15	true
-default_k8	fixed space: complete Julia vs complete R	3.768288934300991e-15	1.700029006457271e-16	true
-default_k8	random covariance: complete Julia vs complete R	1.842900443727854e-14	1.9539925233402755e-13	true
-default_k8	curve preserved by Julia conversion	0.0	0.0	true
-default_k8	penalty preserved by Julia conversion	2.5924933451793746e-15	2.6645352591003757e-15	true
-default_k8	all basis directions retained	6.610527709370325e-15	7.049916206369744e-15	true
-default_k8	curve in common coefficient coordinates	6.985474219048551e-16	3.1086244689504383e-15	true
-default_k8	penalty in common coefficient coordinates	5.504675410021949e-15	7.549516567451064e-15	true
-uneven_k10	fixed space: complete Julia vs complete R	1.9484782569617063e-14	8.36136715420821e-16	true
-uneven_k10	random covariance: complete Julia vs complete R	5.128704739856223e-14	3.0127011996228248e-12	true
-uneven_k10	curve preserved by Julia conversion	0.0	0.0	true
-uneven_k10	penalty preserved by Julia conversion	5.183350886616206e-15	1.021405182655144e-14	true
-uneven_k10	all basis directions retained	4.723309726658815e-15	3.6637359812630166e-15	true
-uneven_k10	curve in common coefficient coordinates	4.777318612408758e-16	3.552713678800501e-15	true
-uneven_k10	penalty in common coefficient coordinates	1.090812326815377e-14	2.7533531010703882e-14	true
-duplicates_k6	fixed space: complete Julia vs complete R	6.408191464555298e-16	4.163336342344337e-17	true
-duplicates_k6	random covariance: complete Julia vs complete R	4.177586732265826e-15	8.881784197001252e-15	true
-duplicates_k6	curve preserved by Julia conversion	0.0	0.0	true
-duplicates_k6	penalty preserved by Julia conversion	1.3713097566496204e-15	1.4408391699504575e-15	true
-duplicates_k6	all basis directions retained	5.558759953280587e-15	3.8441472227646045e-15	true
-duplicates_k6	curve in common coefficient coordinates	2.2023291508218284e-15	3.0808688933348094e-15	true
-duplicates_k6	penalty in common coefficient coordinates	4.611169991493404e-15	5.766439122236373e-15	true
-small_k5	fixed space: complete Julia vs complete R	8.651952216261222e-16	6.245004513516506e-17	true
-small_k5	random covariance: complete Julia vs complete R	1.69157882731302e-15	1.4432899320127035e-15	true
-small_k5	curve preserved by Julia conversion	0.0	0.0	true
-small_k5	penalty preserved by Julia conversion	1.257577467990915e-15	1.3322676295501878e-15	true
-small_k5	all basis directions retained	2.7612576912220866e-15	1.3461454173580023e-15	true
-small_k5	curve in common coefficient coordinates	1.5024702905069834e-15	1.2732870313669764e-15	true
-small_k5	penalty in common coefficient coordinates	1.5856835978398343e-15	1.1810041919388609e-15	true
+case	component	check	scaled_error	max_abs_error	passed
+uniform_k8	all	combined fixed space	2.0984933920982723e-15	1.1102230246251565e-16	true
+uniform_k8	x1	random covariance	1.3070754352621768e-14	1.3944401189291966e-13	true
+uniform_k8	x1	curve preserved	0.0	0.0	true
+uniform_k8	x1	normalized penalty	2.5924933451793746e-15	2.6645352591003757e-15	true
+uniform_k8	x1	all spline directions retained	6.610527709370325e-15	7.049916206369744e-15	true
+uniform_k8	x1	curve in common coordinates	5.014253786098019e-16	2.220446049250313e-15	true
+uniform_k8	x1	penalty in common coordinates	4.8107314858971515e-15	7.327471962526033e-15	true
+uniform_k8	x2	random covariance	6.621650202470973e-15	6.661338147750939e-14	true
+uniform_k8	x2	curve preserved	0.0	0.0	true
+uniform_k8	x2	normalized penalty	2.3602523502169798e-15	1.9796311999485382e-15	true
+uniform_k8	x2	all spline directions retained	3.643749169848572e-15	1.0538445116559103e-15	true
+uniform_k8	x2	curve in common coordinates	4.761448344258917e-16	1.7763568394002505e-15	true
+uniform_k8	x2	penalty in common coordinates	2.997985708095746e-15	2.886579864025407e-15	true
+default_k8	all	combined fixed space	3.1405953761042095e-15	1.6653345369377348e-16	true
+default_k8	x1	random covariance	1.842900443727854e-14	1.9539925233402755e-13	true
+default_k8	x1	curve preserved	0.0	0.0	true
+default_k8	x1	normalized penalty	2.5924933451793746e-15	2.6645352591003757e-15	true
+default_k8	x1	all spline directions retained	6.610527709370325e-15	7.049916206369744e-15	true
+default_k8	x1	curve in common coordinates	6.985474219048551e-16	3.1086244689504383e-15	true
+default_k8	x1	penalty in common coordinates	5.504675410021949e-15	7.549516567451064e-15	true
+default_k8	x2	random covariance	1.0413898272692979e-14	1.0036416142611415e-13	true
+default_k8	x2	curve preserved	0.0	0.0	true
+default_k8	x2	normalized penalty	2.3602523502169798e-15	1.9796311999485382e-15	true
+default_k8	x2	all spline directions retained	3.643749169848572e-15	1.0538445116559103e-15	true
+default_k8	x2	curve in common coordinates	1.0024974745923248e-15	3.1086244689504383e-15	true
+default_k8	x2	penalty in common coordinates	4.6011508639974265e-15	7.105427357601002e-15	true
+uneven_k10	all	combined fixed space	1.5899659805019943e-14	8.257283745649602e-16	true
+uneven_k10	x1	random covariance	5.128704739856223e-14	3.0127011996228248e-12	true
+uneven_k10	x1	curve preserved	0.0	0.0	true
+uneven_k10	x1	normalized penalty	5.183350886616206e-15	1.021405182655144e-14	true
+uneven_k10	x1	all spline directions retained	4.723309726658815e-15	3.6637359812630166e-15	true
+uneven_k10	x1	curve in common coordinates	4.777318612408758e-16	3.552713678800501e-15	true
+uneven_k10	x1	penalty in common coordinates	1.090812326815377e-14	2.7533531010703882e-14	true
+uneven_k10	x2	random covariance	3.14414593518462e-15	7.105427357601002e-15	true
+uneven_k10	x2	curve preserved	0.0	0.0	true
+uneven_k10	x2	normalized penalty	1.0266327424859638e-15	1.1102230246251565e-15	true
+uneven_k10	x2	all spline directions retained	7.035240057128723e-15	1.917086281388869e-15	true
+uneven_k10	x2	curve in common coordinates	1.0792597912861653e-15	1.3322676295501878e-15	true
+uneven_k10	x2	penalty in common coordinates	1.8230546162081415e-15	1.5543122344752192e-15	true
+duplicates_k6	all	combined fixed space	1.251993429934957e-15	6.591949208711867e-17	true
+duplicates_k6	x1	random covariance	2.8736657750104922e-15	5.995204332975845e-15	true
+duplicates_k6	x1	curve preserved	0.0	0.0	true
+duplicates_k6	x1	normalized penalty	9.040465315305834e-16	8.881784197001252e-16	true
+duplicates_k6	x1	all spline directions retained	4.839107870782817e-15	2.3037127760972e-15	true
+duplicates_k6	x1	curve in common coordinates	1.2114285936688776e-15	1.6653345369377348e-15	true
+duplicates_k6	x1	penalty in common coordinates	2.979430303085568e-15	3.3891407607860056e-15	true
+duplicates_k6	x2	random covariance	6.621650202470973e-15	6.661338147750939e-14	true
+duplicates_k6	x2	curve preserved	0.0	0.0	true
+duplicates_k6	x2	normalized penalty	2.3602523502169798e-15	1.9796311999485382e-15	true
+duplicates_k6	x2	all spline directions retained	3.643749169848572e-15	1.0538445116559103e-15	true
+duplicates_k6	x2	curve in common coordinates	4.761448344258917e-16	1.7763568394002505e-15	true
+duplicates_k6	x2	penalty in common coordinates	2.997985708095746e-15	2.886579864025407e-15	true
+small_k5	all	combined fixed space	1.0021168398457436e-15	5.898059818321144e-17	true
+small_k5	x1	random covariance	1.69157882731302e-15	1.4432899320127035e-15	true
+small_k5	x1	curve preserved	0.0	0.0	true
+small_k5	x1	normalized penalty	1.257577467990915e-15	1.3322676295501878e-15	true
+small_k5	x1	all spline directions retained	2.7612576912220866e-15	1.3461454173580023e-15	true
+small_k5	x1	curve in common coordinates	1.5024702905069834e-15	1.2732870313669764e-15	true
+small_k5	x1	penalty in common coordinates	1.5856835978398343e-15	1.1810041919388609e-15	true
+small_k5	x2	random covariance	1.1171865860534194e-15	1.1102230246251565e-15	true
+small_k5	x2	curve preserved	0.0	0.0	true
+small_k5	x2	normalized penalty	2.0538599879460936e-15	1.7763568394002505e-15	true
+small_k5	x2	all spline directions retained	1.2617173145404828e-15	1.6046192152785466e-16	true
+small_k5	x2	curve in common coordinates	6.896821705373282e-16	6.106226635438361e-16	true
+small_k5	x2	penalty in common coordinates	2.0351793122140866e-15	2.6645352591003757e-15	true

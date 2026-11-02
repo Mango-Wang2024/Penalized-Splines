@@ -64,3 +64,30 @@ end
 end
 
 println("Workflow preparation mathematics checks passed.")
+
+isdefined(@__MODULE__,:BSplineBasis) || include(joinpath(@__DIR__,"../../spline_basis/src/BSpline.jl"))
+using .BSplineBasis
+@testset "Additive assembly and retained prediction transformations" begin
+    rng=MersenneTwister(77)
+    for m in (1,2,3,10)
+        xs=[sort(4rand(rng,160).-2) for _ in 1:m]
+        # Randomize row pairing independently for every component.
+        xs=[x[randperm(rng,length(x))] for x in xs]
+        bases=[build_spline(x,default_knots(x,5+mod(j,3))) for (j,x) in enumerate(xs)]
+        p=prepare_additive(bases)
+        @test size(p.X_fixed)==(160,m+1)
+        @test length(p.Z_blocks)==m
+        raw=[b.B_raw for b in bases]
+        new=prediction_inputs(bases,p,raw)
+        @test new.X_fixed ≈ p.X_fixed atol=1e-12
+        for j in 1:m
+            @test new.Z_blocks[j] ≈ p.Z_blocks[j] atol=1e-12
+            @test length(p.fixed_ranges[j])==1
+        end
+        different=[evaluate_basis(b.knots,[-.5,.5]) for b in bases]
+        @test size(prediction_inputs(bases,p,different).X_fixed)==(2,m+1)
+    end
+    x=collect(range(-1,1;length=40));b=build_spline(x,default_knots(x,5))
+    @test_throws ArgumentError prepare_additive([b,b])
+    @test_throws ArgumentError prepare_additive([b];names=["a","b"])
+end

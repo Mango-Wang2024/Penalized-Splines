@@ -1,3 +1,4 @@
-Generated once in Julia 1.13.1, seed 42.
-Both checks use uniform_k8/data.csv and uniform_k8/knots.csv for the main example.
-For cubic B-splines k is the basis size; each full knot vector has k+4 entries. The other knot cases reuse the same x/y values. duplicates_k6 is a separate stress-test dataset.
+Generated once in Julia 1.13.1. Predictor seeds: 42 and 43; noise seed: 44.
+Each row contains x1,x2 and one response y.
+truth=sin(1.7*x1)+0.15*x1+0.5*cos(1.2*x2); noise SD=0.35.
+Both languages read the same saved values. Components are additive, without interactions.

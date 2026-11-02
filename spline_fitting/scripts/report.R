@@ -1,131 +1,118 @@
 #!/usr/bin/env Rscript
 run <- function() {
   args <- commandArgs(trailingOnly=TRUE)
-  if(length(args)!=4L) stop("Expected inputs, fitting outputs, report path and unit-test log")
-  inputs <- normalizePath(args[1]); out <- normalizePath(args[2]); report <- args[3]
-  if(file.exists(report)) stop("The report already exists; choose a new report path")
-  if(!file.exists(args[4])) stop("The Julia unit-test log is required")
-  rdir <- file.path(out,"r_reference"); jdir <- file.path(out,"julia")
-  r <- read.delim(file.path(rdir,"fit_summary.tsv"),check.names=FALSE)
-  j <- read.delim(file.path(jdir,"fit_summary.tsv"),check.names=FALSE)
-  j$converged <- as.logical(j$converged)
-  stopifnot(!anyNA(j$converged))
-  cases <- read.delim(file.path(inputs,"cases.tsv"),stringsAsFactors=FALSE)
-  stopifnot(identical(r$case,cases$case),identical(j$case,cases$case))
-  checks <- list(); index <- 0L
-  scaled <- function(a,b) sqrt(sum((a-b)^2))/max(1,sqrt(sum(a*a)),sqrt(sum(b*b)))
+  stopifnot(length(args)==4L,file.exists(args[4]))
+  inputs <- normalizePath(args[1]);out <- normalizePath(args[2]);report <- args[3]
+  script <- gsub("~+~"," ",sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)),fixed=TRUE)
+  project <- dirname(dirname(dirname(normalizePath(script))))
+  if(file.exists(report))stop("The report already exists; choose a new report path")
+  rdir <- file.path(out,"r_reference");jdir <- file.path(out,"julia")
+  r <- read.delim(file.path(rdir,"fit_summary.tsv"));j <- read.delim(file.path(jdir,"fit_summary.tsv"))
+  re <- read.delim(file.path(rdir,"component_estimates.tsv"));je <- read.delim(file.path(jdir,"component_estimates.tsv"))
+  cases <- read.delim(file.path(inputs,"cases.tsv"))$case
+  stopifnot(identical(r$case,cases),identical(j$case,cases))
+  hashes <- read.delim(file.path(rdir,"source_checksums.tsv"))
+  for(i in seq_len(nrow(hashes)))stopifnot(hashes$md5[i]==unname(tools::md5sum(file.path(inputs,hashes$case[i],hashes$file[i]))))
+  scaled <- function(a,b)sqrt(sum((a-b)^2))/max(1,sqrt(sum(a*a)),sqrt(sum(b*b)))
   relative <- function(a,b) {
-    if(is.infinite(a)&&is.infinite(b)&&sign(a)==sign(b)) return(0)
-    if(!is.finite(a)||!is.finite(b)) return(Inf)
+    if(is.infinite(a)&&is.infinite(b)&&sign(a)==sign(b))return(0)
+    if(!is.finite(a)||!is.finite(b))return(Inf)
     abs(a-b)/max(abs(a),abs(b),.Machine$double.eps)
   }
-  check <- function(case,label,error,tolerance) {
-    index <<- index+1L
-    checks[[index]] <<- data.frame(case=case,check=label,error=error,
-      tolerance=tolerance,passed=is.finite(error)&&error<=tolerance)
+  checks <- list();estimates <- list();ci <- 0L;ei <- 0L
+  check <- function(case,component,label,error,tolerance) {
+    ci <<- ci+1L;checks[[ci]] <<- data.frame(case,component,check=label,error,tolerance,passed=is.finite(error)&&error<=tolerance)
   }
-  source <- read.delim(file.path(rdir,"source_checksums.tsv"))
-  for(i in seq_len(nrow(cases))) {
-    name <- cases$case[i]; src <- file.path(inputs,name)
-    # Fingerprints verify that source files did not change during fitting.
-    stopifnot(source$data_md5[i]==unname(tools::md5sum(file.path(src,"data.csv"))),
-              source$knots_md5[i]==unname(tools::md5sum(file.path(src,"knots.csv"))))
-    rf <- read.csv(file.path(rdir,name,"fitted.csv"))
-    jf <- read.csv(file.path(jdir,name,"fitted.csv"))
-    raw <- read.csv(file.path(src,"data.csv"))
-    stopifnot(nrow(rf)==nrow(raw),nrow(jf)==nrow(raw))
-    observations_error <- max(scaled(as.matrix(rf[,c("x","y")]),as.matrix(raw[,c("x","y")])),
-                              scaled(as.matrix(jf[,c("x","y")]),as.matrix(raw[,c("x","y")])))
-    rk <- scan(file.path(rdir,name,"knots.csv"),quiet=TRUE)
-    jk <- scan(file.path(jdir,name,"knots.csv"),quiet=TRUE)
-    stopifnot(length(rk)==length(jk))
-    check(name,"same predictor and response values",observations_error,1e-12)
-    check(name,"same constructed knots",scaled(rk,jk),1e-12)
-    check(name,"R REML converged",as.numeric(!r$converged[i]||r$method[i]!="REML"),0)
-    check(name,"Julia REML converged",as.numeric(!j$converged[i]||j$method[i]!="REML"),0)
-    one_variance <- r$variance_parameters[i]==1L && j$variance_parameters[i]==1L &&
-      r$random_directions[i]==cases$k[i]-2L && j$random_directions[i]==cases$k[i]-2L &&
-      r$shared_covariance_error[i]<1e-12
-    check(name,"one shared spline variance",as.numeric(!one_variance),0)
-    check(name,"R variance-to-smoothing relationship",relative(r$lambda[i],r$sigma2[i]/r$r2[i]),1e-10)
-    check(name,"estimated lambda",relative(r$lambda[i],j$lambda[i]),1e-5)
-    check(name,"estimated residual variance",relative(r$sigma2[i],j$sigma2[i]),1e-5)
-    check(name,"estimated spline variance",relative(r$r2[i],j$r2[i]),1e-5)
-    check(name,"fitted responses",scaled(rf$fitted,jf$fitted),1e-6)
+  for(i in seq_along(cases)) {
+    name <- cases[i];src <- file.path(inputs,name);terms <- read.delim(file.path(src,"terms.tsv"));keys <- terms$predictor
+    raw <- read.csv(file.path(src,"data.csv"));rf <- read.csv(file.path(rdir,name,"fitted.csv"));jf <- read.csv(file.path(jdir,name,"fitted.csv"))
+    rc <- read.csv(file.path(rdir,name,"components.csv"));jc <- read.csv(file.path(jdir,name,"components.csv"))
+    rg <- read.csv(file.path(rdir,name,"grid.csv"));jg <- read.csv(file.path(jdir,name,"grid.csv"))
+    check(name,"all","same observations",max(scaled(as.matrix(rf[,c(keys,"y")]),as.matrix(raw[,c(keys,"y")])),scaled(as.matrix(jf[,c(keys,"y")]),as.matrix(raw[,c(keys,"y")]))),1e-12)
+    check(name,"all","R REML converged",as.numeric(!as.logical(r$converged[i])||r$method[i]!="REML"),0)
+    check(name,"all","Julia REML converged",as.numeric(!as.logical(j$converged[i])||j$method[i]!="REML"),0)
+    check(name,"all","one variance per component",as.numeric(r$components[i]!=length(keys)||j$variance_parameters[i]!=length(keys)||r$random_directions[i]!=sum(terms$k-2L)||j$random_directions[i]!=sum(terms$k-2L)),0)
+    check(name,"all","residual variance",relative(r$sigma2[i],j$sigma2[i]),1e-5)
+    check(name,"all","fitted responses",scaled(rf$fitted,jf$fitted),1e-6)
+    check(name,"all","same grid predictors",scaled(as.matrix(rg[,keys,drop=FALSE]),as.matrix(jg[,keys,drop=FALSE])),1e-12)
+    check(name,"all","grid predictions",scaled(rg$fitted,jg$fitted),1e-6)
+    for(key in keys) {
+      a <- re[re$case==name&re$component==key,];b <- je[je$case==name&je$component==key,];stopifnot(nrow(a)==1L,nrow(b)==1L)
+      rk <- scan(file.path(rdir,name,key,"knots.csv"),quiet=TRUE);jk <- scan(file.path(jdir,name,key,"knots.csv"),quiet=TRUE)
+      check(name,key,"same knots",scaled(rk,jk),1e-12)
+      check(name,key,"smoothing lambda",relative(a$lambda,b$lambda),1e-5)
+      check(name,key,"spline variance",relative(a$r2,b$r2),1e-5)
+      check(name,key,"component curve",scaled(rc[[key]],jc[[key]]),1e-6)
+      check(name,key,"variance-to-smoothing identity",max(relative(a$lambda,r$sigma2[i]/a$r2),relative(b$lambda,j$sigma2[i]/b$r2)),1e-10)
+      ei <- ei+1L;estimates[[ei]] <- data.frame(case=name,component=key,R_lambda=a$lambda,Julia_lambda=b$lambda,
+        lambda_relative_error=relative(a$lambda,b$lambda),R_r2=a$r2,Julia_r2=b$r2,r2_relative_error=relative(a$r2,b$r2),
+        R_sigma2=r$sigma2[i],Julia_sigma2=j$sigma2[i],sigma2_relative_error=relative(r$sigma2[i],j$sigma2[i]))
+    }
   }
-  checks <- do.call(rbind,checks)
-  dir.create(file.path(out,"comparison"),showWarnings=FALSE)
-  write.table(checks,file.path(out,"comparison","checks.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
-  comparison <- data.frame(case=cases$case,R_lambda=r$lambda,Julia_lambda=j$lambda,
-    lambda_relative_error=mapply(relative,r$lambda,j$lambda),
-    R_sigma2=r$sigma2,Julia_sigma2=j$sigma2,
-    sigma2_relative_error=mapply(relative,r$sigma2,j$sigma2),
-    R_r2=r$r2,Julia_r2=j$r2,
-    r2_relative_error=mapply(relative,r$r2,j$r2),
-    fitted_scaled_error=checks$error[checks$check=="fitted responses"])
-  write.table(comparison,file.path(out,"comparison","estimates.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
-
-  # Scientific comparison in the original observation coordinates.
-  rf <- read.csv(file.path(rdir,"uniform_k8","fitted.csv"))
-  jf <- read.csv(file.path(jdir,"uniform_k8","fitted.csv"))
-  png(file.path(out,"comparison","fitted_curves.png"),width=1400,height=720,res=150)
-  par(mar=c(4.3,4.5,2.8,1.1),cex=1)
-  plot(rf$x,rf$y,pch=16,col="#B1BBC780",xlab="Predictor x",ylab="Response y",
-       main="REML fit: R and Julia",cex.main=1.15)
-  lines(rf$x,rf$truth,col="#757575",lty=3,lwd=2)
-  lines(rf$x,rf$fitted,col="#1675AE",lwd=3)
-  lines(jf$x,jf$fitted,col="#D75E1D",lty=2,lwd=2)
-  legend("topleft",c("Observations","Known curve","R: mgcv / nlme","Julia: MixedModels"),
-    col=c("#B1BBC7","#757575","#1675AE","#D75E1D"),
-    pch=c(16,NA,NA,NA),lty=c(NA,3,1,2),lwd=c(NA,2,3,2),bty="n",cex=.85)
+  checks <- do.call(rbind,checks);estimates <- do.call(rbind,estimates)
+  dst <- file.path(out,"comparison");dir.create(dst,showWarnings=FALSE)
+  for(pair in list(list("checks.tsv",checks),list("estimates.tsv",estimates)))write.table(pair[[2]],file.path(dst,pair[[1]]),sep="\t",quote=FALSE,row.names=FALSE)
+  # Show the joint surface for two predictors; component plots also work for any count.
+  main <- cases[1];raw <- read.csv(file.path(inputs,main,"data.csv"));keys <- read.delim(file.path(inputs,main,"terms.tsv"))$predictor
+  rg <- read.csv(file.path(rdir,main,"grid.csv"));jg <- read.csv(file.path(jdir,main,"grid.csv"));grid <- read.csv(file.path(inputs,main,"grid.csv"))
+  if(length(keys)==2L) {
+    x <- sort(unique(grid[[keys[1]]]));y <- sort(unique(grid[[keys[2]]]));stopifnot(nrow(grid)==length(x)*length(y))
+    to_surface <- function(values)matrix(values,length(x),length(y))
+    png(file.path(dst,"fitted_surfaces.png"),width=2100,height=1600,res=240,type="quartz")
+    par(mfrow=c(2,2),mar=c(2,2,2.5,1),cex=.85)
+    limits <- range(grid$truth,rg$fitted,jg$fitted)
+    surface <- function(v,title,col)persp(x,y,to_surface(v),theta=-40,phi=25,expand=.65,col=col,border="#FFFFFF80",shade=.25,
+      xlab=keys[1],ylab=keys[2],zlab="Response",zlim=limits,ticktype="detailed",main=title)
+    surface(grid$truth,"(a) Known surface","#C0CED8");surface(rg$fitted,"(b) R: mgcv / nlme","#73A9C7");surface(jg$fitted,"(c) Julia: MixedModels","#E7A16D")
+    difference <- to_surface(jg$fitted-rg$fitted);lim <- max(abs(difference),.Machine$double.eps)
+    par(mar=c(4,4,2.5,2))
+    image(x,y,difference,col=colorRampPalette(c("#2166AC","white","#B2182B"))(255),zlim=c(-lim,lim),
+      xlab=keys[1],ylab=keys[2],main="(d) Julia − R",useRaster=TRUE)
+    contour(x,y,difference,add=TRUE,nlevels=5,labcex=.65)
+    mtext(sprintf("Largest absolute difference: %.2e",lim),side=3,line=.25,cex=.7)
+    dev.off()
+  }
+  rc <- read.csv(file.path(rdir,main,"components.csv"));jc <- read.csv(file.path(jdir,main,"components.csv"))
+  png(file.path(dst,"component_curves.png"),width=1800,height=700*ceiling(length(keys)/2),res=200,type="quartz")
+  par(mfrow=c(ceiling(length(keys)/2),min(2,length(keys))),mar=c(4,4,2.3,1),cex=.9)
+  for(key in keys) {
+    ix <- order(raw[[key]]);truth <- raw[[paste0("truth_",key)]];truth <- truth-mean(truth)
+    plot(raw[[key]][ix],truth[ix],type="l",lty=3,lwd=2,col="#666666",xlab=key,ylab="Centered component",main=paste("Spline component:",key),ylim=range(truth,rc[[key]],jc[[key]]))
+    lines(raw[[key]][ix],rc[[key]][ix],lwd=2,col="#1675AE");lines(raw[[key]][ix],jc[[key]][ix],lwd=2,lty=2,col="#D75E1D")
+    legend("topleft",c("Known component","R","Julia"),col=c("#666666","#1675AE","#D75E1D"),lty=c(3,1,2),lwd=2,bty="n",cex=.8)
+  }
   dev.off()
-
-  versions <- rbind(read.delim(file.path(rdir,"versions.tsv")),
-                    read.delim(file.path(jdir,"versions.tsv")))
-  version <- function(key) paste(unique(versions$value[versions$key==key]),collapse=", ")
-  # Relative links make both the published and custom-run reports navigable.
-  relative_path <- function(target) {
-    base <- strsplit(normalizePath(dirname(report)),"/",fixed=TRUE)[[1]]
-    dest <- strsplit(normalizePath(target),"/",fixed=TRUE)[[1]]
-    n <- 0L
-    while(n<min(length(base),length(dest)) && base[n+1L]==dest[n+1L]) n <- n+1L
-    paste(c(rep("..",length(base)-n),dest[seq_along(dest)>n]),collapse="/")
+  relative_path <- function(path) {
+    a <- strsplit(normalizePath(dirname(report)),"/",fixed=TRUE)[[1]];b <- strsplit(normalizePath(path),"/",fixed=TRUE)[[1]];n <- 0L
+    while(n<min(length(a),length(b))&&a[n+1L]==b[n+1L])n <- n+1L
+    paste(c(rep("..",length(a)-n),b[seq_along(b)>n]),collapse="/")
   }
-  link <- function(label,path) paste0("[",label,"](",relative_path(path),")")
-  fmt <- function(x) sprintf("%.9g",x)
+  link <- function(label,path)paste0("[",label,"](",relative_path(path),")")
+  image_tag <- function(file,alt)paste0('<a href="',relative_path(file),'"><img src="',relative_path(file),'" alt="',alt,'" width="800"></a>')
   lines <- c("# Stage 2 results","",
-    "Both branches repeat Stage 1 preparation from the same saved data, then fit with **REML**. R uses `mgcv::gamm` with `nlme::lme`; Julia uses prepared `FeTerm` and `ReMat` inputs with `MixedModels.LinearMixedModel`.","",
-    sprintf("**%d/%d reference comparisons passed across five cases.** No smoothing parameter is fixed before fitting.",sum(checks$passed),nrow(checks)),"",
-    "## Estimated smoothing and fitted curves","",
-    "Each fit estimates $\\sigma^2$ and $r^2$; $\\lambda=\\sigma^2/r^2$ is derived from the same fit. Parameter symbols follow the derivation and denote fitted estimates here.","",
-    "The table compares smoothing strength $\\lambda$ and all 200 fitted responses, $\\hat y_R$ and $\\hat y_{\\mathrm{Julia}}$, in their original observation order. Matching $\\lambda$ checks smoothing; matching $\\hat y$ checks the resulting curve. Acceptance thresholds are $10^{-5}$ for the relative error in $\\lambda$ and $10^{-6}$ for the scaled fitted-response error, as defined in VALIDATION.md.","",
-    "| Case | R $\\lambda$ | Julia $\\lambda$ | $\\lambda$ relative error | Fitted-response scaled error |",
-    "| --- | ---: | ---: | ---: | ---: |")
-  for(i in seq_len(nrow(comparison))) lines <- c(lines,sprintf("| `%s` | %s | %s | %.2e | %.2e |",
-    comparison$case[i],fmt(comparison$R_lambda[i]),fmt(comparison$Julia_lambda[i]),
-    comparison$lambda_relative_error[i],comparison$fitted_scaled_error[i]))
-  lines <- c(lines,"",
-    paste0("![R and Julia fitted curves](",relative_path(file.path(out,"comparison","fitted_curves.png")),")"),"",
-    "Gray points are the observed $y$ values supplied to both fitters; the dotted curve is the known simulation curve. The blue R and orange Julia curves show their fitted responses $\\hat y$ and nearly coincide.","",
+    "R and Julia independently prepare and fit the same additive model. R uses `mgcv::gamm` / `nlme::lme`; Julia uses `MixedModels.jl`. REML jointly estimates a separate spline variance for each predictor and one common noise variance.","",
+    sprintf("**%d/%d comparisons passed across %d cases.** Spline-component counts: %s.",sum(checks$passed),nrow(checks),length(cases),paste(unique(r$components),collapse=", ")),"",
+    "## Smoothing estimates","",
+    "Each component has its own $\\lambda_j=\\sigma^2/r_j^2$. The table compares these smoothing strengths; the variance values and their errors are retained in the detailed estimates.","",
+    "| Case | Component | R $\\lambda_j$ | Julia $\\lambda_j$ | Relative error |","| --- | --- | ---: | ---: | ---: |")
+  for(i in seq_len(nrow(estimates)))lines <- c(lines,sprintf("| `%s` | $%s$ | %.8g | %.8g | %.2e |",estimates$case[i],gsub("x","x_",estimates$component[i]),estimates$R_lambda[i],estimates$Julia_lambda[i],estimates$lambda_relative_error[i]))
+  lines <- c(lines,"",sprintf("Largest scaled difference in training fitted responses: **%.2e**; on the shared evaluation grid: **%.2e**.",max(checks$error[checks$check=="fitted responses"]),max(checks$error[checks$check=="grid predictions"])),"",
+    "## Joint response and individual components","")
+  if(length(keys)==2L)lines <- c(lines,image_tag(file.path(dst,"fitted_surfaces.png"),"Known, R and Julia response surfaces and their difference"),"",
+    "The first three panels share the same response scale. The fourth isolates the small R/Julia difference on the same grid. The known surface is a simulation reference; only the noisy observations are used for fitting.","")
+  lines <- c(lines,image_tag(file.path(dst,"component_curves.png"),"Centered additive spline components"),"",
+    "Each panel isolates one spline contribution. Known components are centered over the training observations to match the fitted smooths; their removed average levels belong to the overall intercept.","",
     "## Supporting checks","",
-    paste0("The ",link("detailed estimates",file.path(out,"comparison","estimates.tsv")),
-      " retain $\\sigma^2$ and $r^2$ for every case. These check the variance scale, which is not determined by their ratio alone."),
-    sprintf("Their largest relative error is **%.2e**, below the $10^{-5}$ threshold.",
-      max(comparison$sigma2_relative_error,comparison$r2_relative_error)),"",
-    "Independent Julia tests check that the input adapter preserves the covariance model, REML objective and fitted coefficients. They also check invariance to rotated spline directions, the zero-variance boundary and invalid inputs.","",
-    paste0(link("Detailed comparisons",file.path(out,"comparison","checks.tsv")),"; ",
-      link("Julia test log",args[4]),". ",
-      link("R fitting status",file.path(rdir,"fit_summary.tsv"))," and ",
-      link("Julia fitting status",file.path(jdir,"fit_summary.tsv"))," record the individual fits."),"",
-    "## Reproducibility","",
-    paste0("Versions: ",version("R"),"; mgcv ",version("mgcv"),"; nlme ",version("nlme"),
-      "; Julia ",version("Julia"),"; MixedModels ",version("MixedModels"),
-      "; StatsModels ",version("StatsModels"),"; BSplineKit ",version("BSplineKit"),"."),"",
-    paste0("The same saved observations and five knot settings are reused from Stage 1. ",
-      link("Input fingerprints",file.path(rdir,"source_checksums.tsv")),
-      " confirm the R source files; both languages' saved predictor, response and knot values are compared directly. Both stages share the dependency versions pinned in the root `Manifest.toml`."))
+    paste0(link("Individual comparisons",file.path(dst,"checks.tsv"))," and ",link("detailed estimates",file.path(dst,"estimates.tsv"))," record all cases. The acceptance criteria are defined in ",link("VALIDATION.md",file.path(project,"VALIDATION.md")),"."),"",
+    paste0(link("Julia unit tests",args[4])," independently check covariance, the REML objective, coefficients and restoration of observation coordinates for 1, 2, 3 and 10 components, including unequal block sizes and the zero-variance boundary."),"",
+    paste0(link("R fitting status",file.path(rdir,"fit_summary.tsv")),"; ",link("Julia fitting status",file.path(jdir,"fit_summary.tsv")),"; ",link("source fingerprints",file.path(rdir,"source_checksums.tsv")),"."),"",
+    "Both languages use the same saved observations, per-predictor settings and evaluation grid. Package versions are recorded in each branch's `versions.tsv`; Julia dependencies are pinned by the root `Manifest.toml`.")
   writeLines(lines,report)
   cat(sprintf("%d/%d Stage 2 comparisons passed\n",sum(checks$passed),nrow(checks)))
-  if(!all(checks$passed)) stop("Stage 2 comparisons failed; see checks.tsv")
+  if(!all(checks$passed))stop("Stage 2 comparisons failed; see checks.tsv")
+  if(normalizePath(dirname(report))==normalizePath(project)) {
+    source(file.path(project,"assets","plot_matrices.R"))
+    plot_fitting_matrices(project,out)
+  }
 }
 run()
