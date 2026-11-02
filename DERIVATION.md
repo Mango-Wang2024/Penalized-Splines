@@ -114,7 +114,7 @@ The random coefficient vectors and noise are mutually independent. Here $\tau_j$
 Each spline receives its own smoothing strength. REML estimates the variances jointly; the ratios give the smoothing parameters. The implied response covariance is:
 
 ```math
-\operatorname{Var}(y)=\sigma^2I+\sum_j r_j^2 Z_jZ_j^\top.
+\mathrm{Var}(y)=\sigma^2I+\sum_j r_j^2 Z_jZ_j^\top.
 ```
 
 This identity also explains why Stage 1 compares each $Z_jZ_j^\top$: equivalent coefficient coordinates must represent the same contribution to covariance. Spline random effects represent curve shapes; participant groups are not required.
@@ -126,7 +126,7 @@ Sources: [penalized fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/
 The [Julia adapter](spline_fitting/src/SplineFit.jl) concatenates the penalized matrices only to find one common observation rotation. Write the combined design as $Z_f=[Z_1,\ldots,Z_m]=Q[R;0]$, and factor its small triangular matrix as $R=U D V^\top$. Define:
 
 ```math
-T=\operatorname{blockdiag}(U^\top,I)Q^\top,
+T=\mathrm{blockdiag}(U^\top,I)Q^\top,
 \qquad y_r=Ty,\qquad X_r=TX_{\mathrm{fixed}}.
 ```
 

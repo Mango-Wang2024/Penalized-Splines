@@ -42,7 +42,7 @@ A common row rotation $T$ and separate coefficient rotations $V_j$ produce $Z_{r
 Here the loading plot shows the fitted relative covariance factor:
 
 ```math
-\Lambda=\operatorname{blockdiag}(\theta_1I_6,\theta_2I_6),
+\Lambda=\mathrm{blockdiag}(\theta_1I_6,\theta_2I_6),
 \qquad\theta_j=r_j/\sigma.
 ```
 
