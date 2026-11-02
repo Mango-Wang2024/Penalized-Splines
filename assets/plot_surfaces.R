@@ -57,7 +57,7 @@ plot_response_surfaces <- function(grid, r_grid, julia_grid, keys, output, resol
   positions <- min(y)+(ticks+bound)/(2*bound)*height
   segments(right,positions,right+.018*span,positions,col="#555555",lwd=.5)
   text(right+.035*span,positions,format(ticks,trim=TRUE),adj=c(0,.5),cex=.78)
-  text((left+right)/2,max(y)+.075*height,bquote(times~10^.(exponent)),cex=.8)
+  text((left+right)/2,max(y)+.075*height,bquote("×"~10^.(exponent)),cex=.8)
   text(right+.14*span,mean(yrange),expression(Delta*hat(y)),srt=90,cex=.9)
   par(xpd=FALSE)
   invisible(list(maximum_absolute_difference=largest,colour_exponent=exponent))
