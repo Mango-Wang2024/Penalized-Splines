@@ -8,7 +8,7 @@ R and Julia independently prepare and fit the same additive model. R uses `mgcv:
 
 Each component has its own $\lambda_j=\sigma^2/r_j^2$. The table compares these smoothing strengths; the variance values and their errors are retained in the detailed estimates.
 
-| Case | Component | R $\lambda_j$ | Julia $\lambda_j$ | Relative error |
+| Case | Component | R λ<sub>j</sub> | Julia λ<sub>j</sub> | Relative error |
 | --- | --- | ---: | ---: | ---: |
 | `uniform_k8` | $x_1$ | 0.56176456 | 0.56176461 | 9.21e-08 |
 | `uniform_k8` | $x_2$ | 5.4194393 | 5.4194392 | 1.80e-08 |

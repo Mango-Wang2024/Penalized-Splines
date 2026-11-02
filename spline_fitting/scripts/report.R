@@ -81,7 +81,7 @@ run <- function() {
     sprintf("**%d/%d comparisons passed across %d cases.** Spline-component counts: %s.",sum(checks$passed),nrow(checks),length(cases),paste(unique(r$components),collapse=", ")),"",
     "## Smoothing estimates","",
     "Each component has its own $\\lambda_j=\\sigma^2/r_j^2$. The table compares these smoothing strengths; the variance values and their errors are retained in the detailed estimates.","",
-    "| Case | Component | R $\\lambda_j$ | Julia $\\lambda_j$ | Relative error |","| --- | --- | ---: | ---: | ---: |")
+    "| Case | Component | R λ<sub>j</sub> | Julia λ<sub>j</sub> | Relative error |","| --- | --- | ---: | ---: | ---: |")
   for(i in seq_len(nrow(estimates)))lines <- c(lines,sprintf("| `%s` | $%s$ | %.8g | %.8g | %.2e |",estimates$case[i],gsub("x","x_",estimates$component[i]),estimates$R_lambda[i],estimates$Julia_lambda[i],estimates$lambda_relative_error[i]))
   lines <- c(lines,"",sprintf("Largest scaled difference in training fitted responses: **%.2e**; on the shared evaluation grid: **%.2e**.",max(checks$error[checks$check=="fitted responses"]),max(checks$error[checks$check=="grid predictions"])),"",
     "## Joint response and individual components","")
