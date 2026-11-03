@@ -25,9 +25,9 @@ Largest scaled difference in training fitted responses: **1.70e-08**; on the sha
 
 ## Joint response and individual components
 
-<a href="spline_fitting/outputs/shared/comparison/fitted_surfaces.png"><img src="spline_fitting/outputs/shared/comparison/fitted_surfaces.png" alt="Six panels: known, R and Julia surfaces; Julia minus R; and both fits minus the known surface" width="900"></a>
+<a href="spline_fitting/outputs/shared/comparison/fitted_surfaces.png"><img src="spline_fitting/outputs/shared/comparison/fitted_surfaces.png" alt="Six panels: known, R and Julia surfaces with training observations; and three surface difference maps" width="900"></a>
 
-Panels (a–c) share the same viewing angle and response limits. Panel (d) compares Julia with R on its own colour scale; its maximum absolute difference is **2.59e-09**. Panels (e–f) compare each fit with the known surface, sharing a colour scale from **−0.3 to 0.3** in response units. Red is positive and blue is negative; every difference scale is centred at zero.
+Panels (a–c) overlay the same **200 training observations** as grey points on translucent surfaces, using identical viewing angles and response limits. The points are noisy observed responses. Panels (d–f) compare surfaces on the prediction grid: (d) Julia minus R, with a maximum absolute difference of **2.59e-09**; (e–f) each fit minus the known surface, sharing a **−0.3 to 0.3** colour scale. Red is positive and blue is negative; all difference scales are centred at zero.
 
 ### Difference from the known surface
 

@@ -57,7 +57,7 @@ run <- function() {
   rg <- read.csv(file.path(rdir,main,"grid.csv"));jg <- read.csv(file.path(jdir,main,"grid.csv"));grid <- read.csv(file.path(inputs,main,"grid.csv"))
   if(length(keys)==2L) {
     source(file.path(project,"assets","plot_surfaces.R"))
-    surface_stats <- plot_response_surfaces(grid,rg,jg,keys,file.path(dst,"fitted_surfaces.png"))
+    surface_stats <- plot_response_surfaces(grid,rg,jg,keys,file.path(dst,"fitted_surfaces.png"),observations=raw)
     truth_stats <- cbind(case=main,surface_stats$truth_comparison)
     write.table(truth_stats,file.path(dst,"truth_comparison.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
   }
@@ -88,8 +88,8 @@ run <- function() {
   lines <- c(lines,"",sprintf("Largest scaled difference in training fitted responses: **%.2e**; on the shared evaluation grid: **%.2e**.",max(checks$error[checks$check=="fitted responses"]),max(checks$error[checks$check=="grid predictions"])),"",
     "## Joint response and individual components","")
   if(length(keys)==2L) {
-    lines <- c(lines,image_tag(file.path(dst,"fitted_surfaces.png"),"Six panels: known, R and Julia surfaces; Julia minus R; and both fits minus the known surface",width=900),"",
-      sprintf("Panels (a–c) share the same viewing angle and response limits. Panel (d) compares Julia with R on its own colour scale; its maximum absolute difference is **%.2e**. Panels (e–f) compare each fit with the known surface, sharing a colour scale from **−%.3g to %.3g** in response units. Red is positive and blue is negative; every difference scale is centred at zero.",surface_stats$maximum_absolute_difference,surface_stats$truth_colour_limit,surface_stats$truth_colour_limit),"",
+    lines <- c(lines,image_tag(file.path(dst,"fitted_surfaces.png"),"Six panels: known, R and Julia surfaces with training observations; and three surface difference maps",width=900),"",
+      sprintf("Panels (a–c) overlay the same **%d training observations** as grey points on translucent surfaces, using identical viewing angles and response limits. The points are noisy observed responses. Panels (d–f) compare surfaces on the prediction grid: (d) Julia minus R, with a maximum absolute difference of **%.2e**; (e–f) each fit minus the known surface, sharing a **−%.3g to %.3g** colour scale. Red is positive and blue is negative; all difference scales are centred at zero.",nrow(raw),surface_stats$maximum_absolute_difference,surface_stats$truth_colour_limit,surface_stats$truth_colour_limit),"",
       "### Difference from the known surface","",
       sprintf("Across %d grid points, RMSE is **%.4f for R** and **%.4f for Julia**. The largest absolute error across both fits is **%.4f**. These errors reflect recovery of the known curve from noisy training data; the R–Julia comparison above checks agreement between implementations.",truth_stats$grid_points[1],truth_stats$rmse[1],truth_stats$rmse[2],max(truth_stats$maximum_absolute_error)),"",
       paste0(link("Numerical summary",file.path(dst,"truth_comparison.tsv")),". RMSE is the square root of the mean squared prediction error on this grid."),"")
