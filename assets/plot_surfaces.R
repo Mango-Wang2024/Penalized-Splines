@@ -62,3 +62,49 @@ plot_response_surfaces <- function(grid, r_grid, julia_grid, keys, output, resol
   par(xpd=FALSE)
   invisible(list(maximum_absolute_difference=largest,colour_exponent=exponent))
 }
+
+# Compare each estimated mean response with the known simulation surface.
+# Both maps use one colour scale, in the original response units.
+plot_surface_truth_errors <- function(grid, r_grid, julia_grid, keys, output, resolution=400) {
+  stopifnot(length(keys)==2L, nrow(grid)==nrow(r_grid), nrow(grid)==nrow(julia_grid),
+            !anyDuplicated(grid[keys]))
+  for(key in keys)stopifnot(isTRUE(all.equal(grid[[key]],r_grid[[key]],tolerance=1e-12)),
+                          isTRUE(all.equal(grid[[key]],julia_grid[[key]],tolerance=1e-12)))
+  x <- sort(unique(grid[[keys[1]]])); y <- sort(unique(grid[[keys[2]]]))
+  stopifnot(nrow(grid)==length(x)*length(y))
+  order <- order(grid[[keys[2]]],grid[[keys[1]]])
+  truth <- grid$truth[order]
+  errors <- list(r_grid$fitted[order]-truth,julia_grid$fitted[order]-truth)
+  stopifnot(all(is.finite(c(truth,unlist(errors)))))
+  largest <- max(abs(unlist(errors)))
+  magnitude <- if(largest>0)10^floor(log10(largest)) else 1
+  bound <- max(1,ceiling(largest/magnitude))*magnitude
+  colours <- colorRampPalette(c("#326795","#FFFFFF","#A65048"))(201)
+  labels <- lapply(keys,function(key) {
+    if(grepl("^x[0-9]+$",key))bquote(x[.(as.integer(sub("^x","",key)))]) else key
+  })
+  png(output,width=7.6,height=3.6,units="in",res=resolution,pointsize=9.5,type="quartz",bg="white")
+  on.exit(dev.off(),add=TRUE)
+  layout(matrix(c(1,2,3),nrow=1),widths=c(1,1,.26))
+  par(family="sans",cex=1,col.axis="#333333",col.lab="#222222",fg="#555555",
+      lwd=.6,tcl=-.2,mgp=c(2,.4,0),xaxs="i",yaxs="i")
+  for(i in seq_along(errors)) {
+    par(mar=c(3.8,3.7,2.5,.8),pty="s",cex.axis=.85,cex.lab=.95)
+    image(x,y,matrix(errors[[i]],length(x),length(y)),col=colours,zlim=c(-bound,bound),
+      axes=FALSE,xlab=as.expression(labels[[1]]),ylab=as.expression(labels[[2]]),
+      xlim=range(x),ylim=range(y),useRaster=TRUE)
+    axis(1,at=pretty(range(x),n=3));axis(2,at=pretty(range(y),n=3),las=1)
+    box(col="#555555",lwd=.6)
+    title(main=c("(a) R − known surface","(b) Julia − known surface")[i],line=.8,adj=0,font.main=1,cex.main=1.05)
+  }
+  par(mar=c(3.8,.1,2.5,4.0),pty="m")
+  plot.new();plot.window(xlim=c(0,1),ylim=c(-bound,bound),xaxs="i",yaxs="i")
+  rasterImage(as.raster(matrix(rev(colours),ncol=1)),0,-bound,1,bound,interpolate=FALSE)
+  rect(0,-bound,1,bound,border="#777777",lwd=.4)
+  ticks <- pretty(c(-bound,bound),n=5);ticks <- ticks[abs(ticks)<=bound]
+  axis(4,at=ticks,labels=format(signif(ticks,3),trim=TRUE),las=1,cex.axis=.8)
+  mtext("Prediction − truth",4,line=2.5,cex=.85)
+  invisible(data.frame(method=c("R","Julia"),grid_points=length(truth),
+    rmse=vapply(errors,function(e)sqrt(mean(e^2)),0.),
+    maximum_absolute_error=vapply(errors,function(e)max(abs(e)),0.)))
+}

@@ -29,6 +29,16 @@ Largest scaled difference in training fitted responses: **1.70e-08**; on the sha
 
 Panels (a–c) share the same viewing angle and response limits. Panel (d) shows Julia minus R with a symmetric colour scale centred at zero; the multiplier above its colourbar gives the scale. Its maximum absolute difference is **2.59e-09**. The known surface is a simulation reference; only the noisy observations are used for fitting.
 
+### Difference from the known surface
+
+<a href="spline_fitting/outputs/shared/comparison/surface_truth_errors.png"><img src="spline_fitting/outputs/shared/comparison/surface_truth_errors.png" alt="R minus the known surface and Julia minus the known surface, with a shared colour scale" width="800"></a>
+
+Each panel shows fitted prediction minus the known, noiseless value. Red indicates overestimation; blue indicates underestimation. Both panels share the same colour scale.
+
+Across 961 grid points, RMSE is **0.0794 for R** and **0.0794 for Julia**. The largest absolute error across both fits is **0.2531**. These errors reflect recovery of the known curve from noisy training data; the R–Julia comparison above checks agreement between implementations.
+
+[Numerical summary](spline_fitting/outputs/shared/comparison/truth_comparison.tsv). RMSE is the square root of the mean squared prediction error on this grid.
+
 <a href="spline_fitting/outputs/shared/comparison/component_curves.png"><img src="spline_fitting/outputs/shared/comparison/component_curves.png" alt="Centered additive spline components" width="800"></a>
 
 Each panel isolates one spline contribution. Known components are centered over the training observations to match the fitted smooths; their removed average levels belong to the overall intercept.

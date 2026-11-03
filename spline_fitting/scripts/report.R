@@ -58,6 +58,8 @@ run <- function() {
   if(length(keys)==2L) {
     source(file.path(project,"assets","plot_surfaces.R"))
     surface_stats <- plot_response_surfaces(grid,rg,jg,keys,file.path(dst,"fitted_surfaces.png"))
+    truth_stats <- cbind(case=main,plot_surface_truth_errors(grid,rg,jg,keys,file.path(dst,"surface_truth_errors.png")))
+    write.table(truth_stats,file.path(dst,"truth_comparison.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
   }
   rc <- read.csv(file.path(rdir,main,"components.csv"));jc <- read.csv(file.path(jdir,main,"components.csv"))
   png(file.path(dst,"component_curves.png"),width=1800,height=700*ceiling(length(keys)/2),res=200,type="quartz")
@@ -85,8 +87,15 @@ run <- function() {
   for(i in seq_len(nrow(estimates)))lines <- c(lines,sprintf("| `%s` | $%s$ | %.8g | %.8g | %.2e |",estimates$case[i],gsub("x","x_",estimates$component[i]),estimates$R_lambda[i],estimates$Julia_lambda[i],estimates$lambda_relative_error[i]))
   lines <- c(lines,"",sprintf("Largest scaled difference in training fitted responses: **%.2e**; on the shared evaluation grid: **%.2e**.",max(checks$error[checks$check=="fitted responses"]),max(checks$error[checks$check=="grid predictions"])),"",
     "## Joint response and individual components","")
-  if(length(keys)==2L)lines <- c(lines,image_tag(file.path(dst,"fitted_surfaces.png"),"Known, R and Julia response surfaces and their difference"),"",
-    sprintf("Panels (a–c) share the same viewing angle and response limits. Panel (d) shows Julia minus R with a symmetric colour scale centred at zero; the multiplier above its colourbar gives the scale. Its maximum absolute difference is **%.2e**. The known surface is a simulation reference; only the noisy observations are used for fitting.",surface_stats$maximum_absolute_difference),"")
+  if(length(keys)==2L) {
+    lines <- c(lines,image_tag(file.path(dst,"fitted_surfaces.png"),"Known, R and Julia response surfaces and their difference"),"",
+      sprintf("Panels (a–c) share the same viewing angle and response limits. Panel (d) shows Julia minus R with a symmetric colour scale centred at zero; the multiplier above its colourbar gives the scale. Its maximum absolute difference is **%.2e**. The known surface is a simulation reference; only the noisy observations are used for fitting.",surface_stats$maximum_absolute_difference),"",
+      "### Difference from the known surface","",
+      image_tag(file.path(dst,"surface_truth_errors.png"),"R minus the known surface and Julia minus the known surface, with a shared colour scale"),"",
+      "Each panel shows fitted prediction minus the known, noiseless value. Red indicates overestimation; blue indicates underestimation. Both panels share the same colour scale.","",
+      sprintf("Across %d grid points, RMSE is **%.4f for R** and **%.4f for Julia**. The largest absolute error across both fits is **%.4f**. These errors reflect recovery of the known curve from noisy training data; the R–Julia comparison above checks agreement between implementations.",truth_stats$grid_points[1],truth_stats$rmse[1],truth_stats$rmse[2],max(truth_stats$maximum_absolute_error)),"",
+      paste0(link("Numerical summary",file.path(dst,"truth_comparison.tsv")),". RMSE is the square root of the mean squared prediction error on this grid."),"")
+  }
   lines <- c(lines,image_tag(file.path(dst,"component_curves.png"),"Centered additive spline components"),"",
     "Each panel isolates one spline contribution. Known components are centered over the training observations to match the fitted smooths; their removed average levels belong to the overall intercept.","",
     "## Supporting checks","",
