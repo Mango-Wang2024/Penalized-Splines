@@ -15,7 +15,6 @@
 !spline_fitting/outputs/shared/unit_tests.txt
 !spline_fitting/outputs/shared/comparison/*.tsv
 !spline_fitting/outputs/shared/comparison/fitted_surfaces.png
-!spline_fitting/outputs/shared/comparison/surface_truth_errors.png
 !spline_fitting/outputs/shared/comparison/component_curves.png
 !spline_fitting/outputs/shared/r_reference/fit_summary.tsv
 !spline_fitting/outputs/shared/r_reference/component_estimates.tsv

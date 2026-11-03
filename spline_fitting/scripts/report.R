@@ -58,7 +58,7 @@ run <- function() {
   if(length(keys)==2L) {
     source(file.path(project,"assets","plot_surfaces.R"))
     surface_stats <- plot_response_surfaces(grid,rg,jg,keys,file.path(dst,"fitted_surfaces.png"))
-    truth_stats <- cbind(case=main,plot_surface_truth_errors(grid,rg,jg,keys,file.path(dst,"surface_truth_errors.png")))
+    truth_stats <- cbind(case=main,surface_stats$truth_comparison)
     write.table(truth_stats,file.path(dst,"truth_comparison.tsv"),sep="\t",quote=FALSE,row.names=FALSE)
   }
   rc <- read.csv(file.path(rdir,main,"components.csv"));jc <- read.csv(file.path(jdir,main,"components.csv"))
@@ -77,7 +77,7 @@ run <- function() {
     paste(c(rep("..",length(a)-n),b[seq_along(b)>n]),collapse="/")
   }
   link <- function(label,path)paste0("[",label,"](",relative_path(path),")")
-  image_tag <- function(file,alt)paste0('<a href="',relative_path(file),'"><img src="',relative_path(file),'" alt="',alt,'" width="800"></a>')
+  image_tag <- function(file,alt,width=800)paste0('<a href="',relative_path(file),'"><img src="',relative_path(file),'" alt="',alt,'" width="',width,'"></a>')
   lines <- c("# Stage 2 results","",
     "R and Julia independently prepare and fit the same additive model. R uses `mgcv::gamm` / `nlme::lme`; Julia uses `MixedModels.jl`. REML jointly estimates a separate spline variance for each predictor and one common noise variance.","",
     sprintf("**%d/%d comparisons passed across %d cases.** Spline-component counts: %s.",sum(checks$passed),nrow(checks),length(cases),paste(unique(r$components),collapse=", ")),"",
@@ -88,11 +88,9 @@ run <- function() {
   lines <- c(lines,"",sprintf("Largest scaled difference in training fitted responses: **%.2e**; on the shared evaluation grid: **%.2e**.",max(checks$error[checks$check=="fitted responses"]),max(checks$error[checks$check=="grid predictions"])),"",
     "## Joint response and individual components","")
   if(length(keys)==2L) {
-    lines <- c(lines,image_tag(file.path(dst,"fitted_surfaces.png"),"Known, R and Julia response surfaces and their difference"),"",
-      sprintf("Panels (a–c) share the same viewing angle and response limits. Panel (d) shows Julia minus R with a symmetric colour scale centred at zero; the multiplier above its colourbar gives the scale. Its maximum absolute difference is **%.2e**. The known surface is a simulation reference; only the noisy observations are used for fitting.",surface_stats$maximum_absolute_difference),"",
+    lines <- c(lines,image_tag(file.path(dst,"fitted_surfaces.png"),"Six panels: known, R and Julia surfaces; Julia minus R; and both fits minus the known surface",width=900),"",
+      sprintf("Panels (a–c) share the same viewing angle and response limits. Panel (d) compares Julia with R on its own colour scale; its maximum absolute difference is **%.2e**. Panels (e–f) compare each fit with the known surface, sharing a colour scale from **−%.3g to %.3g** in response units. Red is positive and blue is negative; every difference scale is centred at zero.",surface_stats$maximum_absolute_difference,surface_stats$truth_colour_limit,surface_stats$truth_colour_limit),"",
       "### Difference from the known surface","",
-      image_tag(file.path(dst,"surface_truth_errors.png"),"R minus the known surface and Julia minus the known surface, with a shared colour scale"),"",
-      "Each panel shows fitted prediction minus the known, noiseless value. Red indicates overestimation; blue indicates underestimation. Both panels share the same colour scale.","",
       sprintf("Across %d grid points, RMSE is **%.4f for R** and **%.4f for Julia**. The largest absolute error across both fits is **%.4f**. These errors reflect recovery of the known curve from noisy training data; the R–Julia comparison above checks agreement between implementations.",truth_stats$grid_points[1],truth_stats$rmse[1],truth_stats$rmse[2],max(truth_stats$maximum_absolute_error)),"",
       paste0(link("Numerical summary",file.path(dst,"truth_comparison.tsv")),". RMSE is the square root of the mean squared prediction error on this grid."),"")
   }

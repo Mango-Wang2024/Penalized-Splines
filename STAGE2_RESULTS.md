@@ -25,15 +25,11 @@ Largest scaled difference in training fitted responses: **1.70e-08**; on the sha
 
 ## Joint response and individual components
 
-<a href="spline_fitting/outputs/shared/comparison/fitted_surfaces.png"><img src="spline_fitting/outputs/shared/comparison/fitted_surfaces.png" alt="Known, R and Julia response surfaces and their difference" width="800"></a>
+<a href="spline_fitting/outputs/shared/comparison/fitted_surfaces.png"><img src="spline_fitting/outputs/shared/comparison/fitted_surfaces.png" alt="Six panels: known, R and Julia surfaces; Julia minus R; and both fits minus the known surface" width="900"></a>
 
-Panels (a–c) share the same viewing angle and response limits. Panel (d) shows Julia minus R with a symmetric colour scale centred at zero; the multiplier above its colourbar gives the scale. Its maximum absolute difference is **2.59e-09**. The known surface is a simulation reference; only the noisy observations are used for fitting.
+Panels (a–c) share the same viewing angle and response limits. Panel (d) compares Julia with R on its own colour scale; its maximum absolute difference is **2.59e-09**. Panels (e–f) compare each fit with the known surface, sharing a colour scale from **−0.3 to 0.3** in response units. Red is positive and blue is negative; every difference scale is centred at zero.
 
 ### Difference from the known surface
-
-<a href="spline_fitting/outputs/shared/comparison/surface_truth_errors.png"><img src="spline_fitting/outputs/shared/comparison/surface_truth_errors.png" alt="R minus the known surface and Julia minus the known surface, with a shared colour scale" width="800"></a>
-
-Each panel shows fitted prediction minus the known, noiseless value. Red indicates overestimation; blue indicates underestimation. Both panels share the same colour scale.
 
 Across 961 grid points, RMSE is **0.0794 for R** and **0.0794 for Julia**. The largest absolute error across both fits is **0.2531**. These errors reflect recovery of the known curve from noisy training data; the R–Julia comparison above checks agreement between implementations.
 
