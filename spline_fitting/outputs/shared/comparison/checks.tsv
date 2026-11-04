@@ -3,89 +3,89 @@ uniform_k8	all	same observations	1.73723887283789e-15	1e-12	TRUE
 uniform_k8	all	R REML converged	0	0	TRUE
 uniform_k8	all	Julia REML converged	0	0	TRUE
 uniform_k8	all	one variance per component	0	0	TRUE
-uniform_k8	all	residual variance	1.82322633990369e-09	1e-05	TRUE
-uniform_k8	all	fitted responses	8.74917406693163e-10	1e-06	TRUE
+uniform_k8	all	residual variance	7.3352859773017e-10	1e-05	TRUE
+uniform_k8	all	fitted responses	2.90845388554077e-10	1e-06	TRUE
 uniform_k8	all	same grid predictors	1.62525012195199e-15	1e-12	TRUE
-uniform_k8	all	grid predictions	9.73792845824271e-10	1e-06	TRUE
+uniform_k8	all	grid predictions	3.33299272299617e-10	1e-06	TRUE
 uniform_k8	x1	same knots	0	1e-12	TRUE
-uniform_k8	x1	smoothing lambda	9.21306895390562e-08	1e-05	TRUE
-uniform_k8	x1	spline variance	9.03074667089722e-08	1e-05	TRUE
-uniform_k8	x1	component curve	9.13157651449712e-10	1e-06	TRUE
+uniform_k8	x1	smoothing lambda	2.23568056781729e-08	1e-05	TRUE
+uniform_k8	x1	spline variance	2.16232805465695e-08	1e-05	TRUE
+uniform_k8	x1	component curve	2.54712106669295e-10	1e-06	TRUE
 uniform_k8	x1	variance-to-smoothing identity	3.16210202338639e-15	1e-10	TRUE
 uniform_k8	x2	same knots	0	1e-12	TRUE
-uniform_k8	x2	smoothing lambda	1.79910973032784e-08	1e-05	TRUE
-uniform_k8	x2	spline variance	1.98143217019973e-08	1e-05	TRUE
-uniform_k8	x2	component curve	7.251213455105e-10	1e-06	TRUE
+uniform_k8	x2	smoothing lambda	1.46157783795253e-08	1e-05	TRUE
+uniform_k8	x2	spline variance	1.38822519145031e-08	1e-05	TRUE
+uniform_k8	x2	component curve	5.97611778937235e-10	1e-06	TRUE
 uniform_k8	x2	variance-to-smoothing identity	1.80276263547861e-15	1e-10	TRUE
 default_k8	all	same observations	1.73723887283789e-15	1e-12	TRUE
 default_k8	all	R REML converged	0	0	TRUE
 default_k8	all	Julia REML converged	0	0	TRUE
 default_k8	all	one variance per component	0	0	TRUE
-default_k8	all	residual variance	1.8228999776561e-09	1e-05	TRUE
-default_k8	all	fitted responses	8.75440311684675e-10	1e-06	TRUE
+default_k8	all	residual variance	7.33202235482226e-10	1e-05	TRUE
+default_k8	all	fitted responses	2.90408382984103e-10	1e-06	TRUE
 default_k8	all	same grid predictors	1.62525012195199e-15	1e-12	TRUE
-default_k8	all	grid predictions	9.74262844555122e-10	1e-06	TRUE
+default_k8	all	grid predictions	3.32875433315198e-10	1e-06	TRUE
 default_k8	x1	same knots	1.14656199037261e-16	1e-12	TRUE
-default_k8	x1	smoothing lambda	9.21650064457347e-08	1e-05	TRUE
-default_k8	x1	spline variance	9.03421085448239e-08	1e-05	TRUE
-default_k8	x1	component curve	9.13391846801976e-10	1e-06	TRUE
+default_k8	x1	smoothing lambda	2.23911225872458e-08	1e-05	TRUE
+default_k8	x1	spline variance	2.16579223848006e-08	1e-05	TRUE
+default_k8	x1	component curve	2.5492675621529e-10	1e-06	TRUE
 default_k8	x1	variance-to-smoothing identity	1.77868238821588e-15	1e-10	TRUE
 default_k8	x2	same knots	3.80066731165453e-16	1e-12	TRUE
-default_k8	x2	smoothing lambda	1.80633408840526e-08	1e-05	TRUE
-default_k8	x2	spline variance	1.988624119971e-08	1e-05	TRUE
-default_k8	x2	component curve	7.2761659321072e-10	1e-06	TRUE
+default_k8	x2	smoothing lambda	1.45435347985021e-08	1e-05	TRUE
+default_k8	x2	spline variance	1.38103324163585e-08	1e-05	TRUE
+default_k8	x2	component curve	5.94860700422202e-10	1e-06	TRUE
 default_k8	x2	variance-to-smoothing identity	3.27775024608794e-16	1e-10	TRUE
 uneven_k10	all	same observations	1.73723887283789e-15	1e-12	TRUE
 uneven_k10	all	R REML converged	0	0	TRUE
 uneven_k10	all	Julia REML converged	0	0	TRUE
 uneven_k10	all	one variance per component	0	0	TRUE
-uneven_k10	all	residual variance	1.43557727671905e-09	1e-05	TRUE
-uneven_k10	all	fitted responses	2.31813724612156e-09	1e-06	TRUE
+uneven_k10	all	residual variance	5.13669467626044e-09	1e-05	TRUE
+uneven_k10	all	fitted responses	3.5334815487268e-09	1e-06	TRUE
 uneven_k10	all	same grid predictors	1.62525012195199e-15	1e-12	TRUE
-uneven_k10	all	grid predictions	2.45391667178842e-09	1e-06	TRUE
+uneven_k10	all	grid predictions	3.8123837196253e-09	1e-06	TRUE
 uneven_k10	x1	same knots	0	1e-12	TRUE
-uneven_k10	x1	smoothing lambda	3.98230756022893e-08	1e-05	TRUE
-uneven_k10	x1	spline variance	4.12586499764758e-08	1e-05	TRUE
-uneven_k10	x1	component curve	3.54213709739021e-10	1e-06	TRUE
+uneven_k10	x1	smoothing lambda	5.32675201248487e-08	1e-05	TRUE
+uneven_k10	x1	spline variance	4.81308286886679e-08	1e-05	TRUE
+uneven_k10	x1	component curve	9.67022756507208e-10	1e-06	TRUE
 uneven_k10	x1	variance-to-smoothing identity	2.98338267019199e-15	1e-10	TRUE
 uneven_k10	x2	same knots	0	1e-12	TRUE
-uneven_k10	x2	smoothing lambda	1.90926834319189e-07	1e-05	TRUE
-uneven_k10	x2	spline variance	1.89491261969854e-07	1e-05	TRUE
-uneven_k10	x2	component curve	6.70852133346113e-09	1e-06	TRUE
+uneven_k10	x2	smoothing lambda	2.90145464565584e-07	1e-05	TRUE
+uneven_k10	x2	spline variance	2.85008776041347e-07	1e-05	TRUE
+uneven_k10	x2	component curve	1.01790080061145e-08	1e-06	TRUE
 uneven_k10	x2	variance-to-smoothing identity	4.76303421328598e-15	1e-10	TRUE
 duplicates_k6	all	same observations	1.76062585207923e-15	1e-12	TRUE
 duplicates_k6	all	R REML converged	0	0	TRUE
 duplicates_k6	all	Julia REML converged	0	0	TRUE
 duplicates_k6	all	one variance per component	0	0	TRUE
-duplicates_k6	all	residual variance	1.04939157625009e-09	1e-05	TRUE
-duplicates_k6	all	fitted responses	3.73575920739199e-10	1e-06	TRUE
+duplicates_k6	all	residual variance	1.30534708106341e-09	1e-05	TRUE
+duplicates_k6	all	fitted responses	4.66268695624533e-10	1e-06	TRUE
 duplicates_k6	all	same grid predictors	1.62525012195199e-15	1e-12	TRUE
-duplicates_k6	all	grid predictions	3.74378396790866e-10	1e-06	TRUE
+duplicates_k6	all	grid predictions	4.66833436514464e-10	1e-06	TRUE
 duplicates_k6	x1	same knots	0	1e-12	TRUE
-duplicates_k6	x1	smoothing lambda	6.0154795202729e-08	1e-05	TRUE
-duplicates_k6	x1	spline variance	5.91054036333335e-08	1e-05	TRUE
-duplicates_k6	x1	component curve	4.01895955975365e-10	1e-06	TRUE
+duplicates_k6	x1	smoothing lambda	7.50232242708718e-08	1e-05	TRUE
+duplicates_k6	x1	spline variance	7.37178773038339e-08	1e-05	TRUE
+duplicates_k6	x1	component curve	5.00761417172784e-10	1e-06	TRUE
 duplicates_k6	x1	variance-to-smoothing identity	0	1e-10	TRUE
 duplicates_k6	x2	same knots	0	1e-12	TRUE
-duplicates_k6	x2	smoothing lambda	5.04148671279237e-09	1e-05	TRUE
-duplicates_k6	x2	spline variance	6.0908776565843e-09	1e-05	TRUE
-duplicates_k6	x2	component curve	1.58710576017021e-10	1e-06	TRUE
+duplicates_k6	x2	smoothing lambda	6.509435161504e-09	1e-05	TRUE
+duplicates_k6	x2	spline variance	7.8147816996195e-09	1e-05	TRUE
+duplicates_k6	x2	component curve	2.04600445911422e-10	1e-06	TRUE
 duplicates_k6	x2	variance-to-smoothing identity	6.72159265540223e-16	1e-10	TRUE
 small_k5	all	same observations	1.73723887283789e-15	1e-12	TRUE
 small_k5	all	R REML converged	0	0	TRUE
 small_k5	all	Julia REML converged	0	0	TRUE
 small_k5	all	one variance per component	0	0	TRUE
-small_k5	all	residual variance	3.65531266555345e-08	1e-05	TRUE
-small_k5	all	fitted responses	1.70208842567377e-08	1e-06	TRUE
+small_k5	all	residual variance	3.80292964176116e-08	1e-05	TRUE
+small_k5	all	fitted responses	1.83271706339952e-08	1e-06	TRUE
 small_k5	all	same grid predictors	1.62525012195199e-15	1e-12	TRUE
-small_k5	all	grid predictions	1.92872690884738e-08	1e-06	TRUE
+small_k5	all	grid predictions	2.06232736797801e-08	1e-06	TRUE
 small_k5	x1	same knots	0	1e-12	TRUE
-small_k5	x1	smoothing lambda	1.26153463588668e-06	1e-05	TRUE
-small_k5	x1	spline variance	1.22498155171018e-06	1e-05	TRUE
-small_k5	x1	component curve	9.63347783780816e-09	1e-06	TRUE
+small_k5	x1	smoothing lambda	1.24258940049051e-06	1e-05	TRUE
+small_k5	x1	spline variance	1.20456014772042e-06	1e-05	TRUE
+small_k5	x1	component curve	9.67090138823955e-09	1e-06	TRUE
 small_k5	x1	variance-to-smoothing identity	2.24009573607084e-15	1e-10	TRUE
 small_k5	x2	same knots	6.45997090532098e-17	1e-12	TRUE
-small_k5	x2	smoothing lambda	1.531959091978e-06	1e-05	TRUE
-small_k5	x2	spline variance	1.49540601772614e-06	1e-05	TRUE
-small_k5	x2	component curve	4.37688234181489e-08	1e-06	TRUE
+small_k5	x2	smoothing lambda	1.68437619484892e-06	1e-05	TRUE
+small_k5	x2	spline variance	1.64634695893318e-06	1e-05	TRUE
+small_k5	x2	component curve	4.80416396237136e-08	1e-06	TRUE
 small_k5	x2	variance-to-smoothing identity	2.15019092185877e-15	1e-10	TRUE

@@ -10,24 +10,24 @@ Each component has its own $\lambda_j=\sigma^2/r_j^2$. The table compares these 
 
 | Case | Component | R λ<sub>j</sub> | Julia λ<sub>j</sub> | Relative error |
 | --- | --- | ---: | ---: | ---: |
-| `uniform_k8` | $x_1$ | 0.56176456 | 0.56176461 | 9.21e-08 |
-| `uniform_k8` | $x_2$ | 5.4194393 | 5.4194392 | 1.80e-08 |
-| `default_k8` | $x_1$ | 0.56176456 | 0.56176461 | 9.22e-08 |
-| `default_k8` | $x_2$ | 5.4194393 | 5.4194392 | 1.81e-08 |
-| `uneven_k10` | $x_1$ | 4.1679192 | 4.167919 | 3.98e-08 |
-| `uneven_k10` | $x_2$ | 0.83912958 | 0.83912974 | 1.91e-07 |
-| `duplicates_k6` | $x_1$ | 0.079999323 | 0.079999328 | 6.02e-08 |
-| `duplicates_k6` | $x_2$ | 5.2855236 | 5.2855236 | 5.04e-09 |
-| `small_k5` | $x_1$ | 0.0085183673 | 0.008518378 | 1.26e-06 |
-| `small_k5` | $x_2$ | 0.20653478 | 0.2065351 | 1.53e-06 |
+| `uniform_k8` | $x_1$ | 0.56176456 | 0.56176457 | 2.24e-08 |
+| `uniform_k8` | $x_2$ | 5.4194393 | 5.4194393 | 1.46e-08 |
+| `default_k8` | $x_1$ | 0.56176456 | 0.56176457 | 2.24e-08 |
+| `default_k8` | $x_2$ | 5.4194393 | 5.4194393 | 1.45e-08 |
+| `uneven_k10` | $x_1$ | 4.1679192 | 4.1679194 | 5.33e-08 |
+| `uneven_k10` | $x_2$ | 0.83912958 | 0.83912982 | 2.90e-07 |
+| `duplicates_k6` | $x_1$ | 0.079999323 | 0.079999329 | 7.50e-08 |
+| `duplicates_k6` | $x_2$ | 5.2855236 | 5.2855236 | 6.51e-09 |
+| `small_k5` | $x_1$ | 0.0085183673 | 0.0085183779 | 1.24e-06 |
+| `small_k5` | $x_2$ | 0.20653478 | 0.20653513 | 1.68e-06 |
 
-Largest scaled difference in training fitted responses: **1.70e-08**; on the shared evaluation grid: **1.93e-08**.
+Largest scaled difference in training fitted responses: **1.83e-08**; on the shared evaluation grid: **2.06e-08**.
 
 ## Joint response and individual components
 
 <a href="spline_fitting/outputs/shared/comparison/fitted_surfaces.png"><img src="spline_fitting/outputs/shared/comparison/fitted_surfaces.png" alt="Six panels: known, R and Julia surfaces with training observations; and three surface difference maps" width="900"></a>
 
-Panels (a–c) overlay the same **200 training observations** as grey points on translucent surfaces, using identical viewing angles and response limits. The points are noisy observed responses. Panels (d–f) compare surfaces on the prediction grid: (d) Julia minus R, with a maximum absolute difference of **2.59e-09**; (e–f) each fit minus the known surface, sharing a **−0.3 to 0.3** colour scale. Red is positive and blue is negative; all difference scales are centred at zero.
+Panels (a–c) overlay the same **200 training observations** as grey points on translucent surfaces, using identical viewing angles and response limits. The points are noisy observed responses. Panels (d–f) compare surfaces on the prediction grid: (d) Julia minus R, with a maximum absolute difference of **8.65e-10**; (e–f) each fit minus the known surface, sharing a **−0.3 to 0.3** colour scale. Red is positive and blue is negative; all difference scales are centred at zero.
 
 ### Difference from the known surface
 

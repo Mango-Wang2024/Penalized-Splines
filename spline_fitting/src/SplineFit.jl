@@ -3,11 +3,10 @@ using LinearAlgebra, MixedModels, StatsModels
 export build_model, fit_reml, restore_observations, predict_response
 include("SharedVariance.jl")
 
-"""One common observation rotation, with coefficient rotations restricted to each component.
+"""Apply one shared QR row rotation to the response and all model columns.
 
-For concatenated Z=Q*[R;0], let R=U*D*V'. Use T=blockdiag(U',I)*Q'.
-For each component choose its own orthogonal V_j, and retain Zr_j=T*Z_j*V_j.
-For one component Zr is diagonal; for several components it is generally dense.
+For concatenated Z=Q*[R;0], retain each component's columns of [R;0].
+The combined upper block is triangular; coefficient coordinates are unchanged.
 Source: MixedModels 5.9.0 src/remat.jl and src/linearmixedmodel.jl.
 """
 function rotate_inputs(yf,Xf,Z_blocks)
@@ -15,21 +14,17 @@ function rotate_inputs(yf,Xf,Z_blocks)
     q=size(all_Z,2)
     qrZ=qr(all_Z)
     R=Matrix(qrZ.R)
-    complete=svd(R)
-    minimum(complete.S)>1e-10*maximum(complete.S) || throw(ArgumentError("Combined penalized columns must be linearly independent"))
+    # Reject numerically zero QR pivots before fitting.
+    minimum(abs,diag(R))>1e-10*opnorm(R,Inf) || throw(ArgumentError("Combined penalized columns must be linearly independent"))
     rotated=qrZ.Q'*hcat(yf,Xf)
-    rotated[1:q,:]=complete.U'*rotated[1:q,:]
-    V_blocks=Matrix{Float64}[];Zr=Matrix{Float64}[]
+    Zr=Matrix{Float64}[]
     offset=0
     for Z in Z_blocks
         r=size(Z,2);cols=(offset+1):(offset+r)
-        parts=svd(R[:,cols])
-        top=complete.U'*R[:,cols]*parts.V
-        push!(Zr,vcat(top,zeros(length(yf)-q,r)))
-        push!(V_blocks,parts.V)
+        push!(Zr,vcat(R[:,cols],zeros(length(yf)-q,r)))
         offset+=r
     end
-    return (;yr=rotated[:,1],Xr=rotated[:,2:end],Zr,qrZ,U=complete.U,V_blocks,rotated_rows=q)
+    return (;yr=rotated[:,1],Xr=rotated[:,2:end],Zr,qrZ)
 end
 
 """Native dense ReMat for each smooth, with one tied diagonal variance per component."""
@@ -75,19 +70,12 @@ function build_model(y::AbstractVector,X::AbstractMatrix,Z_blocks::AbstractVecto
     # The constructor sorts terms by size. Preserve the user-facing component order.
     group_names=MixedModels.fname.(model.reterms)
     model_order=[only(findall(==(key),group_names)) for key in terms.group_names]
-    return (;model,Xr=rotated.Xr,Zr_blocks=rotated.Zr,qrZ=rotated.qrZ,
-             U=rotated.U,V_blocks=rotated.V_blocks,rotated_rows=rotated.rotated_rows,model_order)
+    return (;model,Xr=rotated.Xr,Zr_blocks=rotated.Zr,qrZ=rotated.qrZ,model_order)
 end
 
 """Undo the common observation rotation once, regardless of component count."""
 function restore_observations(prepared,values::AbstractVecOrMat)
-    out=copy(values);q=prepared.rotated_rows
-    if out isa AbstractVector
-        out[1:q]=prepared.U*out[1:q]
-    else
-        out[1:q,:]=prepared.U*out[1:q,:]
-    end
-    return prepared.qrZ.Q*out
+    return prepared.qrZ.Q*values
 end
 
 """Joint REML fitting through MixedModels; each component has its own r² and lambda."""
@@ -106,7 +94,7 @@ function fit_reml(y::AbstractVector,X::AbstractMatrix,Z_blocks::AbstractVector{<
     lambda=inv.(theta.^2)
     b=MixedModels.coef(m) # Combined fixed coefficients: b=[β; α₁; ...; αₘ].
     random=MixedModels.ranef(m)
-    tau=[prepared.V_blocks[j]*vec(random[prepared.model_order[j]]) for j in eachindex(Z_blocks)]
+    tau=[vec(random[i]) for i in prepared.model_order]
     fitted=restore_observations(prepared,MixedModels.fitted(m))
     return (;prepared,lambda,sigma2,r2,r,theta,b,tau,fitted,status,
              objective=MixedModels.objective(m),evaluations=m.optsum.feval)

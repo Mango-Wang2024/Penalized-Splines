@@ -7,9 +7,9 @@ The main example has 200 observations and two spline components, each with eight
 - **(a) $B_{\mathrm{raw}}$ (200 × 16):** both raw bases side by side. Each entry is one basis function evaluated at that observation's predictor value.
 - **(b) $B$ (200 × 14):** the centered bases, $B_j=B_{\mathrm{raw},j}H_j$. Each spline's average level is separated from the overall intercept.
 - **(c) $Z_f=[Z_1,Z_2]$ (200 × 12):** penalized basis directions, rescaled using each penalty matrix. The two unpenalized directions are included in $X_f$.
-- **(d) $Z_r=[TZ_1V_1,TZ_2V_2]$ (200 × 12):** the adapted random-effect designs. Only rows 1–16 are shown; rows 13–200 are zero. All 200 observations remain in the model.
+- **(d) $Z_r=Q^\top[Z_1,Z_2]$ (200 × 12):** the QR-transformed random-effect designs. The upper 12 × 12 block is triangular. Only rows 1–16 are shown; rows 13–200 are zero. All 200 observations remain in the model.
 
-Colour represents entry values: red is positive, blue is negative, and white is zero or near zero. Each panel has its own linear scale. Rows are ordered by $x_1$; $x_2$ remains independently ordered, explaining its less gradual colour pattern.
+Colour represents entry values: red is positive, blue is negative, and white is zero or near zero. Each panel has its own linear scale. Before rotation, rows are ordered by $x_1$; $x_2$ remains independently ordered, explaining its less gradual colour pattern.
 
 ## Xf: fixed model parts before rotation
 
@@ -21,7 +21,7 @@ $X_f=[X,X_{0,1},X_{0,2}]$ has 200 rows and three columns: the ordinary fixed par
 
 <a href="xr_heatmap.png"><img src="xr_heatmap.png" alt="Combined fixed design after the common observation rotation" width="480"></a>
 
-The adapter computes $X_r=TX_f$. Each new row is a weighted combination of original observation rows; columns keep their model roles. The same row transformation is applied to $y$ and every random-effect block. `hcat(y,Xf)` places columns side by side and transforms them independently.
+The adapter computes $X_r=Q^\top X_f$. Each new row is a weighted combination of original observation rows; columns keep their model roles. The same row transformation is applied to $y$ and every random-effect block. `hcat(y,Xf)` places columns side by side and transforms them independently.
 
 ## Zf: penalized spline parts before rotation
 
@@ -33,7 +33,7 @@ Each six-column block is $Z_j=B_jU_{+,j}D_{+,j}^{-1/2}$. Its columns describe pe
 
 <a href="zr_heatmap.png"><img src="zr_heatmap.png" alt="Rotated random-effect designs, first sixteen rows" width="480"></a>
 
-A common row rotation $T$ and separate coefficient rotations $V_j$ produce $Z_{r,j}=TZ_jV_j$. With multiple spline components, the upper block is generally dense. Coefficient directions are rotated only within their own component, preserving its variance $r_j^2I$.
+A single QR decomposition of $Z_f$ gives $Z_r=Q^\top Z_f=[R;0]$. Its first 12 rows form the upper-triangular matrix $R$; each spline keeps its original six columns. There is no additional column rotation, and each block retains its variance $r_j^2I$.
 
 ## loading: relative covariance factor after fitting
 
@@ -46,6 +46,6 @@ Here the loading plot shows the fitted relative covariance factor:
 \qquad\theta_j=r_j/\sigma.
 ```
 
-Each diagonal block repeats one component's fitted scale; off-diagonal entries are zero. This replaces the old single-component row-loading illustration. Unlike the preceding design matrices, $\Lambda$ is obtained after REML fitting. It contains variance scales, not penalty eigenvalues or design singular values.
+Each diagonal block repeats one component's fitted scale; off-diagonal entries are zero. Unlike the preceding design matrices, $\Lambda$ is obtained after REML fitting. It contains variance scales, not penalty eigenvalues.
 
 **Sources:** [shared observations and settings](../data/inputs/uniform_k8/), [BSplineKit construction](../spline_basis/src/BSpline.jl), [component preparation](../model_preparation/src/ModelInputs.jl), [input rotation and restoration](../spline_fitting/src/SplineFit.jl), [shared variance storage](../spline_fitting/src/SharedVariance.jl), and the [plot generator](plot_matrices.R). The [derivation](../DERIVATION.md) explains the transformations.

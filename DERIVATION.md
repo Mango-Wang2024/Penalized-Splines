@@ -123,30 +123,32 @@ Sources: [penalized fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/
 
 ## 5. Adapt the designs to fitting containers
 
-The [Julia adapter](spline_fitting/src/SplineFit.jl) concatenates the penalized matrices only to find one common observation rotation. Write the combined design as $Z_f=[Z_1,\ldots,Z_m]=Q[R;0]$, and factor its small triangular matrix as $R=U D V^\top$. Define:
+The [Julia adapter](spline_fitting/src/SplineFit.jl) applies QR to the combined penalized design $Z_f=[Z_1,\ldots,Z_m]=Q[R;0]$. The matrix $R$ is upper triangular. Apply the same row transformation to every model term:
 
 ```math
-T=\mathrm{blockdiag}(U^\top,I)Q^\top,
-\qquad y_r=Ty,\qquad X_r=TX_{\mathrm{fixed}}.
+y_r=Q^\top y,\qquad X_r=Q^\top X_{\mathrm{fixed}},
+\qquad Z_{r,j}=Q^\top Z_j.
 ```
 
 The code applies $Q^\top$ implicitly, without forming a full observation matrix. Its line `Q' * hcat(y, X_fixed)` places the columns side by side and transforms each independently:
 
 ```math
-T[y\;X_{\mathrm{fixed}}]=[Ty\;TX_{\mathrm{fixed}}].
+Q^\top[y\;X_{\mathrm{fixed}}]=[Q^\top y\;Q^\top X_{\mathrm{fixed}}].
 ```
 
-No response column is added to a fixed-effect column. Next, each component receives its own orthogonal coefficient rotation $V_j$, obtained from an SVD of its columns of $R$:
+No response column is added to a fixed-effect column. Each spline keeps its original coefficient columns:
 
 ```math
-Z_{r,j}=TZ_jV_j,\qquad \tau_{r,j}=V_j^\top\tau_j.
+Z_r=[Z_{r,1},\ldots,Z_{r,m}]=Q^\top Z_f=
+\begin{bmatrix}R\\0\end{bmatrix},
+\qquad\tau_{r,j}=\tau_j.
 ```
 
-A single spline can become diagonal under these transformations. With multiple splines, the upper part of $Z_{r,j}$ is generally dense; rows below the total penalized rank are zero. The row transformation is common to all model terms, and coefficient rotations stay **within** their component. Rotating coefficient directions between components could mix different variances and would change the model.
+For the main example, the first 12 rows form $R$ and rows 13–200 are zero. The first six columns belong to spline 1 and the next six to spline 2. QR changes observation coordinates without mixing the components' coefficient groups.
 
-Orthogonality preserves squared residual lengths and the covariance $r_j^2I$ within each component. Each block therefore retains one variance parameter. Its native `MixedModels.ReMat` stores a dense multi-column term with one synthetic grouping level. [SharedVariance.jl](spline_fitting/src/SharedVariance.jl) ties that term's diagonal covariance entries to one parameter $\theta_j=r_j/\sigma$; off-diagonal entries remain zero. This wrapper uses the pinned MixedModels 5.9.0 low-level API.
+Orthogonality preserves squared residual lengths and the noise covariance $\sigma^2I$. The coefficient covariance $r_j^2I$ remains unchanged, so each spline retains one variance parameter. Its native `MixedModels.ReMat` stores a dense multi-column term with one synthetic grouping level. [SharedVariance.jl](spline_fitting/src/SharedVariance.jl) ties that term's diagonal covariance entries to one parameter $\theta_j=r_j/\sigma$; off-diagonal entries remain zero. This wrapper uses the pinned MixedModels 5.9.0 low-level API.
 
-The transformed model has the same covariance structure and REML objective. After fitting, coefficients return through $\tau_j=V_j\tau_{r,j}$, and `restore_observations` applies $T^\top$ to fitted responses. Thus each returned fitted value again corresponds to one original data row.
+The transformed model has the same REML objective. The fitted coefficients are already in the original spline coordinates. After fitting, `restore_observations` applies $Q$ to the transformed fitted responses: $\hat y=Q\hat y_r$. Thus each returned fitted value again corresponds to one original data row.
 
 R uses its own internal QR operations in [nlme](https://github.com/cran/nlme/blob/3.1-169/src/matrix.c#L195-L223). Agreement is required for the model and fitted results, not for identical internal rotations.
 

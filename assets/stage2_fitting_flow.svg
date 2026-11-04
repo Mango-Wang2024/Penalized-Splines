@@ -23,7 +23,7 @@
 <text x="230.0" y="352.5">Joint REML fit</text>
 <rect x="485" y="293" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>
 <text x="650.0" y="327.5">Julia / MixedModels</text>
-<text x="650.0" y="352.5">Adapt inputs → joint REML fit</text>
+<text x="650.0" y="352.5">QR inputs → joint REML fit</text>
 <path d="M230 375V406" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
 <path d="M650 375V406" fill="none" stroke="#687F90" stroke-width="1.8" marker-end="url(#arrow)"/>
 <rect x="65" y="411" width="330" height="82" rx="9" fill="#F8FAFC" stroke="#CAD5DE" stroke-width="1.4"/>

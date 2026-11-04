@@ -47,13 +47,15 @@ end
             @test restore_observations(prepared,T*y) ≈ y atol=1e-12
             @test restore_observations(prepared,T*X) ≈ X atol=1e-12
             for j in 1:count
-                @test prepared.Zr_blocks[j] ≈ T*Zs[j]*prepared.V_blocks[j] atol=1e-12
+                @test prepared.Zr_blocks[j] ≈ T*Zs[j] atol=1e-12
             end
+            combined=hcat(prepared.Zr_blocks...);q=size(combined,2)
+            @test istriu(combined[1:q,:])
         end
     end
 end
 
-@testset "Component rotations, boundary and invalid inputs" begin
+@testset "Basis invariance, boundary and invalid inputs" begin
     x=collect(range(-1,1;length=80));X=hcat(ones(80),x)
     Z=hcat(x.^2,x.^3,x.^4);y=1 .+2x.+sin.(3x).+.1cos.(83x)
     fit=fit_reml(y,X,[Z])

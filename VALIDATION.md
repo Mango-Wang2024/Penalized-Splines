@@ -70,7 +70,7 @@ Raw coefficient entries and package log-likelihood values are not used for cross
 
 ### Checking the Julia input adapter
 
-The adapter applies one common observation rotation, with coefficient rotations restricted to individual spline blocks. A wrapper uses native `ReMat` storage and ties the diagonal variance entries within each block. It preserves the covariance model without combining the components' separate smoothing parameters. Coefficients and fitted responses are returned to their original coordinates.
+The adapter applies the same QR row rotation $Q^\top$ to the response and every design matrix. The combined penalized design has a triangular upper block and zero rows below it. Coefficient coordinates are unchanged, so each spline retains its separate variance. A wrapper uses native `ReMat` storage and ties the diagonal variance entries within each block. Fitted responses return to the original observation rows through multiplication by $Q$.
 
 Independent Julia tests cover **1, 2, 3 and 10 components**, including unequal block sizes. They compare the fitted coefficients and REML objective against a direct Gaussian covariance calculation, check coordinate restoration and rotation invariance, and cover zero variance and invalid inputs. Preparation tests also assemble and evaluate variable-length component lists. These checks do not add a separate fixed-$\lambda$ fitting stage.
 
