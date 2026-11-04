@@ -66,6 +66,19 @@ We compare **each $\lambda_j$**, the combined fitted responses, individual splin
 
 Prediction evaluates each spline at new predictor values using its **training knots and transformations**, then combines the saved coefficients. The new rows must contain a value for every fitted predictor; responses are not required.
 
-The current workflow already compares predictions on a shared two-predictor grid. A broader prediction study and integration with Unfold or UnfoldMixedModels remain future work. The same additive interface can accept 3, 10 or another number of spline components, subject to the model's rank and sample-size requirements; independent tests cover 1, 2, 3 and 10 components.
+**Prediction error:** on 961 new grid points, the two-predictor example has RMSE **0.0794 for R and Julia** against the known noiseless surface, in response units. [Prediction results](spline_fitting/outputs/shared/comparison/truth_comparison.tsv).
+
+**Variable component counts:** the fitting tests were rerun with 160 synthetic observations for each count; **105/105 checks passed**. The table shows measured differences from an independent Gaussian matrix calculation using the same fitted variance values.
+
+| Spline components | Largest coefficient relative error | Fitted-response relative error |
+| ---: | ---: | ---: |
+| 1 | 9.69e-15 | 7.90e-15 |
+| 2 | 9.40e-15 | 6.49e-15 |
+| 3 | 1.25e-14 | 8.40e-15 |
+| 10 | 1.36e-14 | 4.13e-15 |
+
+Relative error is the norm of the difference divided by the larger result norm. The coefficient column reports the largest error across $b$ and the $\tau_j$ vectors. These values measure numerical agreement; the RMSE above measures recovery of the known surface. [Full measured errors](spline_fitting/outputs/shared/unit_tests.txt); [test calculations](spline_fitting/test/runtests.jl).
+
+The interface accepts a variable number of spline components, subject to rank and sample-size requirements. Broader prediction studies and integration with Unfold or UnfoldMixedModels remain future work.
 
 Sources: [BSplineKit](https://jipolanco.github.io/BSplineKit.jl/stable/), [mgcv fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html), [smooth-to-random preparation](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/smooth2random.html), [MixedModels constructors](https://juliastats.org/MixedModels.jl/stable/constructors/), and [MixedModels estimation](https://juliastats.org/MixedModels.jl/stable/optimization/). The [original R call](https://github.com/cran/mgcv/blob/1b6a4c8374612da27e36420b4459e93acb183f2d/R/gamm.r#L1398) is connected to the [captured R inputs](model_preparation/outputs/shared/r_reference/lme_inputs/INPUTS_EXPLAINED.txt).

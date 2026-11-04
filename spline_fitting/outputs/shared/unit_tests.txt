@@ -1,4 +1,16 @@
 Test Summary:                                  | Pass  Total  Time
-Variable component counts and shared variances |   92     92  7.1s
+Variable component counts and shared variances |   92     92  6.7s
 Test Summary:                                 | Pass  Total  Time
-Basis invariance, boundary and invalid inputs |   13     13  1.4s
+Basis invariance, boundary and invalid inputs |   13     13  1.2s
+
+Measured errors from the variable-component tests (2026-11-05).
+Reference: marginal_check at the same fitted theta values.
+Relative error: norm(a-b) / max(norm(a),norm(b),eps(Float64)).
+Coefficient error: largest relative error across b and the tau vectors.
+Data: 160 synthetic observations per case; random seed 100 + component count.
+
+components	observations	max_coefficient_relative_error	fitted_relative_error	objective_relative_error
+1	160	9.6891844270631933e-15	7.9047503593973099e-15	2.0490320612271699e-14
+2	160	9.4008390900596711e-15	6.491105998631719e-15	1.2351070121139018e-13
+3	160	1.2512056348881345e-14	8.403682660825739e-15	3.4311251926123678e-13
+10	160	1.3592525362348889e-14	4.134530932689486e-15	1.816777862855294e-13
