@@ -25,17 +25,4 @@ $b$ contains one coefficient for each column. The product $X_fb$ gives the combi
 
 Each six-column block is $Z_j=B_jU_{+,j}D_{+,j}^{-1/2}$. Its columns describe penalized shapes for that predictor. The two blocks remain separate in the model, so each can have its own smoothing strength.
 
-## loading: relative covariance factor after fitting
-
-<a href="loading_heatmap.png"><img src="loading_heatmap.png" alt="Block diagonal relative covariance factor with one shared value per component" width="480"></a>
-
-Here the loading plot shows the fitted relative covariance factor:
-
-```math
-\Lambda=\mathrm{blockdiag}(\theta_1I_6,\theta_2I_6),
-\qquad\theta_j=r_j/\sigma.
-```
-
-Each diagonal block repeats one component's fitted scale; off-diagonal entries are zero. Unlike the preceding design matrices, $\Lambda$ is obtained after REML fitting. It contains variance scales, not penalty eigenvalues.
-
 **Sources:** [shared observations and settings](../data/inputs/uniform_k8/), [BSplineKit construction](../spline_basis/src/BSpline.jl), [component preparation](../model_preparation/src/ModelInputs.jl), [direct fitting](../spline_fitting/src/SplineFit.jl), [shared variance storage](../spline_fitting/src/SharedVariance.jl), and the [plot generator](plot_matrices.R). The [derivation](../DERIVATION.md) explains the transformations.
