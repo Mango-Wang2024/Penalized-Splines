@@ -34,6 +34,8 @@ We use two comparisons: **basis construction** compares independently built $B_j
 
 The number of predictors is determined by the saved term list, rather than hard-coded in the preparation or fitting functions. `prepare_additive` assembles the fixed matrix and a variable-length list of penalized matrices. Each term can have a different basis size.
 
+The caller supplies the ordinary fixed matrix $X$ explicitly; this example uses a column of ones. Prediction receives the new fixed columns explicitly, and both languages read the same saved prediction grid.
+
 ## Stage 2: jointly fit the splines
 
 Both branches repeat preparation from the same saved data, then fit the noisy response $y$ with **REML**. R uses `mgcv::gamm` / `nlme::lme`; Julia calls the low-level `MixedModels.LinearMixedModel` constructor and `fit!` with its own prepared designs.

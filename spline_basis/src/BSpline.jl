@@ -73,12 +73,14 @@ function build_spline(x,knots)
     !isempty(xv) && all(isfinite,xv) || throw(ArgumentError("Predictors must be nonempty and finite"))
     length(unique(xv))>=k || throw(ArgumentError("Need at least k distinct predictor values"))
     all(v->t[4]<=v<=t[end-3],xv) || throw(ArgumentError("Training predictors must lie inside the middle knot interval"))
-    B_raw = evaluate_basis(t,xv)
-    D2 = evaluate_basis(t,xv;derivative=2)
+    # Training values and knots are checked above; reuse one package basis.
+    basis = package_basis(t)
+    B_raw = basis_matrix(basis,xv,0)
+    D2 = basis_matrix(basis,xv,2)
     # Galerkin integration covers [t[4],t[end-3]], matching mgcv's penalty domain.
     # Both factors are second derivatives: S_raw[i,j] = integral(b_i'' * b_j'').
     second = BSplineKit.Derivative(2)
-    S_raw = Matrix(BSplineKit.galerkin_matrix(package_basis(t),(second,second),Matrix{Float64}))
+    S_raw = Matrix(BSplineKit.galerkin_matrix(basis,(second,second),Matrix{Float64}))
     penalty_scale = opnorm(S_raw,1)/opnorm(B_raw,Inf)^2
     S_scaled = S_raw/penalty_scale
     constraint = vec(mean(B_raw;dims=1))

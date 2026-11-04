@@ -73,6 +73,5 @@ end
     @test_throws ArgumentError build_model(y,hcat(x,x),[Z])
     @test_throws ArgumentError build_model(y,X,[hcat(x.^2,x.^2)])
     @test_throws ArgumentError build_model(y,X,Matrix{Float64}[])
-    @test_throws ArgumentError build_model(y,X,[Z];names=["a","b"])
-    @test_throws ArgumentError build_model(y,X,[Z,Z];names=["a","a"])
+    @test_throws DimensionMismatch predict_response(fit,X,[])
 end

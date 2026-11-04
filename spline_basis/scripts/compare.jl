@@ -3,10 +3,8 @@ import BSplineKit
 include(joinpath(@__DIR__,"../../spline_basis/src/BSpline.jl"));using .BSplineBasis
 include(joinpath(@__DIR__,"../../data/SharedData.jl"));using .SharedData
 function main(args)
-    root=dirname(@__DIR__)
-    inputs=length(args)>=1 ? abspath(args[1]) : joinpath(root,"../data/inputs")
-    reference=length(args)>=2 ? abspath(args[2]) : joinpath(root,"outputs/shared/r_reference")
-    out=length(args)>=3 ? abspath(args[3]) : joinpath(root,"outputs/shared/julia")
+    length(args)==3 || error("Expected shared inputs, R reference and a new output directory")
+    inputs,reference,out=abspath.(args)
     isdir(out)&&!isempty(readdir(out))&&error("Output directory is not empty")
     mkpath(out);records=NamedTuple[]
     function check(case,component,label,a,b)

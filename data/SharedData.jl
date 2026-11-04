@@ -14,21 +14,12 @@ function load_case(root,name)
              knots=vec(readdlm(joinpath(path,"knots_"*names[i]*".csv"),',',Float64)),
              evaluation_x=vec(readdlm(joinpath(path,"evaluation_"*names[i]*".csv"),',',Float64)),
              truth=columns["truth_"*names[i]]) for i in axes(spec,1)]
-    return (;name,path,terms,names,y=columns["y"],truth=columns["truth"],columns)
+    return (;name,path,terms,names,y=columns["y"],truth=columns["truth"])
 end
-"""A prediction grid for the first two inputs; remaining predictors are fixed at zero."""
-function evaluation_grid(case;points=31)
-    if isfile(joinpath(case.path,"grid.csv"))
-        values,header=readdlm(joinpath(case.path,"grid.csv"),',',Float64;header=true)
-        keys=vec(string.(header))
-        return [values[:,only(findall(==(name),keys))] for name in case.names]
-    end
-    m=length(case.terms)
-    m>=1 || error("No predictors")
-    grids=[collect(range(minimum(t.x),maximum(t.x);length=points)) for t in case.terms]
-    m==1 && return [grids[1]]
-    first=repeat(grids[1];outer=points)
-    second=repeat(grids[2];inner=points)
-    return [first,second,[zeros(length(first)) for _ in 3:m]...]
+"""Read the supplied prediction grid in predictor-list order."""
+function evaluation_grid(case)
+    values,header=readdlm(joinpath(case.path,"grid.csv"),',',Float64;header=true)
+    keys=vec(string.(header))
+    return [values[:,only(findall(==(name),keys))] for name in case.names]
 end
 end

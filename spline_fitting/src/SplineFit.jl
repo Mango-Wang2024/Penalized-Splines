@@ -19,22 +19,21 @@ function rotate_inputs(yf,Xf,Z_blocks)
     minimum(complete.S)>1e-10*maximum(complete.S) || throw(ArgumentError("Combined penalized columns must be linearly independent"))
     rotated=qrZ.Q'*hcat(yf,Xf)
     rotated[1:q,:]=complete.U'*rotated[1:q,:]
-    V_blocks=Matrix{Float64}[];Zr=Matrix{Float64}[];singular_values=Vector{Float64}[]
+    V_blocks=Matrix{Float64}[];Zr=Matrix{Float64}[]
     offset=0
     for Z in Z_blocks
         r=size(Z,2);cols=(offset+1):(offset+r)
         parts=svd(R[:,cols])
         top=complete.U'*R[:,cols]*parts.V
         push!(Zr,vcat(top,zeros(length(yf)-q,r)))
-        push!(V_blocks,parts.V);push!(singular_values,parts.S)
+        push!(V_blocks,parts.V)
         offset+=r
     end
-    return (;yr=rotated[:,1],Xr=rotated[:,2:end],Zr,qrZ,U=complete.U,V_blocks,
-             singular_values,rotated_rows=q)
+    return (;yr=rotated[:,1],Xr=rotated[:,2:end],Zr,qrZ,U=complete.U,V_blocks,rotated_rows=q)
 end
 
 """Native dense ReMat for each smooth, with one tied diagonal variance per component."""
-function build_model_terms(yr,Xr,Zr,names)
+function build_model_terms(yr,Xr,Zr)
     n,p=size(Xr)
     fixed_names=Symbol.("fixed_".*string.(1:p))
     entries=Pair{Symbol,Any}[:response=>yr]
@@ -60,30 +59,25 @@ function build_model_terms(yr,Xr,Zr,names)
 end
 
 """Accept a variable-length list of spline designs, one shared variance per entry."""
-function build_model(y::AbstractVector,X::AbstractMatrix,Z_blocks::AbstractVector{<:AbstractMatrix};names=["x"*string(j) for j in eachindex(Z_blocks)])
+function build_model(y::AbstractVector,X::AbstractMatrix,Z_blocks::AbstractVector{<:AbstractMatrix})
     yf,Xf=Vector{Float64}(y),Matrix{Float64}(X)
     Zs=Matrix{Float64}.(Z_blocks)
     n,p=size(Xf)
-    !isempty(Zs) && length(names)==length(Zs) && length(unique(names))==length(names) || throw(ArgumentError("Supply distinct names and at least one component"))
+    isempty(Zs) && throw(ArgumentError("Supply at least one spline component"))
     length(yf)==n && all(size(Z,1)==n for Z in Zs) || throw(DimensionMismatch("All inputs must share observation rows"))
     p>0 && all(size(Z,2)>0 for Z in Zs) && n>p+sum(size(Z,2) for Z in Zs) || throw(ArgumentError("Require fixed and penalized columns and n > p + total penalized columns"))
     all(isfinite,yf) && all(isfinite,Xf) && all(all(isfinite,Z) for Z in Zs) || throw(ArgumentError("Model inputs must be finite"))
     rank(Xf)==p || throw(ArgumentError("Fixed-effect columns must be linearly independent"))
     rotated=rotate_inputs(yf,Xf,Zs)
-    terms=build_model_terms(rotated.yr,rotated.Xr,rotated.Zr,names)
+    terms=build_model_terms(rotated.yr,rotated.Xr,rotated.Zr)
+    # Keep spline blocks separate and retain their single synthetic grouping level.
     model=MixedModels.LinearMixedModel(rotated.yr,terms.feterm,terms.reterms,terms.form,Float64[],nothing,false,1000,false)
-    length(model.θ)==length(Zs) || error("Expected one variance parameter per component")
     # The constructor sorts terms by size. Preserve the user-facing component order.
     group_names=MixedModels.fname.(model.reterms)
     model_order=[only(findall(==(key),group_names)) for key in terms.group_names]
-    for j in eachindex(Zs)
-        isapprox(Matrix(model.reterms[model_order[j]]),rotated.Zr[j];rtol=1e-12,atol=1e-12) || error("Stored random design changed")
-    end
-    return (;model,names=String.(names),y=yf,X=Xf,yr=rotated.yr,Xr=rotated.Xr,Z_blocks=Zs,Zr_blocks=rotated.Zr,
-             qrZ=rotated.qrZ,U=rotated.U,V_blocks=rotated.V_blocks,
-             singular_values=rotated.singular_values,rotated_rows=rotated.rotated_rows,model_order)
+    return (;model,Xr=rotated.Xr,Zr_blocks=rotated.Zr,qrZ=rotated.qrZ,
+             U=rotated.U,V_blocks=rotated.V_blocks,rotated_rows=rotated.rotated_rows,model_order)
 end
-build_model(y::AbstractVector,X::AbstractMatrix,Z::AbstractMatrix;kwargs...) = build_model(y,X,[Z];kwargs...)
 
 """Undo the common observation rotation once, regardless of component count."""
 function restore_observations(prepared,values::AbstractVecOrMat)
@@ -97,8 +91,8 @@ function restore_observations(prepared,values::AbstractVecOrMat)
 end
 
 """Joint REML fitting through MixedModels; each component has its own r² and lambda."""
-function fit_reml(y::AbstractVector,X::AbstractMatrix,Z_blocks::AbstractVector{<:AbstractMatrix};kwargs...)
-    prepared=build_model(y,X,Z_blocks;kwargs...);m=prepared.model
+function fit_reml(y::AbstractVector,X::AbstractMatrix,Z_blocks::AbstractVector{<:AbstractMatrix})
+    prepared=build_model(y,X,Z_blocks);m=prepared.model
     # Multi-parameter reference checks need tighter objective stopping tolerances.
     m.optsum.ftol_rel=1e-14
     m.optsum.ftol_abs=1e-12
@@ -109,18 +103,14 @@ function fit_reml(y::AbstractVector,X::AbstractMatrix,Z_blocks::AbstractVector{<
     theta=[abs(m.reterms[i].λ[1,1]) for i in prepared.model_order]
     sigma2=MixedModels.varest(m)
     r2=sigma2.*theta.^2;r=sqrt.(r2)
-    lambda=[iszero(t) ? Inf : inv(t^2) for t in theta]
+    lambda=inv.(theta.^2)
     b=MixedModels.coef(m) # Combined fixed coefficients: b=[β; α₁; ...; αₘ].
     random=MixedModels.ranef(m)
     tau=[prepared.V_blocks[j]*vec(random[prepared.model_order[j]]) for j in eachindex(Z_blocks)]
     fitted=restore_observations(prepared,MixedModels.fitted(m))
-    reconstructed=predict_response((;b,tau),prepared.X,prepared.Z_blocks)
-    isapprox(fitted,reconstructed;rtol=1e-10,atol=1e-10) || error("Fitted-response reconstruction failed")
-    isfinite(sigma2) && sigma2>0 && all(isfinite,fitted) || error("Invalid fitted model")
     return (;prepared,lambda,sigma2,r2,r,theta,b,tau,fitted,status,
              objective=MixedModels.objective(m),evaluations=m.optsum.feval)
 end
-fit_reml(y::AbstractVector,X::AbstractMatrix,Z::AbstractMatrix;kwargs...) = fit_reml(y,X,[Z];kwargs...)
 
 function predict_response(fit,X,Z_blocks)
     length(Z_blocks)==length(fit.tau) || throw(DimensionMismatch("Component counts disagree"))

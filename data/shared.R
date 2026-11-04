@@ -18,12 +18,7 @@ save_matrix <- function(M,name,path) {
   strings <- matrix(sprintf("%.17g",as.numeric(M)),nrow(M),ncol(M))
   write.table(strings,file.path(path,paste0(name,".csv")),sep=",",quote=FALSE,row.names=FALSE,col.names=FALSE)
 }
-grid_inputs <- function(case,points=31L) {
+grid_inputs <- function(case) {
   keys <- case$terms$predictor
-  if(file.exists(file.path(case$path,"grid.csv")))return(read.csv(file.path(case$path,"grid.csv"),check.names=FALSE)[,keys,drop=FALSE])
-  axes <- lapply(keys,function(key)seq(min(case$data[[key]]),max(case$data[[key]]),length.out=points))
-  if(length(keys)==1L)return(setNames(data.frame(axes[[1]]),keys))
-  grid <- expand.grid(axes[1:2],KEEP.OUT.ATTRS=FALSE);names(grid) <- keys[1:2]
-  for(key in keys[-c(1,2)])grid[[key]] <- 0
-  grid
+  read.csv(file.path(case$path,"grid.csv"),check.names=FALSE)[,keys,drop=FALSE]
 }

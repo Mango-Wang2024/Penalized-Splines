@@ -3,10 +3,8 @@ include(joinpath(@__DIR__,"../../spline_basis/src/BSpline.jl"));using .BSplineBa
 include(joinpath(@__DIR__,"../src/ModelInputs.jl"));using .ModelInputs
 include(joinpath(@__DIR__,"../../data/SharedData.jl"));using .SharedData
 function main(args)
-    root=dirname(@__DIR__)
-    inputs=length(args)>=1 ? abspath(args[1]) : joinpath(root,"../data/inputs")
-    reference=length(args)>=2 ? abspath(args[2]) : joinpath(root,"outputs/shared/r_reference")
-    out=length(args)>=3 ? abspath(args[3]) : joinpath(root,"outputs/shared/julia")
+    length(args)==3 || error("Expected shared inputs, R reference and a new output directory")
+    inputs,reference,out=abspath.(args)
     isdir(out)&&!isempty(readdir(out))&&error("Output directory is not empty")
     mkpath(out);records=NamedTuple[]
     function check(case,component,label,a,b)
@@ -17,7 +15,8 @@ function main(args)
     for name in case_names(inputs)
         case=load_case(inputs,name)
         bases=[build_spline(t.x,t.mode=="default" ? default_knots(t.x,t.k) : t.knots) for t in case.terms]
-        p=prepare_additive(bases;names=case.names)
+        X=ones(length(case.y),1)
+        p=prepare_additive(bases,X)
         Xr=readdlm(joinpath(reference,name,"X_fixed.csv"),',',Float64)
         check(name,"all","combined fixed space",space_projector(p.X_fixed),space_projector(Xr))
         dst=joinpath(out,name);mkpath(dst)

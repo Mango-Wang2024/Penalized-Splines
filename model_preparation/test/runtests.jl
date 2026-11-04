@@ -6,7 +6,7 @@ using .ModelInputs
     x = collect(range(-1,1; length=30))
     B = hcat(ones(30), x, x.^2, x.^3)
     S = Matrix(Diagonal([0.,0.,4.,9.]))
-    c = prepare_inputs(B,S; expected_rank=2)
+    c = prepare_inputs(B,S)
     @test size(c.X0) == (30,2)
     @test size(c.Z) == (30,2)
     @test c.penalty_rank == 2
@@ -59,8 +59,6 @@ end
     @test_throws ArgumentError prepare_inputs(B,[1. 1.;0. 1.])
     @test_throws ArgumentError prepare_inputs(B,Matrix(Diagonal([1.,-1.])))
     @test_throws ArgumentError prepare_inputs([NaN 0.;0. 1.],B)
-    @test_throws ArgumentError prepare_inputs(B,B;expected_rank=1)
-    @test_throws ArgumentError prepare_inputs(B,B;expected_rank=3)
 end
 
 println("Workflow preparation mathematics checks passed.")
@@ -74,20 +72,29 @@ using .BSplineBasis
         # Randomize row pairing independently for every component.
         xs=[x[randperm(rng,length(x))] for x in xs]
         bases=[build_spline(x,default_knots(x,5+mod(j,3))) for (j,x) in enumerate(xs)]
-        p=prepare_additive(bases)
-        @test size(p.X_fixed)==(160,m+1)
+        # Include an additional ordinary fixed predictor in the two-spline case.
+        X=m==2 ? hcat(ones(160),randn(rng,160)) : ones(160,1)
+        p=prepare_additive(bases,X)
+        @test size(p.X_fixed)==(160,m+size(X,2))
         @test length(p.Z_blocks)==m
         raw=[b.B_raw for b in bases]
-        new=prediction_inputs(bases,p,raw)
+        new=prediction_inputs(bases,p,raw,X)
         @test new.X_fixed ≈ p.X_fixed atol=1e-12
         for j in 1:m
             @test new.Z_blocks[j] ≈ p.Z_blocks[j] atol=1e-12
             @test length(p.fixed_ranges[j])==1
         end
         different=[evaluate_basis(b.knots,[-.5,.5]) for b in bases]
-        @test size(prediction_inputs(bases,p,different).X_fixed)==(2,m+1)
+        Xnew=m==2 ? hcat(ones(2),[-.2,.4]) : ones(2,1)
+        new=prediction_inputs(bases,p,different,Xnew)
+        @test size(new.X_fixed)==(2,m+size(X,2))
+        @test new.X_fixed[:,1:size(X,2)]==Xnew
     end
     x=collect(range(-1,1;length=40));b=build_spline(x,default_knots(x,5))
-    @test_throws ArgumentError prepare_additive([b,b])
-    @test_throws ArgumentError prepare_additive([b];names=["a","b"])
+    X=ones(40,1);p=prepare_additive([b],X)
+    @test_throws ArgumentError prepare_additive([b,b],X)
+    @test_throws ArgumentError prepare_additive([],X)
+    @test_throws DimensionMismatch prediction_inputs([b],p,[],X)
+    @test_throws DimensionMismatch prediction_inputs([b],p,[b.B_raw],ones(40,2))
+    @test_throws DimensionMismatch prediction_inputs([b],p,[b.B_raw],ones(39,1))
 end
