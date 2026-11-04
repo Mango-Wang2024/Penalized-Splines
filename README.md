@@ -4,7 +4,7 @@ We construct cubic B-splines with **BSplineKit.jl**, prepare their mixed-model i
 
 The project follows **model preparation → fitting → prediction**. Stages 1 and 2 are implemented and checked against R; Stage 3 is planned.
 
-[DATA.md](DATA.md) explains the observations and test cases; [DERIVATION.md](DERIVATION.md) explains the mathematics; [VALIDATION.md](VALIDATION.md) defines the comparison criteria. [STAGE1_RESULTS.md](STAGE1_RESULTS.md) records input-preparation checks, and [STAGE2_RESULTS.md](STAGE2_RESULTS.md) records fitting results.
+[DATA.md](DATA.md) explains the observations and test cases; [DERIVATION.md](DERIVATION.md) explains the mathematics; [VALIDATION.md](VALIDATION.md) defines the comparison criteria. [STAGE1_RESULTS.md](STAGE1_RESULTS.md) records input-preparation checks, and [STAGE2_RESULTS.md](STAGE2_RESULTS.md) records fitting results. [Fitting matrices](assets/FITTING_MATRICES.md) shows the actual arrays as heatmaps.
 
 The main dimensions below refer to our **200-observation example with $k=8$ raw basis functions**. Matrix dimensions are written as rows × columns; other test cases use different basis sizes.
 
