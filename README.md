@@ -56,9 +56,9 @@ The spline coefficient vectors are independent of each other and of the noise. T
 
 ![Stage 2 comparison flow](assets/stage2_fitting_flow.svg)
 
-**Input adaptation:** QR of the combined penalized design gives one shared row transformation: $y_r=Q^\top y$, $X_r=Q^\top X_{\mathrm{fixed}}$ and $Z_{r,j}=Q^\top Z_j$. The combined upper block is triangular; the spline coefficients keep their original coordinates. Each block uses native `ReMat` storage with its diagonal variances tied to one shared parameter by [SharedVariance.jl](spline_fitting/src/SharedVariance.jl). The adapter uses the pinned MixedModels 5.9.0 low-level API. After fitting, `restore_observations` multiplies fitted responses by $Q$ to return them to the original observation rows.
+**Fitting inputs:** Julia passes the prepared $y$, $X_{\mathrm{fixed}}$ and separate $Z_j$ blocks directly to MixedModels, keeping their original observation rows and coefficient coordinates. Each block uses native `ReMat` storage with its diagonal variances tied to one shared parameter by [SharedVariance.jl](spline_fitting/src/SharedVariance.jl). The code uses the pinned MixedModels 5.9.0 low-level API. Fitted responses already correspond to the original observations.
 
-The R package also performs internal QR transformations in [nlme's fitting code](https://github.com/cran/nlme/blob/3.1-169/src/matrix.c#L195-L223). Its transformations need not match our adapter step for step; the prepared covariance model and fitted results must agree.
+R performs internal QR transformations in [nlme's fitting code](https://github.com/cran/nlme/blob/3.1-169/src/matrix.c#L195-L223). Each package handles its own numerical factorization; we compare the covariance model and fitted results.
 
 We compare **each $\lambda_j$**, the combined fitted responses, individual spline contributions and shared-grid predictions. Variances provide supporting checks. Coefficients are returned in Julia's original spline coordinates; their raw entries are not compared across different R/Julia coordinate choices. The results show a 3D response surface for the two-predictor example, plus separate component curves.
 

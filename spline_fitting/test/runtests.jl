@@ -1,7 +1,7 @@
 using Test, LinearAlgebra, Random, MixedModels
 include(joinpath(@__DIR__,"../src/SplineFit.jl"));using .SplineFit
 
-# Independent original-coordinate Gaussian calculations, without adapter rotations.
+# Independent Gaussian calculations, without MixedModels' fitting internals.
 function marginal_check(y,X,Zs,theta)
     n,p=size(X)
     V=cholesky(Symmetric(Matrix{Float64}(I,n,n)+sum(theta[j]^2*(Zs[j]*Zs[j]') for j in eachindex(Zs))))
@@ -32,6 +32,7 @@ end
         @test fit.objective ≈ independent.objective rtol=1e-9
         @test fit.fitted ≈ independent.fitted rtol=1e-9
         for j in 1:count
+            @test Matrix(m.reterms[fit.prepared.model_order[j]])==Zs[j]
             @test fit.tau[j] ≈ independent.tau[j] rtol=1e-9
             @test fit.lambda[j] ≈ fit.sigma2/fit.r2[j]
         end
@@ -40,18 +41,6 @@ end
         model_theta=trial[invperm(fit.prepared.model_order)]
         obj=MixedModels.objective!(m,model_theta)
         @test obj ≈ marginal_check(y,X,Zs,trial).objective rtol=1e-9
-        if count==3
-            prepared=fit.prepared
-            T=restore_observations(prepared,Matrix{Float64}(I,n,n))'
-            @test T*T' ≈ I atol=1e-12
-            @test restore_observations(prepared,T*y) ≈ y atol=1e-12
-            @test restore_observations(prepared,T*X) ≈ X atol=1e-12
-            for j in 1:count
-                @test prepared.Zr_blocks[j] ≈ T*Zs[j] atol=1e-12
-            end
-            combined=hcat(prepared.Zr_blocks...);q=size(combined,2)
-            @test istriu(combined[1:q,:])
-        end
     end
 end
 
@@ -73,7 +62,9 @@ end
     @test_throws DimensionMismatch build_model(y,X,[Z[2:end,:]])
     @test_throws ArgumentError build_model(fill(NaN,80),X,[Z])
     @test_throws ArgumentError build_model(y,hcat(x,x),[Z])
-    @test_throws ArgumentError build_model(y,X,[hcat(x.^2,x.^2)])
+    duplicate_Z=hcat(x.^2,x.^2)
+    duplicate_fit=fit_reml(y,X,[duplicate_Z])
+    @test duplicate_fit.fitted ≈ marginal_check(y,X,[duplicate_Z],duplicate_fit.theta).fitted rtol=1e-9
     @test_throws ArgumentError build_model(y,X,Matrix{Float64}[])
     @test_throws DimensionMismatch predict_response(fit,X,[])
 end

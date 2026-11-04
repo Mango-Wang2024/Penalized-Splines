@@ -121,36 +121,19 @@ This identity also explains why Stage 1 compares each $Z_jZ_j^\top$: equivalent 
 
 Sources: [penalized fitting](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/magic.html), [smooths as mixed models](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gamm.html).
 
-## 5. Adapt the designs to fitting containers
+## 5. Pass the prepared designs to fitting containers
 
-The [Julia adapter](spline_fitting/src/SplineFit.jl) applies QR to the combined penalized design $Z_f=[Z_1,\ldots,Z_m]=Q[R;0]$. The matrix $R$ is upper triangular. Apply the same row transformation to every model term:
-
-```math
-y_r=Q^\top y,\qquad X_r=Q^\top X_{\mathrm{fixed}},
-\qquad Z_{r,j}=Q^\top Z_j.
-```
-
-The code applies $Q^\top$ implicitly, without forming a full observation matrix. Its line `Q' * hcat(y, X_fixed)` places the columns side by side and transforms each independently:
+The [Julia fitting code](spline_fitting/src/SplineFit.jl) passes $y$, $X_{\mathrm{fixed}}$ and the separate $Z_j$ matrices directly to MixedModels. They retain their original observation rows and coefficient coordinates. The combined penalized design is:
 
 ```math
-Q^\top[y\;X_{\mathrm{fixed}}]=[Q^\top y\;Q^\top X_{\mathrm{fixed}}].
+Z_f=[Z_1,\ldots,Z_m].
 ```
 
-No response column is added to a fixed-effect column. Each spline keeps its original coefficient columns:
+For the main example, $X_{\mathrm{fixed}}$ has 200 rows and three columns. Each $Z_j$ has 200 rows and six columns. Each row still refers to one original observation.
 
-```math
-Z_r=[Z_{r,1},\ldots,Z_{r,m}]=Q^\top Z_f=
-\begin{bmatrix}R\\0\end{bmatrix},
-\qquad\tau_{r,j}=\tau_j.
-```
+The fixed design is stored in `MixedModels.FeTerm`. Each spline's native `MixedModels.ReMat` stores its $Z_j$ with one synthetic grouping level. [SharedVariance.jl](spline_fitting/src/SharedVariance.jl) ties that term's diagonal covariance entries to one parameter $\theta_j=r_j/\sigma$; off-diagonal entries remain zero. This retains the covariance $r_j^2I$ for each spline. The code uses the pinned MixedModels 5.9.0 low-level API.
 
-For the main example, the first 12 rows form $R$ and rows 13–200 are zero. The first six columns belong to spline 1 and the next six to spline 2. QR changes observation coordinates without mixing the components' coefficient groups.
-
-Orthogonality preserves squared residual lengths and the noise covariance $\sigma^2I$. The coefficient covariance $r_j^2I$ remains unchanged, so each spline retains one variance parameter. Its native `MixedModels.ReMat` stores a dense multi-column term with one synthetic grouping level. [SharedVariance.jl](spline_fitting/src/SharedVariance.jl) ties that term's diagonal covariance entries to one parameter $\theta_j=r_j/\sigma$; off-diagonal entries remain zero. This wrapper uses the pinned MixedModels 5.9.0 low-level API.
-
-The transformed model has the same REML objective. The fitted coefficients are already in the original spline coordinates. After fitting, `restore_observations` applies $Q$ to the transformed fitted responses: $\hat y=Q\hat y_r$. Thus each returned fitted value again corresponds to one original data row.
-
-R uses its own internal QR operations in [nlme](https://github.com/cran/nlme/blob/3.1-169/src/matrix.c#L195-L223). Agreement is required for the model and fitted results, not for identical internal rotations.
+MixedModels returns coefficients and fitted responses in these same coordinates. There is no additional QR/SVD preprocessing or observation-restoration step. R uses its own internal QR operations in [nlme](https://github.com/cran/nlme/blob/3.1-169/src/matrix.c#L195-L223). Agreement is required for the model and fitted results, not for identical package internals.
 
 Sources: pinned [MixedModels constructor](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/linearmixedmodel.jl), [random-term storage](https://github.com/JuliaStats/MixedModels.jl/blob/v5.9.0/src/remat.jl), and [estimation](https://juliastats.org/MixedModels.jl/stable/optimization/).
 

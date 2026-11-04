@@ -1,4 +1,4 @@
 Test Summary:                                  | Pass  Total  Time
-Variable component counts and shared variances |   83     83  7.5s
+Variable component counts and shared variances |   92     92  7.1s
 Test Summary:                                 | Pass  Total  Time
-Basis invariance, boundary and invalid inputs |   13     13  1.3s
+Basis invariance, boundary and invalid inputs |   13     13  1.4s

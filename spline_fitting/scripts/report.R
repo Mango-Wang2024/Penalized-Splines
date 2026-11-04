@@ -98,7 +98,7 @@ run <- function() {
     "Each panel isolates one spline contribution. Known components are centered over the training observations to match the fitted smooths; their removed average levels belong to the overall intercept.","",
     "## Supporting checks","",
     paste0(link("Individual comparisons",file.path(dst,"checks.tsv"))," and ",link("detailed estimates",file.path(dst,"estimates.tsv"))," record all cases. The acceptance criteria are defined in ",link("VALIDATION.md",file.path(project,"VALIDATION.md")),"."),"",
-    paste0(link("Julia unit tests",args[4])," independently check covariance, the REML objective, coefficients and restoration of observation coordinates for 1, 2, 3 and 10 components, including unequal block sizes and the zero-variance boundary."),"",
+    paste0(link("Julia unit tests",args[4])," independently check the stored designs, covariance, REML objective, coefficients and basis invariance for 1, 2, 3 and 10 components, including unequal block sizes and the zero-variance boundary."),"",
     paste0(link("R fitting status",file.path(rdir,"fit_summary.tsv")),"; ",link("Julia fitting status",file.path(jdir,"fit_summary.tsv")),"; ",link("source fingerprints",file.path(rdir,"source_checksums.tsv")),"."),"",
     "Both languages use the same saved observations, per-predictor settings and evaluation grid. Package versions are recorded in each branch's `versions.tsv`; Julia dependencies are pinned by the root `Manifest.toml`.")
   writeLines(lines,report)

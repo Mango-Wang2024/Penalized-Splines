@@ -68,11 +68,11 @@ Supporting checks verify matching predictor, response and knot values, and one s
 
 Raw coefficient entries and package log-likelihood values are not used for cross-language agreement because coefficient coordinates and fixed-effect scaling can differ. Fitted responses are compared in the original observation coordinates. Results and individual checks are in [STAGE2_RESULTS.md](STAGE2_RESULTS.md).
 
-### Checking the Julia input adapter
+### Checking the Julia fitting inputs
 
-The adapter applies the same QR row rotation $Q^\top$ to the response and every design matrix. The combined penalized design has a triangular upper block and zero rows below it. Coefficient coordinates are unchanged, so each spline retains its separate variance. A wrapper uses native `ReMat` storage and ties the diagonal variance entries within each block. Fitted responses return to the original observation rows through multiplication by $Q$.
+The prepared response, fixed matrix and separate penalized matrices are passed directly to MixedModels. Tests confirm that its stored random-effect designs equal the supplied $Z_j$ matrices, with the same observation rows and coefficient coordinates. A wrapper uses native `ReMat` storage and ties the diagonal variance entries within each block to retain one smoothing parameter per spline.
 
-Independent Julia tests cover **1, 2, 3 and 10 components**, including unequal block sizes. They compare the fitted coefficients and REML objective against a direct Gaussian covariance calculation, check coordinate restoration and rotation invariance, and cover zero variance and invalid inputs. Preparation tests also assemble and evaluate variable-length component lists. These checks do not add a separate fixed-$\lambda$ fitting stage.
+Independent Julia tests cover **1, 2, 3 and 10 components**, including unequal block sizes. They compare fitted coefficients, responses and the REML objective against a direct Gaussian covariance calculation, check basis invariance, and cover repeated random-effect columns, zero variance and invalid inputs. Preparation tests also assemble and evaluate variable-length component lists. These checks do not add a separate fixed-$\lambda$ fitting stage.
 
 The joint fit uses tighter numerical stopping settings for reliable parameter comparisons: Julia uses objective tolerances `ftol_rel=1e-14`, `ftol_abs=1e-12`; R uses `nlme`'s `nlminb` option with `rel.tol=1e-14`, `x.tol=1e-12` and `sing.tol=1e-25`. These are solver settings, separate from the acceptance thresholds above. Neither fit receives the other branch's estimates.
 

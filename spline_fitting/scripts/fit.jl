@@ -27,8 +27,7 @@ function main(args)
         new=prediction_inputs(bases,p,[evaluate_basis(b.knots,g) for (b,g) in zip(bases,grid)],ones(length(first(grid)),1))
         predicted=predict_response(fit,new.X_fixed,new.Z_blocks)
         write_columns(joinpath(dst,"grid.csv"),vcat(case.names,["fitted"]),hcat(grid...,predicted))
-        for (label,M) in ["fixed_coefficients"=>fit.b,"Xf"=>p.X_fixed,"Xr"=>fit.prepared.Xr,
-                          "Zf"=>hcat(p.Z_blocks...),"Zr"=>hcat(fit.prepared.Zr_blocks...),
+        for (label,M) in ["fixed_coefficients"=>fit.b,"Xf"=>p.X_fixed,"Zf"=>hcat(p.Z_blocks...),
                           "relative_loading"=>Matrix(Diagonal(vcat((fill(fit.theta[j],size(p.Z_blocks[j],2)) for j in eachindex(bases))...)))]
             writedlm(joinpath(dst,label*".csv"),M,',')
         end
@@ -37,7 +36,7 @@ function main(args)
             for (label,M) in ["knots"=>bases[j].knots,"H"=>bases[j].H,"C"=>p.components[j].C,
                               "random_coefficients"=>fit.tau[j],
                               "spline_coefficients"=>p.components[j].C*vcat(fit.tau[j],fit.b[p.fixed_ranges[j]]),
-                              "Zf"=>p.Z_blocks[j],"Zr"=>fit.prepared.Zr_blocks[j]]
+                              "Zf"=>p.Z_blocks[j]]
                 writedlm(joinpath(path,label*".csv"),M,',')
             end
             push!(estimates,(;case=name,component=case.names[j],lambda=fit.lambda[j],r2=fit.r2[j],r=fit.r[j],theta=fit.theta[j],random_directions=size(p.Z_blocks[j],2)))
