@@ -11,7 +11,7 @@ Further left means faster fitting or fewer allocated bytes. The axes start at **
 
 ## Agreement of fitted results
 
-<a href="qr_agreement.png"><img src="qr_agreement.png" alt="Direct versus QR differences in fitted responses, predictions and smoothing strengths, all below the existing numerical tolerances in five cases" width="860"></a>
+<a href="qr_agreement.png"><img src="qr_agreement.png" alt="Direct versus QR differences in fitted responses, predictions and smoothing strengths, all below the existing numerical tolerances in five cases" width="575"></a>
 
 Each point shows the direct–QR difference divided by its existing [numerical tolerance](../VALIDATION.md): $10^{-6}$ for fitted responses and grid predictions, and $10^{-5}$ for smoothing strengths. Response differences use scaled vector errors; smoothing differences use relative errors. **Points below 1 pass the comparison.** Every point lies to the left of the dashed tolerance line across all five cases.
 

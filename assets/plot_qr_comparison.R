@@ -69,7 +69,7 @@ ratios <- cbind(agreement$qr_direct_training_scaled_difference/1e-6,
 metric_colours <- c("#007A83","#536EA5","#8B5A83")
 metric_symbols <- c(16L,17L,15L)
 
-png(file.path(output,"qr_agreement.png"),width=10,height=4.2,units="in",res=300,
+png(file.path(output,"qr_agreement.png"),width=6.7,height=4.2,units="in",res=300,
     pointsize=11,type="quartz",bg="white")
 par(mar=c(4.1,7.9,2.2,1.4),oma=c(2.0,0,.1,0),mgp=c(2.5,.55,0),tcl=-.22,
     family="sans",fg="#333333",col.axis="#333333",col.lab="#222222",lwd=.7)
