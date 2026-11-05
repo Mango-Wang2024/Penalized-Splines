@@ -4,6 +4,22 @@ R and Julia independently prepare and fit the same additive model. R uses `mgcv:
 
 **90/90 comparisons passed across 5 cases.** Spline-component counts: 2.
 
+## Joint response and individual components
+
+<a href="spline_fitting/outputs/shared/comparison/fitted_surfaces.png"><img src="spline_fitting/outputs/shared/comparison/fitted_surfaces.png" alt="Six panels: known, R and Julia surfaces with training observations; and three surface difference maps" width="900"></a>
+
+Panels (a–c) overlay the same **200 training observations** as grey points on translucent surfaces, using identical viewing angles and response limits. The points are noisy observed responses. Panels (d–f) compare surfaces on the prediction grid: (d) Julia minus R, with a maximum absolute difference of **1.19e-08**; (e–f) each fit minus the known surface, sharing a **−0.3 to 0.3** colour scale. Red is positive and blue is negative; all difference scales are centred at zero.
+
+### Difference from the known surface
+
+Across 961 grid points, RMSE is **0.0794 for R** and **0.0794 for Julia**. The largest absolute error across both fits is **0.2531**. These errors reflect recovery of the known curve from noisy training data; the R–Julia comparison above checks agreement between implementations.
+
+[Numerical summary](spline_fitting/outputs/shared/comparison/truth_comparison.tsv). RMSE is the square root of the mean squared prediction error on this grid.
+
+<a href="spline_fitting/outputs/shared/comparison/component_curves.png"><img src="spline_fitting/outputs/shared/comparison/component_curves.png" alt="Centered additive spline components" width="800"></a>
+
+Each panel isolates one spline contribution. Known components are centered over the training observations to match the fitted smooths; their removed average levels belong to the overall intercept.
+
 ## Smoothing estimates
 
 Each component has its own $\lambda_j=\sigma^2/r_j^2$. The table compares these smoothing strengths; the variance values and their errors are retained in the detailed estimates.
@@ -22,22 +38,6 @@ Each component has its own $\lambda_j=\sigma^2/r_j^2$. The table compares these 
 | `small_k5` | $x_2$ | 0.20653478 | 0.2065347 | 3.87e-07 |
 
 Largest scaled difference in training fitted responses: **5.73e-09**; on the shared evaluation grid: **6.00e-09**.
-
-## Joint response and individual components
-
-<a href="spline_fitting/outputs/shared/comparison/fitted_surfaces.png"><img src="spline_fitting/outputs/shared/comparison/fitted_surfaces.png" alt="Six panels: known, R and Julia surfaces with training observations; and three surface difference maps" width="900"></a>
-
-Panels (a–c) overlay the same **200 training observations** as grey points on translucent surfaces, using identical viewing angles and response limits. The points are noisy observed responses. Panels (d–f) compare surfaces on the prediction grid: (d) Julia minus R, with a maximum absolute difference of **1.19e-08**; (e–f) each fit minus the known surface, sharing a **−0.3 to 0.3** colour scale. Red is positive and blue is negative; all difference scales are centred at zero.
-
-### Difference from the known surface
-
-Across 961 grid points, RMSE is **0.0794 for R** and **0.0794 for Julia**. The largest absolute error across both fits is **0.2531**. These errors reflect recovery of the known curve from noisy training data; the R–Julia comparison above checks agreement between implementations.
-
-[Numerical summary](spline_fitting/outputs/shared/comparison/truth_comparison.tsv). RMSE is the square root of the mean squared prediction error on this grid.
-
-<a href="spline_fitting/outputs/shared/comparison/component_curves.png"><img src="spline_fitting/outputs/shared/comparison/component_curves.png" alt="Centered additive spline components" width="800"></a>
-
-Each panel isolates one spline contribution. Known components are centered over the training observations to match the fitted smooths; their removed average levels belong to the overall intercept.
 
 ## Supporting checks
 

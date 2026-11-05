@@ -81,11 +81,6 @@ run <- function() {
   lines <- c("# Stage 2 results","",
     "R and Julia independently prepare and fit the same additive model. R uses `mgcv::gamm` / `nlme::lme`; Julia uses `MixedModels.jl`. REML jointly estimates a separate spline variance for each predictor and one common noise variance.","",
     sprintf("**%d/%d comparisons passed across %d cases.** Spline-component counts: %s.",sum(checks$passed),nrow(checks),length(cases),paste(unique(r$components),collapse=", ")),"",
-    "## Smoothing estimates","",
-    "Each component has its own $\\lambda_j=\\sigma^2/r_j^2$. The table compares these smoothing strengths; the variance values and their errors are retained in the detailed estimates.","",
-    "| Case | Component | R λ<sub>j</sub> | Julia λ<sub>j</sub> | Relative error |","| --- | --- | ---: | ---: | ---: |")
-  for(i in seq_len(nrow(estimates)))lines <- c(lines,sprintf("| `%s` | $%s$ | %.8g | %.8g | %.2e |",estimates$case[i],gsub("x","x_",estimates$component[i]),estimates$R_lambda[i],estimates$Julia_lambda[i],estimates$lambda_relative_error[i]))
-  lines <- c(lines,"",sprintf("Largest scaled difference in training fitted responses: **%.2e**; on the shared evaluation grid: **%.2e**.",max(checks$error[checks$check=="fitted responses"]),max(checks$error[checks$check=="grid predictions"])),"",
     "## Joint response and individual components","")
   if(length(keys)==2L) {
     lines <- c(lines,image_tag(file.path(dst,"fitted_surfaces.png"),"Six panels: known, R and Julia surfaces with training observations; and three surface difference maps",width=900),"",
@@ -96,6 +91,11 @@ run <- function() {
   }
   lines <- c(lines,image_tag(file.path(dst,"component_curves.png"),"Centered additive spline components"),"",
     "Each panel isolates one spline contribution. Known components are centered over the training observations to match the fitted smooths; their removed average levels belong to the overall intercept.","",
+    "## Smoothing estimates","",
+    "Each component has its own $\\lambda_j=\\sigma^2/r_j^2$. The table compares these smoothing strengths; the variance values and their errors are retained in the detailed estimates.","",
+    "| Case | Component | R λ<sub>j</sub> | Julia λ<sub>j</sub> | Relative error |","| --- | --- | ---: | ---: | ---: |")
+  for(i in seq_len(nrow(estimates)))lines <- c(lines,sprintf("| `%s` | $%s$ | %.8g | %.8g | %.2e |",estimates$case[i],gsub("x","x_",estimates$component[i]),estimates$R_lambda[i],estimates$Julia_lambda[i],estimates$lambda_relative_error[i]))
+  lines <- c(lines,"",sprintf("Largest scaled difference in training fitted responses: **%.2e**; on the shared evaluation grid: **%.2e**.",max(checks$error[checks$check=="fitted responses"]),max(checks$error[checks$check=="grid predictions"])),"",
     "## Supporting checks","",
     paste0(link("Individual comparisons",file.path(dst,"checks.tsv"))," and ",link("detailed estimates",file.path(dst,"estimates.tsv"))," record all cases. The acceptance criteria are defined in ",link("VALIDATION.md",file.path(project,"VALIDATION.md")),"."),"",
     paste0(link("Julia unit tests",args[4])," independently check the stored designs, covariance, REML objective, coefficients and basis invariance for 1, 2, 3 and 10 components, including unequal block sizes and the zero-variance boundary."),"",
