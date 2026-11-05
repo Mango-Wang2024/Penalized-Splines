@@ -1,0 +1,28 @@
+setting	value
+source_commit	c9018c09699e816e164a62ed1e65e0356caf4d9d
+source_url	https://github.com/Mango-Wang2024/Penalized-Splines/blob/c9018c09699e816e164a62ed1e65e0356caf4d9d/spline_fitting/src/SplineFit.jl
+comparison	QR-only adapter versus the same fitter with input rotation and fitted-response restoration bypassed; no SVD preprocessing
+held_constant	Prepared data, variance structure, model containers, REML solver and stopping settings
+direct_variant	Bypassed QR preparation, its QR rank check, and inverse response rotation; all five inputs were full rank
+cases	Five cases; 200 observations and two predictors per case
+paired_repetitions_per_case	30
+total_timed_fits	300
+timing_includes	Model construction, REML optimization, coefficient extraction and fitted-response restoration where applicable
+timing_excludes	Common spline construction and prediction-matrix evaluation
+warmup	Both fit paths, all basis sizes and timing wrappers warmed before measurements
+order	Alternating QR/direct and direct/QR; case order randomized each repetition
+ordering_seed	20261104
+garbage_collection	Forced before each timed call, outside timing; all measured GC times were zero
+runtime_statistic	Median elapsed milliseconds per case and mode
+runtime_spread	25th and 75th percentiles; ranges overlap in several cases
+allocation_measure	Cumulative allocated bytes per fit, not peak memory
+scaled_error_formula	norm(a-b) / max(1, norm(a), norm(b))
+lambda_relative_error_formula	max_j(abs(a_j-b_j) / max(abs(a_j), abs(b_j), eps(Float64)))
+R_agreement_thresholds	lambda relative error <= 1e-5; fitted-response and grid scaled errors <= 1e-6
+Julia	1.13.1
+MixedModels	5.9.0
+Julia_threads	1
+BLAS_threads	1
+BLAS	OpenBLAS 0.3.30; ILP64
+CPU	Apple M3
+platform	macOS; arm64-apple-darwin27.0.0
