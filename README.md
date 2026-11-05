@@ -60,7 +60,7 @@ The spline coefficient vectors are independent of each other and of the noise. T
 
 R performs internal QR transformations in [nlme's fitting code](https://github.com/cran/nlme/blob/3.1-169/src/matrix.c#L195-L223). Each package handles its own numerical factorization; we compare the covariance model and fitted results.
 
-**Why no extra rotation?** Direct fitting and QR-only preprocessing gave practically identical results in the five tested cases, while QR took longer and allocated more memory. We therefore keep direct fitting. See the [runtime and memory comparison](assets/ROTATION_COMPARISON.md).
+**Why no extra rotation?** This benchmark compares **two Julia/MixedModels fits** using the same prepared inputs: direct fitting and QR-only preprocessing. They gave practically identical results in the five tested cases, while QR took longer and allocated more memory. We therefore keep direct fitting. Saved R results provide a separate reference check; the plots compare only the two Julia fits, and the runtime and memory measurements cover only Julia. See the [runtime and memory comparison](assets/ROTATION_COMPARISON.md).
 
 We compare **each $\lambda_j$**, the combined fitted responses, individual spline contributions and shared-grid predictions. Variances provide supporting checks. Coefficients are returned in Julia's original spline coordinates; their raw entries are not compared across different R/Julia coordinate choices. The results show a 3D response surface for the two-predictor example, plus separate component curves.
 

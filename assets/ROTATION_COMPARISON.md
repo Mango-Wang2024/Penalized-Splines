@@ -1,6 +1,8 @@
 # Direct fitting versus extra QR rotation
 
-We compared fitting the prepared matrices directly with applying QR rotation before fitting. Both used the same inputs, variance structure and REML settings. The five cases each have 200 observations and two predictors, with 30 repetitions per method and case.
+We compared **two Julia/MixedModels fits**: fitting the prepared matrices directly and applying QR rotation before fitting. Both used the same prepared inputs, variance structure and REML settings. The five cases each have 200 observations and two predictors, with 30 repetitions per method and case.
+
+The plots compare only these two Julia versions. Saved R results provide a separate reference check; the runtime and memory measurements cover only Julia.
 
 <a href="qr_comparison.png"><img src="qr_comparison.png" alt="Side-by-side comparison of fitting runtime and allocated memory for direct fitting and extra QR rotation across five cases" width="860"></a>
 
