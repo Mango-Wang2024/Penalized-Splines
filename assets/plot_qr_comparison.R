@@ -59,3 +59,39 @@ legend(.5,.025,legend=c("Direct fitting","With QR rotation"),
        col=colours,pch=symbols,horiz=TRUE,bty="n",xjust=.5,yjust=0,
        cex=.9,pt.cex=1.05,x.intersp=.65)
 invisible(dev.off())
+
+# Numerical agreement uses the project's existing response and smoothing tolerances.
+agreement <- read.delim(file.path(project,"spline_fitting/outputs/shared/comparison/qr_benchmark_agreement.tsv"))
+stopifnot(identical(agreement$case,results$case))
+ratios <- cbind(agreement$qr_direct_training_scaled_difference/1e-6,
+                agreement$qr_direct_grid_scaled_difference/1e-6,
+                agreement$qr_direct_lambda_relative_difference/1e-5)
+metric_colours <- c("#007A83","#536EA5","#8B5A83")
+metric_symbols <- c(16L,17L,15L)
+
+png(file.path(output,"qr_agreement.png"),width=10,height=4.2,units="in",res=300,
+    pointsize=11,type="quartz",bg="white")
+par(mar=c(4.1,7.9,2.2,1.4),oma=c(2.0,0,.1,0),mgp=c(2.5,.55,0),tcl=-.22,
+    family="sans",fg="#333333",col.axis="#333333",col.lab="#222222",lwd=.7)
+plot.new()
+plot.window(xlim=c(1e-5,1.8),ylim=c(.5,length(rows)+.5),log="x",xaxs="i",yaxs="i")
+ticks <- 10^(-5:0)
+abline(v=ticks,col="#E5E8EB",lwd=.65)
+abline(h=rows,col="#F0F1F3",lwd=.6)
+abline(v=1,col="#555555",lty=2,lwd=1.0)
+axis(1,at=ticks,labels=c("0.00001","0.0001","0.001","0.01","0.1","1"),
+     col="#777777",col.ticks="#777777",cex.axis=.9)
+axis(2,at=rows,labels=cases,las=1,tick=FALSE,cex.axis=.92)
+mtext("Direct–QR difference / numerical tolerance (log scale)",side=1,line=2.5,cex=.95)
+mtext("(c) Agreement of fitted results",side=3,line=.75,adj=0,font=1,cex=1.08)
+mtext("Tolerance",side=3,line=.4,at=1,cex=.85,col="#555555")
+for(j in seq_len(ncol(ratios))) {
+  points(ratios[,j],rows+c(.2,0,-.2)[j],col=metric_colours[j],pch=metric_symbols[j],cex=1.1)
+}
+par(fig=c(0,1,0,1),mar=rep(0,4),oma=rep(0,4),new=TRUE)
+plot.new()
+plot.window(xlim=c(0,1),ylim=c(0,1),xaxs="i",yaxs="i")
+legend(.5,.025,legend=c("Fitted responses","Grid predictions","Smoothing strengths"),
+       col=metric_colours,pch=metric_symbols,horiz=TRUE,bty="n",xjust=.5,yjust=0,
+       cex=.9,pt.cex=1.05,x.intersp=.65)
+invisible(dev.off())

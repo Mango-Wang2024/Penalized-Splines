@@ -9,6 +9,12 @@ We compared fitting the prepared matrices directly with applying QR rotation bef
 
 Further left means faster fitting or fewer allocated bytes. The axes start at **0.4 ms** and **300 KiB** to reduce empty space. Timing includes model construction and fitting; the common spline-construction step is excluded.
 
+## Agreement of fitted results
+
+<a href="qr_agreement.png"><img src="qr_agreement.png" alt="Direct versus QR differences in fitted responses, predictions and smoothing strengths, all below the existing numerical tolerances in five cases" width="860"></a>
+
+Each point shows the direct–QR difference divided by its existing [numerical tolerance](../VALIDATION.md): $10^{-6}$ for fitted responses and grid predictions, and $10^{-5}$ for smoothing strengths. Response differences use scaled vector errors; smoothing differences use relative errors. **Points below 1 pass the comparison.** Every point lies to the left of the dashed tolerance line across all five cases.
+
 Both methods passed the R agreement checks and gave practically identical fitted results. The extra QR step provided no measured benefit in these cases, so we use direct fitting.
 
 ## Supporting data and measurement settings
