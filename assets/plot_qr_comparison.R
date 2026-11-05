@@ -40,7 +40,7 @@ panel <- function(title,x_label,direct,qr,limits,ticks,show_cases,
 png(file.path(output,"qr_comparison.png"),width=10,height=4.2,units="in",res=300,
     pointsize=11,type="quartz",bg="white")
 layout(matrix(1:2,nrow=1),widths=c(1.24,1))
-par(oma=c(0,0,1.8,0),mgp=c(2.5,.55,0),tcl=-.22,
+par(oma=c(2.0,0,.1,0),mgp=c(2.5,.55,0),tcl=-.22,
     family="sans",fg="#333333",col.axis="#333333",col.lab="#222222",lwd=.7)
 panel("(a) Runtime","Median time per fit (ms)",
       results$direct_median_ms,results$qr_median_ms,
@@ -51,11 +51,11 @@ panel("(b) Memory allocation","Median allocation per fit (KiB)",
       results$direct_median_allocated_bytes/1024,results$qr_median_allocated_bytes/1024,
       c(300,700),seq(300,700,100),FALSE)
 
-# One legend serves both panels.
+# One shared legend sits below both panels.
 par(fig=c(0,1,0,1),mar=rep(0,4),oma=rep(0,4),new=TRUE)
 plot.new()
 plot.window(xlim=c(0,1),ylim=c(0,1),xaxs="i",yaxs="i")
-legend(.56,.985,legend=c("Direct fitting","With QR rotation"),
-       col=colours,pch=symbols,horiz=TRUE,bty="n",xjust=.5,yjust=1,
+legend(.5,.025,legend=c("Direct fitting","With QR rotation"),
+       col=colours,pch=symbols,horiz=TRUE,bty="n",xjust=.5,yjust=0,
        cex=.9,pt.cex=1.05,x.intersp=.65)
 invisible(dev.off())
